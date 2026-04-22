@@ -218,7 +218,7 @@ const ROUTES=[
    tr:'公車迴轉站假日遊客密集；大霧時與公車保持充分距離，下坡謹慎。'},
  ]},
 {id:'yangjin',name:'陽金',sub:'金山→馬槽→小油坑鞍部',dist:15.0,elev:720,
- mp:[[121.6380,25.2190],[121.6295,25.2145],[121.6200,25.2095],[121.6100,25.2050],[121.5990,25.2000],[121.5875,25.1955],[121.5755,25.1920],[121.5640,25.1900],[121.5555,25.1870],[121.5500,25.1830],[121.5475,25.1795],[121.5465,25.1785]],
+ mp:[[121.638,25.219],[121.6295,25.209],[121.6215,25.201],[121.612,25.196],[121.599,25.192],[121.587,25.189],[121.575,25.187],[121.564,25.187],[121.5555,25.186],[121.549,25.183],[121.5475,25.1795],[121.5465,25.1785]],
  lat:25.200,lon:121.524,bear:155,
  segs:[
   {n:'金山老街起步',m:'0–3.8 km · 坡 3% · SSE',bear:160,elFrac:0,
@@ -279,7 +279,7 @@ const ROUTES=[
  ]},
 ,
   {id:'danjin',name:'淡金來回',sub:'承德路七段麥當勞→淡水→三芝→石門→金山（折返）',dist:86.0,elev:820,
- mp:[[121.5143,25.1030],[121.5110,25.1145],[121.5075,25.1260],[121.5030,25.1400],[121.4985,25.1555],[121.4940,25.1715],[121.4910,25.1875],[121.4920,25.2035],[121.4965,25.2180],[121.5030,25.2325],[121.5105,25.2465],[121.5190,25.2580],[121.5290,25.2660],[121.5400,25.2720],[121.5520,25.2755],[121.5645,25.2760],[121.5770,25.2740],[121.5895,25.2690],[121.6015,25.2610],[121.6130,25.2510],[121.6240,25.2395],[121.6340,25.2290],[121.6380,25.2190]],
+ mp:[[121.5143,25.103],[121.5078,25.118],[121.5012,25.134],[121.4955,25.149],[121.491,25.165],[121.4695,25.1745],[121.462,25.166],[121.457,25.1605],[121.449,25.169],[121.4395,25.192],[121.432,25.221],[121.426,25.258],[121.435,25.272],[121.448,25.282],[121.464,25.287],[121.483,25.284],[121.5005,25.2582],[121.519,25.258],[121.54,25.256],[121.564,25.248],[121.638,25.219]],
  lat:25.225,lon:121.476,bear:0,
  segs:[
   {n:'承德路七段麥當勞',m:'0–8 km · 坡 1% · N',bear:0,elFrac:0,
@@ -644,6 +644,8 @@ function bldMap(){
   let loaded=0;const total=OSM_COLS*OSM_ROWS;
   function finish(){
     mc.drawImage(tc,srcX0,srcY0,srcW0,srcH0,0,0,RCW,RCH);
+    // 底圖淡化：白色蒙版降低彩度
+    mc.save();mc.globalAlpha=0.38;mc.fillStyle='#fff';mc.fillRect(0,0,RCW,RCH);mc.restore();
     const mlx=window._merc.lx,mly=window._merc.ly;
     processedRoutes.forEach(r=>{
       if(!r.mp)return;
@@ -694,7 +696,11 @@ function drF(st){
       img.onerror=()=>{rImgCache[tileUrl]=null;};
       img.src=tileUrl;rImgCache[tileUrl]='loading';
     } else if(rImgCache[tileUrl]instanceof HTMLImageElement){
-      ctx.save();ctx.globalAlpha=0.72;
+      ctx.save();ctx.globalAlpha=0.88;ctx.globalCompositeOperation='multiply';
+      try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
+      ctx.restore();
+      // 再疊一次增加對比
+      ctx.save();ctx.globalAlpha=0.45;ctx.globalCompositeOperation='screen';
       try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
       ctx.restore();
     }
@@ -708,6 +714,26 @@ function drF(st){
   });
   const ar=processedRoutes.find(x=>x.id===rAid);
   if(ar?.mp){
+    // 中途點標記（限 danjin / yangjin 顯示各段起點）
+    const showWaypoints=['danjin','yangjin'].includes(ar.id);
+    if(showWaypoints&&ar.segs){
+      ar.segs.forEach((seg,si)=>{
+        const frac=seg.elFrac||0;
+        const mpIdx=Math.round(frac*(ar.mp.length-1));
+        const wp=ar.mp[Math.min(mpIdx,ar.mp.length-1)];
+        const wx=lx(wp[0]),wy=ly(wp[1]);
+        // 小菱形點
+        ctx.beginPath();ctx.arc(wx,wy,3,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,220,80,0.92)';ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.6)';ctx.lineWidth=0.8;ctx.stroke();
+        // 短標（最多4字）
+        const wlbl=seg.n.replace(/（.*?）/g,'').slice(0,4);
+        ctx.font="10px 'PingFang TC','Noto Sans TC',sans-serif";
+        ctx.textAlign='left';ctx.textBaseline='middle';
+        ctx.shadowColor='rgba(255,255,255,0.9)';ctx.shadowBlur=2;
+        ctx.fillStyle='#111';ctx.fillText(wlbl,wx+5,wy);ctx.shadowBlur=0;
+      });
+    }
     const ep=ar.mp[ar.mp.length-1];
     const ax=lx(ep[0]),ay=ly(ep[1]);
     ctx.beginPath();ctx.arc(ax,ay,5,0,Math.PI*2);
