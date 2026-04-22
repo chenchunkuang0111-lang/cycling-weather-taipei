@@ -495,9 +495,14 @@ function processWeather(raw){
       const sliceLen=9;// 9 points = 4h at 30min intervals → use every-other hourly
       const idxs=[];for(let i=0;i<sliceLen;i++){const idx=startIdx+Math.round(i*0.5);if(idx<h.time.length)idxs.push(idx);else idxs.push(h.time.length-1);}
       const segsData=route.segs.map((seg,si)=>{
-        const segIdx=idxs[Math.min(Math.round(si*2),idxs.length-1)];
-        const t=Math.round(h.temperature_2m[segIdx]||22);
-        const f=Math.round(h.apparent_temperature[segIdx]||t-2);
+        // 根據路段預計抵達時間選取正確的氣象小時索引（假設平均爬升速度 12km/h）
+        const estimatedRideHrs=Math.round((route.dist||10)*(seg.elFrac||0)/12);
+        const segIdx=Math.min(startIdx+estimatedRideHrs,h.time.length-1);
+        // 根據海拔差修正溫度（標準大氣遞減率 -6.5°C/1000m）
+        const elevDelta=(route.elev||0)*(seg.elFrac||0);
+        const tempAdj=-(elevDelta/1000)*6.5;
+        const t=Math.round((h.temperature_2m[segIdx]||22)+tempAdj);
+        const f=Math.round((h.apparent_temperature[segIdx]||(h.temperature_2m[segIdx]||22)-2)+tempAdj);
         const rain=Math.round(h.precipitation_probability[segIdx]||0);
         const ws=Math.round((h.wind_speed_10m[segIdx]||5)/3.6*10)/10;// km/h→m/s
         const wd=h.wind_direction_10m[segIdx]||180;
@@ -735,28 +740,30 @@ function drF(st){
       img.onerror=()=>{rImgCache[tileUrl]=null;};
       img.src=tileUrl;rImgCache[tileUrl]='loading';
     } else if(rImgCache[tileUrl]instanceof HTMLImageElement){
-      // 深藍色雲層：先繪製到離屏 canvas 轉換為深藍色調
-      const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;
-      const offCtx=offC.getContext('2d');
+      // 雷達雲層：直接繪製 RainViewer 圖像並套用深藍色濾鏡
       try{
-        offCtx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);
-        // 將有顏色像素轉換為深藍色
+        // 第一步：繪製原始雷達圖（全圖縮放至畫布）
+        const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;
+        const offCtx=offC.getContext('2d');
+        offCtx.drawImage(rImgCache[tileUrl],0,0,RCW,RCH);
+        // 第二步：逐像素轉換為深藍色系
         const imgData=offCtx.getImageData(0,0,RCW,RCH);
-        const d=imgData.data;
-        for(let p=0;p<d.length;p+=4){
-          const a=d[p+3];
-          if(a>10){
-            // 根據原始亮度計算深藍色強度
-            const brightness=(d[p]*0.3+d[p+1]*0.59+d[p+2]*0.11)/255;
-            const intensity=Math.min(1,brightness*1.5+0.2);
-            d[p]=Math.round(10+intensity*30);    // R: 暗
-            d[p+1]=Math.round(20+intensity*60);  // G: 中
-            d[p+2]=Math.round(80+intensity*120); // B: 深藍
-            d[p+3]=Math.min(220,Math.round(a*1.2));
+        const pxd=imgData.data;
+        for(let p=0;p<pxd.length;p+=4){
+          const alpha=pxd[p+3];
+          if(alpha>8){
+            // 原始亮度（用於決定深藍強度）
+            const br=(pxd[p]*0.3+pxd[p+1]*0.59+pxd[p+2]*0.11)/255;
+            const iv=Math.min(1,br*1.8+0.15);
+            // 深藍色：R極暗，G偏暗，B主色
+            pxd[p]=Math.round(5+iv*20);      // R: 5~25（極暗）
+            pxd[p+1]=Math.round(15+iv*55);   // G: 15~70（偏暗）
+            pxd[p+2]=Math.round(100+iv*130); // B: 100~230（深藍）
+            pxd[p+3]=Math.min(230,Math.round(alpha*1.3));
           }
         }
         offCtx.putImageData(imgData,0,0);
-        ctx.save();ctx.globalAlpha=0.92;ctx.globalCompositeOperation='source-over';
+        ctx.save();ctx.globalAlpha=0.88;ctx.globalCompositeOperation='source-over';
         ctx.drawImage(offC,0,0);
         ctx.restore();
       }catch(e){}
