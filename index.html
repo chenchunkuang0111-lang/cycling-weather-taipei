@@ -319,45 +319,60 @@ let weatherSrc='', weatherData=null, radarData=null;
 const now=new Date();
 
 async function fetchWeather(){
-  const lats=ROUTES.map(r=>r.lat).join(',');
-  const lons=ROUTES.map(r=>r.lon).join(',');
-  // Primary: Open-Meteo
+  const routeArr=Object.values(ROUTES);
+  const lats=routeArr.map(r=>r.lat);
+  const lons=routeArr.map(r=>r.lon);
+  const latStr=lats.join(',');
+  const lonStr=lons.join(',');
   try{
-    setText('正在連線 Open-Meteo API...','來源：api.open-meteo.com（主要源）');
-    const u=`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&hourly=temperature_2m,apparent_temperature,precipitation_probability,wind_speed_10m,wind_direction_10m&timezone=Asia%2FTaipei&forecast_days=3`;
-    const r=await fetchTimeout(u,12000);
+    setText('正在連線 Open-Meteo API...','來源：api.open-meteo.com（主要來源）');
+    const u='https://api.open-meteo.com/v1/forecast?latitude='+latStr+'&longitude='+lonStr+'&hourly=temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
+    const r=await fetch(u,{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    if(Array.isArray(d)&&d.length===ROUTES.length){weatherSrc='Open-Meteo';return d;}
+    const arr=Array.isArray(d)?d:[d];
+    if(arr.length===routeArr.length){weatherSrc='Open-Meteo';return arr;}
     throw new Error('Unexpected response format');
   }catch(e1){
     console.warn('Primary (Open-Meteo) failed:',e1.message);
-    // Backup 1: wttr.in
     try{
-      setText('Open-Meteo 不可用，切換 wttr.in...','來源：wttr.in（備援源 1）');
+      setText('切換 Open-Meteo 單點模式...','來源：Open-Meteo（單點重試）');
       const results=[];
-      for(const r of ROUTES){
-        const u=`https://wttr.in/${r.lat},${r.lon}?format=j1`;
-        const resp=await fetchTimeout(u,8000);
-        results.push(await resp.json());
+      for(const r of routeArr){
+        const u2='https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&hourly=temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
+        const rr=await fetch(u2,{cache:'no-store'});
+        if(!rr.ok)throw new Error('HTTP '+rr.status);
+        results.push(await rr.json());
       }
-      weatherSrc='wttr.in';return convertWttr(results);
+      weatherSrc='Open-Meteo (單點)';return results;
     }catch(e2){
-      console.warn('Backup 1 (wttr.in) failed:',e2.message);
-      // Backup 2: Open-Meteo with single call per route
+      console.warn('Backup 1 (Open-Meteo single) failed:',e2.message);
       try{
-        setText('備援源 1 不可用，嘗試備援源 2...','來源：Open-Meteo 單點查詢');
+        setText('切換 MET Norway...','來源：api.met.no（備用）');
         const results=[];
-        for(const r of ROUTES){
-          const u=`https://api.open-meteo.com/v1/forecast?latitude=${r.lat}&longitude=${r.lon}&hourly=temperature_2m,apparent_temperature,precipitation_probability,wind_speed_10m,wind_direction_10m&timezone=Asia%2FTaipei&forecast_days=3`;
-          const resp=await fetchTimeout(u,8000);
-          results.push(await resp.json());
+        for(const r of routeArr){
+          const u3='https://api.met.no/weatherapi/locationforecast/2.0/compact?lat='+r.lat+'&lon='+r.lon;
+          const rr=await fetch(u3);
+          if(!rr.ok)throw new Error('HTTP '+rr.status);
+          results.push(await rr.json());
         }
-        weatherSrc='Open-Meteo (單點)';return results;
+        weatherSrc='MET Norway';return results;
       }catch(e3){
-        console.warn('Backup 2 failed:',e3.message);
-        weatherSrc='離線快取';
-        showError('所有氣象來源暫時無法連線，使用離線預設資料。');
-        return getDefaultWeather();
+        console.warn('Backup 2 (MET Norway) failed:',e3.message);
+        try{
+          setText('切換 wttr.in...','來源：wttr.in（備用）');
+          const results=[];
+          for(const r of routeArr){
+            const u4='https://wttr.in/'+r.lat+','+r.lon+'?format=j1';
+            const rr=await fetch(u4,{cache:'no-store'});
+            if(!rr.ok)throw new Error('HTTP '+rr.status);
+            results.push(await rr.json());
+          }
+          weatherSrc='wttr.in';return results;
+        }catch(e4){
+          console.warn('Backup 3 (wttr.in) failed:',e4.message);
+          throw new Error('All weather sources failed');
+        }
       }
     }
   }
@@ -609,16 +624,36 @@ function bldMap(){
  if(rMC)return;rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;const mc=rMC.getContext('2d');
  mc.fillStyle='#08152a';mc.fillRect(0,0,RCW,RCH);
  const poly=(pts,f)=>{mc.beginPath();mc.moveTo(...pts[0]);pts.slice(1).forEach(p=>mc.lineTo(...p));mc.closePath();mc.fillStyle=f;mc.fill();};
- poly([rxy(121.36,25.33),rxy(121.45,25.33),rxy(121.50,25.31),rxy(121.54,25.30),rxy(121.60,25.29),rxy(121.70,25.27),rxy(121.70,25.33)],'#0a1e32');
- poly([rxy(121.42,25.32),rxy(121.55,25.32),rxy(121.60,25.29),rxy(121.57,25.21),rxy(121.53,25.17),rxy(121.46,25.19),rxy(121.41,25.23)],'#0e3018');
- poly([rxy(121.48,25.28),rxy(121.57,25.27),rxy(121.59,25.22),rxy(121.55,25.18),rxy(121.50,25.17),rxy(121.46,25.20),rxy(121.45,25.25)],'#133820');
- poly([rxy(121.62,25.16),rxy(121.70,25.16),rxy(121.70,25.10),rxy(121.66,25.06),rxy(121.62,25.08),rxy(121.60,25.13)],'#0e2a14');
- poly([rxy(121.36,25.02),rxy(121.70,25.02),rxy(121.70,25.12),rxy(121.65,25.09),rxy(121.60,25.10),rxy(121.54,25.09),rxy(121.48,25.10),rxy(121.44,25.12),rxy(121.40,25.15),rxy(121.36,25.17)],'#0d1e2e');
- mc.lineWidth=1.2;mc.strokeStyle='rgba(110,155,180,.18)';
- processedRoutes.forEach(r=>{if(!r.mp)return;mc.beginPath();mc.moveTo(...rxy(r.mp[0][0],r.mp[0][1]));r.mp.slice(1).forEach(p=>mc.lineTo(...rxy(p[0],p[1])));mc.stroke();});
- mc.font='11px sans-serif';
- [{n:'陽明山',lo:121.535,la:25.185},{n:'風櫃嘴',lo:121.593,la:25.155},{n:'金山',lo:121.476,la:25.225},{n:'三芝',lo:121.435,la:25.252},{n:'石門',lo:121.394,la:25.296},{n:'淡水',lo:121.462,la:25.168},{n:'五指山',lo:121.657,la:25.120}].forEach(l=>{
-  const[x,y]=rxy(l.lo,l.la);mc.beginPath();mc.arc(x,y,2.5,0,Math.PI*2);mc.fillStyle='rgba(255,255,255,.35)';mc.fill();mc.fillStyle='#5c8a68';mc.textAlign='left';mc.fillText(l.n,x+4,y-3);});
+ poly([rxy(121.36,25.33),rxy(121.45,25.33),rxy(121.50,25.31),rxy(121.55,25.28),rxy(121.52,25.21),rxy(121.42,25.19),rxy(121.36,25.21)],'rgba(50,120,80,.35)');
+ poly([rxy(121.42,25.32),rxy(121.55,25.32),rxy(121.60,25.29),rxy(121.62,25.24),rxy(121.55,25.18),rxy(121.46,25.20)],'rgba(45,110,75,.30)');
+ poly([rxy(121.48,25.28),rxy(121.57,25.27),rxy(121.59,25.22),rxy(121.55,25.17),rxy(121.50,25.17)],'rgba(40,100,70,.40)');
+ poly([rxy(121.62,25.16),rxy(121.70,25.16),rxy(121.70,25.10),rxy(121.65,25.08),rxy(121.62,25.10)],'rgba(45,105,75,.30)');
+ poly([rxy(121.36,25.02),rxy(121.70,25.02),rxy(121.70,25.12),rxy(121.55,25.14),rxy(121.36,25.14)],'rgba(35,90,65,.25)');
+ mc.font='10px sans-serif';mc.textAlign='left';mc.textBaseline='middle';
+ processedRoutes.forEach(r=>{
+  if(!r.mp||!r.sub)return;
+  const step=Math.max(1,Math.floor(r.mp.length/r.sub.length));
+  r.sub.forEach((name,si)=>{
+   const i=Math.min(r.mp.length-1,si*step);
+   const[lo,la]=r.mp[i];
+   const[x,y]=rxy(lo,la);
+   mc.beginPath();mc.arc(x,y,3,0,Math.PI*2);mc.fillStyle='#ff9a55';mc.fill();
+   mc.strokeStyle='rgba(255,200,120,.9)';mc.lineWidth=1;mc.stroke();
+   mc.fillStyle='rgba(255,220,180,.95)';mc.shadowColor='rgba(0,0,0,.9)';mc.shadowBlur=3;
+   mc.fillText(name,x+5,y);mc.shadowBlur=0;
+  });
+  const[slo,sla]=r.mp[r.mp.length-1];const[sx,sy]=rxy(slo,sla);
+  mc.beginPath();mc.arc(sx,sy,4,0,Math.PI*2);mc.fillStyle='#ff4d4d';mc.fill();
+  mc.strokeStyle='#fff';mc.lineWidth=1;mc.stroke();
+  mc.fillStyle='#ffeaa0';mc.shadowColor='rgba(0,0,0,1)';mc.shadowBlur=3;
+  mc.font='bold 11px sans-serif';mc.fillText(r.name,sx+6,sy);mc.shadowBlur=0;mc.font='10px sans-serif';
+ });
+ mc.fillStyle='rgba(200,210,220,.55)';mc.font='11px sans-serif';mc.textAlign='center';
+ [{n:'石門',lo:121.568,la:25.29},{n:'三芝',lo:121.504,la:25.258},{n:'淺水',lo:121.44,la:25.167},{n:'金山',lo:121.638,la:25.22},{n:'陽明山',lo:121.54,la:25.17},{n:'風櫃嘴',lo:121.603,la:25.137},{n:'五指山',lo:121.657,la:25.144}].forEach(l=>{
+  const[x,y]=rxy(l.lo,l.la);
+  mc.beginPath();mc.arc(x,y,2,0,Math.PI*2);mc.fillStyle='rgba(180,190,200,.6)';mc.fill();
+  mc.fillStyle='rgba(200,210,220,.55)';mc.fillText(l.n,x,y-6);
+ });
 }
 function drF(st){
   const cv=document.getElementById('rCV');if(!cv)return;
