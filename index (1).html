@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>騎士氣象台 – 台北公路車天氣</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi6aip5aOr5rCj6LGh5Y+wIiwic2hvcnRfbmFtZSI6IumqkeWjq+awo+ixoSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTBhIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIn0=">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--fg:#e8e8e8;--fg2:#999;--fg3:#666;--bdr:#2a2a2a;--green:#4CAF50;--yellow:#FFC107;--red:#E53935;--blue:#42A5F5;--purple:#7E57C2}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','PingFang TC','Noto Sans TC',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;-webkit-font-smoothing:antialiased}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .5s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.spinner{width:36px;height:36px;border:3px solid var(--bdr);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{margin-top:16px;font-size:13px;color:var(--fg2)}.load-src{font-size:11px;color:var(--fg3);margin-top:6px}
+.error-banner{display:none;padding:10px 16px;background:#1a1205;border-bottom:1px solid #3d2f0a;font-size:11px;color:#FFC107}
+.error-banner.show{display:block}
+header{padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:flex-start}
+header h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
+header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);padding:4px 10px;border:1px solid #1b3a1b;border-radius:20px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 16px 14px}
+.tab{padding:10px 4px;border-radius:10px;border:1px solid var(--bdr);background:transparent;font-size:12px;font-weight:500;color:var(--fg2);cursor:pointer;text-align:center;transition:all .2s}
+.tab.active{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tab .ts{display:block;font-size:9px;margin-top:2px;opacity:.7}
+#main{padding:0 16px 40px}
+.route-hd{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.route-hd h2{font-size:17px;font-weight:600}.route-hd .desc{font-size:11px;color:var(--fg2);margin-top:2px}
+.route-hd .stats{font-size:10px;color:var(--fg2)}.route-hd .stats b{color:var(--fg);margin-left:3px}
+.day-row{display:flex;gap:6px;margin-bottom:14px}
+.dbtn{flex:1;padding:10px 4px 8px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);cursor:pointer;text-align:center;transition:all .2s}
+.dbtn.active{background:var(--fg);border-color:var(--fg)}
+.dbtn .dn{font-size:11px;font-weight:500;display:block;color:var(--fg2)}.dbtn.active .dn{color:var(--bg)}
+.dbtn .ds{font-size:19px;font-weight:600;display:block;margin-top:3px}.dbtn.active .ds{color:var(--bg)!important}
+.dbtn .dd{font-size:9px;color:var(--fg3);display:block;margin-top:2px}.dbtn.active .dd{color:rgba(0,0,0,.5)}
+.hero{background:var(--bg2);border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.score-ring{position:relative;width:64px;height:64px;flex:0 0 auto}
+.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600}
+.hero-txt{flex:1;min-width:0}.hero-txt h3{font-size:14px;font-weight:500;line-height:1.4}
+.hero-txt .reason{font-size:11px;color:var(--fg2);margin-top:4px;line-height:1.5}
+.wchip{display:inline-block;margin-top:7px;font-size:10px;padding:3px 10px;border-radius:20px;font-weight:500}
+.wchip.g{background:#1b3a1b;color:#81C784}.wchip.w{background:#3d2f0a;color:#FFD54F}.wchip.b{background:#3a1212;color:#EF9A9A}
+.src-info{font-size:9px;color:var(--fg3);text-align:right;margin-bottom:8px}
+.src-info b{color:var(--fg2)}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:12px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.card-head h4{font-size:14px;font-weight:500}
+.pill{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:500}
+.pill.g{background:#1b3a1b;color:#81C784}.pill.w{background:#3d2f0a;color:#FFD54F}.pill.b{background:#3a1212;color:#EF9A9A}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.metric{background:var(--bg3);border-radius:10px;padding:9px 10px}
+.metric .lbl{font-size:10px;color:var(--fg2);display:block}.metric .val{font-size:15px;font-weight:500;display:block;margin-top:3px}
+.mbar{height:5px;background:var(--bg);border-radius:3px;margin-top:5px;overflow:hidden}
+.mfill{height:100%;border-radius:3px}
+.callouts{display:flex;flex-direction:column;gap:6px}
+.co{display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.45}
+.co-tag{flex-shrink:0;font-size:9px;font-weight:500;padding:3px 7px;border-radius:4px;min-width:42px;text-align:center}
+.co-tag.weak{background:#3a1212;color:#EF9A9A}.co-tag.ok{background:#1b3a1b;color:#81C784}.co-tag.warn{background:#3d2f0a;color:#FFD54F}
+.radar-wrap{border-radius:10px;overflow:hidden;position:relative;margin-bottom:10px}
+.radar-wrap canvas{display:block;width:100%}
+.radar-ctrl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.radar-time{font-size:14px;font-weight:500;font-family:'SF Mono',monospace}
+.play-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--bdr);background:transparent;color:var(--fg);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.radar-off{font-size:11px;color:var(--fg2)}
+.rslider{width:100%;-webkit-appearance:none;appearance:none;height:4px;background:var(--bg3);border-radius:2px;outline:none;cursor:pointer;margin:8px 0 4px}
+.rslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--fg);cursor:pointer}
+.rticks{display:flex;justify-content:space-between;font-size:10px;color:var(--fg3)}
+.rstatus{font-size:11px;color:var(--fg2);margin-top:5px;line-height:1.4}.rstatus b{color:var(--fg)}
+.seg-list{display:flex;flex-direction:column;gap:10px}
+.seg{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:12px 14px}
+.seg-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.seg-top>div:first-child{flex:1;min-width:0}
+.seg-name{font-size:14px;font-weight:500;line-height:1.3}.seg-meta{font-size:10px;color:var(--fg2);margin-top:2px}
+.temp-blk{text-align:right;flex-shrink:0}.temp-blk .big{font-size:18px;font-weight:600;display:block}.temp-blk .sm{font-size:10px;color:var(--fg2);display:block;margin-top:2px}
+.wind-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.wtag{font-weight:500;font-size:11px;padding:3px 10px;border-radius:20px}
+.wtag.tail{background:#1b3a1b;color:#81C784}.wtag.head{background:#3a1212;color:#EF9A9A}.wtag.side{background:#3d2f0a;color:#FFD54F}
+.wspeed{color:var(--fg2);font-size:10px}
+.wbar{position:relative;height:8px;background:var(--bg3);border-radius:4px}
+.wbar-c{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--fg3);z-index:2}
+.wfill{position:absolute;top:0;bottom:0;border-radius:2px}.wfill.tail{background:var(--green)}.wfill.head{background:var(--red)}
+.wscale{display:flex;justify-content:space-between;font-size:9px;color:var(--fg3);margin-top:3px}
+.road-box{background:var(--bg3);border-radius:10px;padding:10px 12px;margin-top:10px}
+.road-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.road-lbl{display:flex;align-items:center;gap:8px}
+.road-lbl span:first-child{font-size:10px;color:var(--fg2);font-weight:500}
+.road-rain{font-size:11px;color:var(--fg2)}
+.road-desc{font-size:11px;line-height:1.4;margin-bottom:6px}
+.tl-period{font-size:10px;color:var(--fg3);margin-bottom:5px}
+.tl-leg{display:flex;gap:7px;font-size:9px;color:var(--fg2);margin:4px 0 5px;flex-wrap:wrap}
+.tl-sw{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:2px;vertical-align:-1px}
+.tl-hint{font-size:11px;color:var(--fg2);font-weight:500;margin:6px 0 0}.tl-hint b{color:var(--fg)}
+.note{font-size:10px;color:var(--fg2);line-height:1.55;padding-top:7px;border-top:1px solid var(--bdr);margin-top:7px}.note b{color:var(--fg)}
+.tr-box{font-size:10px;color:var(--fg2);line-height:1.55;padding:7px 10px;margin-top:6px;background:var(--bg);border-radius:8px;border-left:2.5px solid var(--purple)}.tr-box b{color:var(--fg)}
+.pr-line{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;margin-top:9px}
+.pr-lbl{font-size:11px;color:var(--fg2)}.pr-body{display:flex;align-items:center;gap:8px}.pr-val{font-size:17px;font-weight:600}
+.gear-box{display:flex;align-items:flex-start;gap:7px;margin-top:9px;padding:8px 10px;background:#0d1520;border-radius:8px}
+.gear-box .tag{font-size:10px;font-weight:500;color:var(--blue);flex-shrink:0}.gear-box .txt{font-size:11px;color:var(--blue);line-height:1.5;opacity:.85}
+.seg-foot{display:flex;gap:6px;margin-top:9px}
+.sbtn{flex:1;min-width:0;padding:8px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:11px;font-weight:500;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s}
+.sbtn:active{background:var(--bg3)}
+.sbtn.cam{background:#0d1520;color:var(--blue);border-color:transparent}
+.sbtn .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.band{font-size:14px;font-weight:500;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.band .hint{font-size:10px;color:var(--fg3);font-weight:400}
+
+.elev-card{margin:8px 0 0 0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.25)}
+.elev-card svg{display:block}</style>
+</head>
+<body>
+<div class="loading-overlay" id="loadScreen">
+  <div class="spinner"></div>
+  <div class="load-text" id="loadText">正在載入即時天氣資料...</div>
+  <div class="load-src" id="loadSrc">來源：Open-Meteo API</div>
+</div>
+<div class="error-banner" id="errBanner"></div>
+<header>
+  <div><h1>騎士氣象台</h1><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
+  <div class="live-badge"><div class="live-dot"></div><span id="srcLabel">LIVE</span></div>
+</header>
+<div class="tabs" id="tabs"></div>
+<div id="main"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONFIG: 9 Routes with coordinates, climb bearing, camera links
+// ═══════════════════════════════════════════════════════════════════════════════
+const ROUTES=[
+{id:'feng',name:'風櫃嘴',sub:'楓林橋→萬溪産業道路→風櫃嘴涼亭',dist:10.8,elev:620,
+ mp:[[121.578,25.100],[121.582,25.118],[121.588,25.135],[121.595,25.157]],
+ lat:25.127,lon:121.583,bear:350,
+ segs:[
+  {n:'楓林橋起登段',m:'0–2.5 km · 坡 5% · N',bear:350,elFrac:0,
+   cam:{name:'楓林橋路口',url:'https://www.google.com/maps/search/?api=1&query=25.104,121.576'},
+   tr:'至善路三段故宮主幹道，09:00 後遊覽車大量湧入；建議 08:00 前通過，下山車速快靠右行駛。'},
+  {n:'萬溪産業道路中段',m:'2.5–5.8 km · 坡 9% · NNE',bear:20,elFrac:.33,
+   cam:null,
+   tr:'車流極少，偶有農用車；路幅約 4m，彎道視線短，遇對向機車需靠右減速讓行。'},
+  {n:'萬溪上段陡坡',m:'5.8–8.5 km · 坡 11% · N',bear:350,elFrac:.66,
+   cam:{name:'萬溪上段岔路',url:'https://www.google.com/maps/search/?api=1&query=25.137,121.585'},
+   tr:'路幅最窄處僅單線通行；下坡機車速度快，衝頂前確認無來車，選寬處讓行。'},
+  {n:'稜線至風櫃嘴涼亭',m:'8.5–10.8 km · 坡 6% · NNE',bear:20,elFrac:1,
+   cam:null,
+   tr:'假日機車族聚集風櫃嘴涼亭，停車混亂；下坡前先觀察人車動態，避免高速衝入停車區。'},
+ ]},
+{id:'leng',name:'冷水坑',sub:'至善路口→平等里→冷水坑',dist:11.4,elev:658,
+ mp:[[121.543,25.082],[121.556,25.118],[121.567,25.145],[121.574,25.168]],
+ lat:25.125,lon:121.557,bear:10,
+ segs:[
+  {n:'至善路三段口',m:'0–3 km · 坡 3% · N',bear:0,elFrac:0,
+   cam:{name:'故宮路口',url:'https://www.google.com/maps/search/?api=1&query=25.082,121.540'},
+   tr:'故宮幹道 09:00 後遊覽車頻繁；靠右側，進出故宮路口放慢注意盲彎。'},
+  {n:'平等里茶園',m:'3–6.2 km · 坡 6% · N',bear:5,elFrac:.33,cam:null,
+   tr:'農用車偶爾出現；彎道多，預判對向來車，農機具體積大注意會車空間。'},
+  {n:'內雙溪→冷擎',m:'6.2–9.4 km · 坡 8% · NNW',bear:340,elFrac:.66,
+   cam:{name:'內雙溪橋',url:'https://www.google.com/maps/search/?api=1&query=25.14,121.565'},
+   tr:'車輛極少；橋面鐵格柵雨後特別滑，過橋降速慢行。'},
+  {n:'冷水坑遊客中心',m:'9.4–11.4 km · 坡 5% · NW',bear:315,elFrac:1,
+   cam:{name:'冷水坑停車場',url:'https://www.google.com/maps/search/?api=1&query=25.168,121.575'},
+   tr:'假日遊覽車集中，停車場出入頻繁；下坡前觀察出口車輛，勿高速通過入口區。'},
+ ]},
+{id:'yangde',name:'仰德小油',sub:'劍潭→仰德大道→小油坑',dist:14.8,elev:805,
+ mp:[[121.518,25.073],[121.524,25.108],[121.535,25.148],[121.548,25.179]],
+ lat:25.130,lon:121.535,bear:5,
+ segs:[
+  {n:'文化大學起登',m:'0–3.5 km · 坡 6% · N',bear:0,elFrac:0,
+   cam:{name:'文大門口',url:'https://www.google.com/maps/search/?api=1&query=25.100,121.512'},
+   tr:'仰德大道通勤幹道 07-08 點尖峰，路邊停車多注意門殺；公車進出頻繁保持距離。'},
+  {n:'仰德大道三段',m:'3.5–7.8 km · 坡 7% · N',bear:5,elFrac:.33,
+   cam:{name:'永公路口',url:'https://www.google.com/maps/search/?api=1&query=25.125,121.525'},
+   tr:'09:00 後車流銳減；下坡方向車速偏快，靠右爬升，直線路段視野佳可預判對向車況。'},
+  {n:'陽明山公車總站',m:'7.8–11 km · 坡 5% · NNE',bear:15,elFrac:.66,
+   cam:{name:'第二停車場',url:'https://www.google.com/maps/search/?api=1&query=25.155,121.540'},
+   tr:'公車路線密集，注意停靠站盲區和乘客橫越；公車迴轉體積大，待其完成再繞行。'},
+  {n:'陽金→小油坑',m:'11–14.8 km · 坡 9% · NE',bear:40,elFrac:1,
+   cam:{name:'小油坑觀景台',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   tr:'假日觀光遊覽車多但上坡速慢；注意遊覽車寬幅轉彎盲角，下坡衝速前確認稜線視野。'},
+ ]},
+{id:'xingyi',name:'行義小油',sub:'行義路→紗帽路→小油坑',dist:13.1,elev:782,
+ mp:[[121.502,25.096],[121.510,25.128],[121.528,25.158],[121.548,25.179]],
+ lat:25.142,lon:121.525,bear:345,
+ segs:[
+  {n:'行義路溫泉區',m:'0–2.5 km · 坡 4% · N',bear:350,elFrac:0,
+   cam:{name:'行義路口',url:'https://www.google.com/maps/search/?api=1&query=25.102,121.500'},
+   tr:'溫泉區假日下午最忙，清晨無車；不規則停車多注意突然開門。'},
+  {n:'紗帽路前山段',m:'2.5–6.8 km · 坡 7% · N',bear:0,elFrac:.33,cam:null,
+   tr:'車流大減，主要居民用車；彎多靠右，注意機車逆向使用路肩。'},
+  {n:'紗帽接陽投',m:'6.8–10.2 km · 坡 8% · NNW',bear:340,elFrac:.66,
+   cam:{name:'陽投路口',url:'https://www.google.com/maps/search/?api=1&query=25.145,121.520'},
+   tr:'陽投公路路面較寬，自用車偶有超速；注意側風路段車輛壓線，保持右側行駛。'},
+  {n:'小油坑停車場',m:'10.2–13.1 km · 坡 9% · NE',bear:40,elFrac:1,
+   cam:{name:'小油坑觀景',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   tr:'假日觀光車進出繁忙，旅遊巴士大轉彎占全路幅；停車場入口降速讓行。'},
+ ]},
+{id:'balaka',name:'巴拉卡',sub:'三芝 101甲→大屯鞍部',dist:17.3,elev:784,
+ mp:[[121.435,25.252],[121.466,25.225],[121.502,25.198],[121.548,25.179]],
+ lat:25.218,lon:121.494,bear:135,
+ segs:[
+  {n:'三芝起登',m:'0–4.2 km · 坡 4% · SE',bear:135,elFrac:0,
+   cam:{name:'三芝市區',url:'https://www.google.com/maps/search/?api=1&query=25.255,121.432'},
+   tr:'101甲商業卡車偶有，保持安全距離；市區路口多注意行人和機車搶道。'},
+  {n:'中段林道',m:'4.2–9.5 km · 坡 6% · SE',bear:130,elFrac:.33,cam:null,
+   tr:'林道幾乎無車，偶有農用車；注意路面落土和倒竹。'},
+  {n:'二子坪入口段',m:'9.5–13.8 km · 坡 7% · SE',bear:140,elFrac:.66,
+   cam:{name:'二子坪入口',url:'https://www.google.com/maps/search/?api=1&query=25.185,121.530'},
+   tr:'公車停靠時注意乘客動向；霧天公車能見度低，遇公車先等待完全通過再追。'},
+  {n:'大屯山鞍部',m:'13.8–17.3 km · 坡 8% · ESE',bear:110,elFrac:1,
+   cam:{name:'大屯鞍部',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   tr:'公車迴轉站假日遊客密集；大霧時與公車保持充分距離，下坡謹慎。'},
+ ]},
+{id:'yangjin',name:'陽金',sub:'金山→馬槽→小油坑鞍部',dist:15.0,elev:720,
+ mp:[[121.476,25.225],[121.503,25.205],[121.528,25.188],[121.548,25.179]],
+ lat:25.200,lon:121.524,bear:155,
+ segs:[
+  {n:'金山老街起步',m:'0–3.8 km · 坡 3% · SSE',bear:160,elFrac:0,
+   cam:{name:'金山中山路',url:'https://www.google.com/maps/search/?api=1&query=25.222,121.478'},
+   tr:'夏日海水浴場遊客車多；路口多注意行人，機車隨意切換車道。'},
+  {n:'磺港→馬槽',m:'3.8–8.5 km · 坡 6% · SE',bear:140,elFrac:.33,
+   cam:{name:'馬槽橋',url:'https://www.google.com/maps/search/?api=1&query=25.205,121.510'},
+   tr:'陽金公路大型遊覽車頻繁；上坡被超車風險高靠右，注意遊覽車下坡衝速的迎面風壓。'},
+  {n:'馬槽至竹仔山',m:'8.5–12 km · 坡 8% · SE',bear:130,elFrac:.66,cam:null,
+   tr:'觀光車下山車速快，彎道對向車多；霧中注意車燈方向，聽到引擎聲先靠邊停候。'},
+  {n:'竹仔山至鞍部',m:'12–15 km · 坡 7% · SSE',bear:150,elFrac:1,
+   cam:{name:'小油坑鞍部',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   tr:'鞍部停車複雜，公車遊覽車同時進出；下坡前於高點觀察確認安全後再通過。'},
+ ]},
+{id:'zhzheng',name:'中正山',sub:'行義路→紗帽路→中正山',dist:8.2,elev:546,
+ mp:[[121.505,25.100],[121.498,25.118],[121.490,25.140]],
+ lat:25.118,lon:121.498,bear:330,
+ segs:[
+  {n:'行義路溫泉口',m:'0–1.8 km · 坡 5% · N',bear:350,elFrac:0,
+   cam:{name:'陽明醫院口',url:'https://www.google.com/maps/search/?api=1&query=25.102,121.505'},
+   tr:'清晨通暢；不規則停車密集注意車門突然打開。'},
+  {n:'紗帽路支線',m:'1.8–4.2 km · 坡 7% · NW',bear:320,elFrac:.33,cam:null,
+   tr:'鄰里小道幾乎無車；偶有機車，彎道中線保持。'},
+  {n:'中正山産道口',m:'4.2–6.5 km · 坡 9% · NW',bear:315,elFrac:.66,cam:null,
+   tr:'産道入口後零車流，偶有登山客停車路肩；路幅極窄下坡前確認無來車。'},
+  {n:'中正山瞭望台',m:'6.5–8.2 km · 坡 10% · NNW',bear:340,elFrac:1,cam:null,
+   tr:'健行步道與公路交叉；注意徒步者走入路面，鳴鈴預告後再通過。'},
+ ]},
+{id:'xiwan',name:'汐萬五指',sub:'汐止→汐萬路→五指山',dist:10.5,elev:590,
+ mp:[[121.665,25.065],[121.660,25.090],[121.658,25.112],[121.657,25.128]],
+ lat:25.098,lon:121.657,bear:0,
+ segs:[
+  {n:'汐萬路起登',m:'0–2.5 km · 坡 4% · N',bear:355,elFrac:0,
+   cam:{name:'汐萬大同口',url:'https://www.google.com/maps/search/?api=1&query=25.070,121.660'},
+   tr:'通勤車流 07-08 點集中，之後快速減少；砂石車出入量大保持車距。'},
+  {n:'汐萬中段林道',m:'2.5–6 km · 坡 7% · N',bear:0,elFrac:.33,cam:null,
+   tr:'林道車流極少；彎道盲點多注意下坡機車高速衝出，爬升靠右行駛。'},
+  {n:'五指山公墓入口',m:'6–8.2 km · 坡 8% · N',bear:5,elFrac:.66,
+   cam:{name:'公墓入口',url:'https://www.google.com/maps/search/?api=1&query=25.110,121.655'},
+   tr:'清明掃墓季節人車暴增，平日幾乎無車；清明前後避開此路線。'},
+  {n:'五指山稜線',m:'8.2–10.5 km · 坡 6% · NNE',bear:20,elFrac:1,cam:null,
+   tr:'無一般車輛，健行者多；下坡前鳴鈴警示步道交叉口，注意碎石制動。'},
+ ]},
+{id:'dahu',name:'大湖五指',sub:'內湖大湖→碧山→五指山',dist:7.8,elev:622,
+ mp:[[121.622,25.066],[121.635,25.090],[121.648,25.110],[121.657,25.128]],
+ lat:25.096,lon:121.638,bear:30,
+ segs:[
+  {n:'大湖山莊街起步',m:'0–1.8 km · 坡 5% · NE',bear:30,elFrac:0,
+   cam:{name:'大湖公園',url:'https://www.google.com/maps/search/?api=1&query=25.068,121.622'},
+   tr:'住宅區晨間通勤車流集中，路邊停車多；注意突然開門，靠左離停車帶 1m 以上。'},
+  {n:'碧山路口轉入',m:'1.8–3.5 km · 坡 8% · NE',bear:35,elFrac:.33,cam:null,
+   tr:'碧山路有機車和自用車；轉彎前確認後方車輛，避免轉彎中被後車超越。'},
+  {n:'陡坡髮夾彎區',m:'3.5–5.8 km · 坡 12% · NNE',bear:20,elFrac:.66,cam:null,
+   tr:'上坡車流少但下坡快速機車多；彎道視野受限，聽引擎聲先靠右讓，注意來車衝出彎角。'},
+  {n:'五指山公墓段',m:'5.8–7.8 km · 坡 7% · NE',bear:30,elFrac:1,
+   cam:{name:'公墓觀景',url:'https://www.google.com/maps/search/?api=1&query=25.125,121.655'},
+   tr:'清明節人車大增，其他幾乎無車；墓區工程車偶出現，注意沙塵影響抓地力。'},
+ ]},
+,
+  {id:'danjin',name:'淡金來回',sub:'承德路七段麥當勞→淡水→三芝→石門→金山（折返）',dist:86.0,elev:820,
+ mp:[[121.514,25.100],[121.462,25.158],[121.435,25.252],[121.394,25.296],[121.476,25.225],[121.394,25.296],[121.435,25.252],[121.462,25.158],[121.514,25.100]],
+ lat:25.225,lon:121.476,bear:0,
+ segs:[
+  {n:'承德路七段麥當勞',m:'0–8 km · 坡 1% · N',bear:0,elFrac:0,
+   cam:{name:'承德路七段口',url:'https://www.google.com/maps/search/?api=1&query=25.100,121.514'},
+   tr:'淡水河濱路段平日通勤車流，假日單車客密集；注意紅燈路口左轉車，保持直線行駛靠右。'},
+  {n:'紅樹林捷運站',m:'8–24 km · 坡 1% · NNW',bear:340,elFrac:.12,
+   cam:{name:'紅樹林站',url:'https://www.google.com/maps/search/?api=1&query=25.158,121.462'},
+   tr:'淡金公路平坦海濱路段；假日機車多，注意路口行人橫越，風強時側風明顯。'},
+  {n:'三芝金芝門市',m:'24–42 km · 坡 3% · N',bear:5,elFrac:.30,
+   cam:{name:'三芝市區',url:'https://www.google.com/maps/search/?api=1&query=25.252,121.435'},
+   tr:'三芝市區路口多；卡車出入加油站注意，假日遊客車在此休息補給，路側停車雜亂。'},
+  {n:'石門郵局',m:'42–54 km · 坡 2% · NNE',bear:20,elFrac:.48,
+   cam:{name:'石門市區',url:'https://www.google.com/maps/search/?api=1&query=25.296,121.394'},
+   tr:'北海岸路段側風強烈；101縣道與台2線路口注意轉向車，下坡車速快保持右側行駛。'},
+  {n:'金山環金門市',m:'54–65 km · 坡 2% · SE',bear:140,elFrac:.65,
+   cam:{name:'金山中山路',url:'https://www.google.com/maps/search/?api=1&query=25.225,121.476'},
+   tr:'金山市區補給後折返；溫泉旅館出入車較多，假日海水浴場遊客多，補給後原路折返。'},
+  {n:'石門郵局（折返）',m:'65–76 km · 坡 2% · SSW',bear:200,elFrac:.78,
+   cam:null,
+   tr:'折返路段視野好但逆風；保持穩定踏頻，注意疲勞累積後的注意力下降。'},
+  {n:'三芝金芝門市（折返）',m:'76–81 km · 坡 1% · S',bear:175,elFrac:.88,
+   cam:null,
+   tr:'三芝至淡水路段平坦；下午常有南向側風，補充水分為長距離後段重要事項。'},
+  {n:'紅樹林捷運站（折返）',m:'81–84 km · 坡 1% · SSE',bear:170,elFrac:.95,
+   cam:null,
+   tr:'返程進入淡水市區路段；17:00後通勤車增加，靠右行駛，機車道注意並行。'},
+  {n:'承德路七段麥當勞（返抵）',m:'84–86 km · 坡 1% · S',bear:180,elFrac:1,
+   cam:{name:'承德路七段終點',url:'https://www.google.com/maps/search/?api=1&query=25.100,121.514'},
+   tr:'返抵起點；慢速冷卻，注意路口左轉車，完成後補充飲食。'},
+ ]}
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// API LAYER: Triple fallback weather fetching
+// ═══════════════════════════════════════════════════════════════════════════════
+let weatherSrc='', weatherData=null, radarData=null;
+const now=new Date();
+
+async function fetchWeather(){
+  const lats=ROUTES.map(r=>r.lat).join(',');
+  const lons=ROUTES.map(r=>r.lon).join(',');
+  // Primary: Open-Meteo
+  try{
+    setText('正在連線 Open-Meteo API...','來源：api.open-meteo.com（主要源）');
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&hourly=temperature_2m,apparent_temperature,precipitation_probability,wind_speed_10m,wind_direction_10m&timezone=Asia%2FTaipei&forecast_days=3`;
+    const r=await fetchTimeout(u,12000);
+    const d=await r.json();
+    if(Array.isArray(d)&&d.length===ROUTES.length){weatherSrc='Open-Meteo';return d;}
+    throw new Error('Unexpected response format');
+  }catch(e1){
+    console.warn('Primary (Open-Meteo) failed:',e1.message);
+    // Backup 1: wttr.in
+    try{
+      setText('Open-Meteo 不可用，切換 wttr.in...','來源：wttr.in（備援源 1）');
+      const results=[];
+      for(const r of ROUTES){
+        const u=`https://wttr.in/${r.lat},${r.lon}?format=j1`;
+        const resp=await fetchTimeout(u,8000);
+        results.push(await resp.json());
+      }
+      weatherSrc='wttr.in';return convertWttr(results);
+    }catch(e2){
+      console.warn('Backup 1 (wttr.in) failed:',e2.message);
+      // Backup 2: Open-Meteo with single call per route
+      try{
+        setText('備援源 1 不可用，嘗試備援源 2...','來源：Open-Meteo 單點查詢');
+        const results=[];
+        for(const r of ROUTES){
+          const u=`https://api.open-meteo.com/v1/forecast?latitude=${r.lat}&longitude=${r.lon}&hourly=temperature_2m,apparent_temperature,precipitation_probability,wind_speed_10m,wind_direction_10m&timezone=Asia%2FTaipei&forecast_days=3`;
+          const resp=await fetchTimeout(u,8000);
+          results.push(await resp.json());
+        }
+        weatherSrc='Open-Meteo (單點)';return results;
+      }catch(e3){
+        console.warn('Backup 2 failed:',e3.message);
+        weatherSrc='離線快取';
+        showError('所有氣象來源暫時無法連線，使用離線預設資料。');
+        return getDefaultWeather();
+      }
+    }
+  }
+}
+
+function fetchTimeout(url,ms){
+  return Promise.race([
+    fetch(url),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout')),ms))
+  ]);
+}
+
+function convertWttr(results){
+  // Convert wttr.in format to Open-Meteo-like hourly arrays
+  return results.map(d=>{
+    const cur=d.current_condition?.[0]||{};
+    const forecasts=d.weather||[];
+    const hourly={time:[],temperature_2m:[],apparent_temperature:[],precipitation_probability:[],wind_speed_10m:[],wind_direction_10m:[]};
+    forecasts.forEach((day,di)=>{
+      (day.hourly||[]).forEach(h=>{
+        const dt=`${day.date}T${String(h.time).padStart(4,'0').slice(0,2)}:00`;
+        hourly.time.push(dt);
+        hourly.temperature_2m.push(parseFloat(h.tempC));
+        hourly.apparent_temperature.push(parseFloat(h.FeelsLikeC));
+        hourly.precipitation_probability.push(parseFloat(h.chanceofrain||0));
+        hourly.wind_speed_10m.push(parseFloat(h.windspeedKmph));
+        hourly.wind_direction_10m.push(parseFloat(h.winddirDegree));
+      });
+    });
+    return{hourly};
+  });
+}
+
+function getDefaultWeather(){
+  return ROUTES.map(r=>{
+    const hours=72;const hourly={time:[],temperature_2m:[],apparent_temperature:[],precipitation_probability:[],wind_speed_10m:[],wind_direction_10m:[]};
+    for(let i=0;i<hours;i++){
+      const d=new Date(now);d.setHours(d.getHours()+i);
+      hourly.time.push(d.toISOString().slice(0,16));
+      const hr=d.getHours();const t=hr>=6&&hr<=14?22+Math.sin((hr-6)/8*Math.PI)*6:18;
+      hourly.temperature_2m.push(Math.round(t*10)/10);
+      hourly.apparent_temperature.push(Math.round((t-2)*10)/10);
+      hourly.precipitation_probability.push(hr>=14?Math.min(80,(hr-14)*12):Math.max(0,5));
+      hourly.wind_speed_10m.push(Math.round((3+Math.sin(hr/6)*2)*10)/10);
+      hourly.wind_direction_10m.push(180);
+    }
+    return{hourly};
+  });
+}
+
+async function fetchRadar(){
+  try{
+    setText('載入降雨雷達資料...','來源：RainViewer API');
+    const r=await fetchTimeout('https://api.rainviewer.com/public/weather-maps.json',8000);
+    radarData=await r.json();
+    const past=(radarData.radar&&radarData.radar.past)||[];
+    const nowcast=(radarData.radar&&radarData.radar.nowcast)||[];
+    // Store path strings (e.g. '/v2/radar/abc123')
+    radarFrames=[...past,...nowcast].map(f=>f.path).filter(Boolean);
+    radarHost=radarData.host||'https://tilecache.rainviewer.com';
+    console.log('Radar frames loaded:',radarFrames.length,'host:',radarHost);
+  }catch(e){
+    console.warn('Radar fetch failed:',e.message);
+    radarData=null;radarFrames=[];radarHost='';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATA PROCESSING: Convert raw API → route scores & segment data
+// ═══════════════════════════════════════════════════════════════════════════════
+function windAlign(windDirDeg,climbBear){
+  const windTo=(windDirDeg+180)%360;
+  const diff=((windTo-climbBear+540)%360)-180;
+  return Math.cos(diff*Math.PI/180);
+}
+
+function processWeather(raw){
+  const processed=[];
+  ROUTES.forEach((route,ri)=>{
+    const h=raw[ri]?.hourly;if(!h)return;
+    const nowIdx=findNowIdx(h.time);
+    // Build 3 day scenarios
+    const days=[0,1,2].map(di=>{
+      const startIdx=di===0?nowIdx:findHourIdx(h.time,di,6);
+      const sliceLen=9;// 9 points = 4h at 30min intervals → use every-other hourly
+      const idxs=[];for(let i=0;i<sliceLen;i++){const idx=startIdx+Math.round(i*0.5);if(idx<h.time.length)idxs.push(idx);else idxs.push(h.time.length-1);}
+      const segsData=route.segs.map((seg,si)=>{
+        const segIdx=idxs[Math.min(Math.round(si*2),idxs.length-1)];
+        const t=Math.round(h.temperature_2m[segIdx]||22);
+        const f=Math.round(h.apparent_temperature[segIdx]||t-2);
+        const rain=Math.round(h.precipitation_probability[segIdx]||0);
+        const ws=Math.round((h.wind_speed_10m[segIdx]||5)/3.6*10)/10;// km/h→m/s
+        const wd=h.wind_direction_10m[segIdx]||180;
+        const a=Math.round(windAlign(wd,seg.bear)*100)/100;
+        const road=rain>=45?'wet':rain>=20?'damp':'dry';
+        const pr=Math.max(10,Math.min(98,Math.round(85-rain*0.6+(a*ws*2.5)-(seg.elFrac*8))));
+        // Build timeline
+        const tl={rain:[],road:[],windMs:[],windAlign:[]};
+        idxs.forEach(idx=>{
+          const rn=Math.round(h.precipitation_probability[idx]||0);
+          tl.rain.push(rn);tl.road.push(rn>=45?'wet':rn>=20?'damp':'dry');
+          tl.windMs.push(Math.round((h.wind_speed_10m[idx]||5)/3.6*10)/10);
+          tl.windAlign.push(Math.round(windAlign(h.wind_direction_10m[idx]||180,seg.bear)*100)/100);
+        });
+        const rdTxt=road==='wet'?'潮濕·降雨中':road==='damp'?'微濕·有降雨機率':'乾燥·路面狀態良好';
+        const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+        const wdir=dirs[Math.round(wd/22.5)%16];
+        return{...seg,t,f,rain,road,rd:rdTxt,w:{ms:ws,dir:wdir,a},pr,tl};
+      });
+      // Overall score
+      const avgRain=segsData.reduce((s,x)=>s+x.rain,0)/segsData.length;
+      const avgPr=Math.round(segsData.reduce((s,x)=>s+x.pr,0)/segsData.length);
+      const avgA=segsData.reduce((s,x)=>s+x.w.a,0)/segsData.length;
+      const score=Math.max(15,Math.min(98,avgPr));
+      const verdict=score>=80?'狀態良好，把握當前時段':score>=65?'條件中上，適合練習':score>=50?'條件一般，注意安全':score>=35?'不建議出發，路況差':'強烈不建議出發';
+      const reason=`平均降雨 ${Math.round(avgRain)}%、風向對齊 ${Math.round(avgA*100)}%、破紀錄指數均值 ${avgPr}。`;
+      const wl=score>=75?'最佳視窗·現在起':score>=60?'條件漸轉·把握時間':'今日條件不佳';
+      const wt=score>=75?'g':score>=55?'w':'b';
+      const weakest=segsData.reduce((w,s)=>s.pr<w.pr?s:w,segsData[0]);
+      // Route-level timeline (use first seg's timeline as base)
+      const rtl=segsData[0].tl;
+      return{score,verdict,reason,windowLabel:wl,windowType:wt,segs:segsData,tl:rtl,
+        surf:{state:avgRain<15?'全線偏乾':avgRain<40?'部分路段微濕':'多段潮濕',
+              stateCls:avgRain<15?'good':avgRain<40?'warn':'bad',
+              weakest:`${weakest.n}·破紀錄指數最低 (${weakest.pr})`,
+              window:score>=70?'現在為最佳時段':'注意天氣變化',
+              hazards:avgRain>=40?'降雨路滑·煞車增距':'午後雷陣雨·稜線風大'}};
+    });
+    processed.push({...route,days});
+  });
+  return processed;
+}
+
+function findNowIdx(times){
+  const n=now.toISOString().slice(0,13);
+  for(let i=0;i<times.length;i++){if(times[i]&&times[i].startsWith(n))return i;}
+  return 0;
+}
+function findHourIdx(times,dayOffset,hour){
+  const d=new Date(now);d.setDate(d.getDate()+dayOffset);d.setHours(hour,0,0,0);
+  const target=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(hour).padStart(2,'0')}`;
+  for(let i=0;i<times.length;i++){if(times[i]&&times[i].startsWith(target))return i;}
+  return Math.min(dayOffset*24+hour,times.length-1);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+const sC=s=>s>=80?'#4CAF50':s>=65?'#FFC107':s>=45?'#FF9800':'#E53935';
+const RT={dry:'乾燥',damp:'微濕',wet:'潮濕'};
+const RC={dry:'#4CAF50',damp:'#FFC107',wet:'#E53935'};
+const kOf=a=>a>.15?'tail':a<-.15?'head':'side';
+const wL=k=>k==='tail'?'順風':k==='head'?'逆風':'側風';
+function gear(f,rain){const p=[];if(f>=22)p.push('短袖車衣','短車褲');else if(f>=19)p.push('短袖+薄臂套','短車褲');else if(f>=16)p.push('長袖車衣','薄腿套');else p.push('保暖長袖','防風外套');if(rain>=40)p.push('輕量雨衣');if(f<13)p.push('長指手套');else if(f<19)p.push('薄手套');return p.join(' · ');}
+function sRing(s){const c=sC(s),d=Math.round(s*1.6);return`<svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="26" stroke="#2a2a2a" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="26" stroke="${c}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="${d} 165" transform="rotate(-90 32 32)"/></svg>`;}
+function setText(t,s){const a=document.getElementById('loadText'),b=document.getElementById('loadSrc');if(a)a.textContent=t;if(b)b.textContent=s;}
+function showError(msg){const b=document.getElementById('errBanner');b.textContent='⚠ '+msg;b.classList.add('show');}
+function chint(rd){const f=rd[0],t={dry:'乾燥',damp:'微濕',wet:'潮濕'};for(let i=1;i<rd.length;i++){if(rd[i]!==f){const m=i*30;return`+${m>=60?Math.floor(m/60)+'h'+(m%60?m%60+'m':''):m+' 分'} ${rd[i]==='wet'||rd[i]==='damp'?'轉':'恢復'}${t[rd[i]]}`;}}return`維持${t[f]}（穩定）`;}
+
+function msToBeaufort(ms){if(ms<0.3)return 0;if(ms<1.6)return 1;if(ms<3.4)return 2;if(ms<5.5)return 3;if(ms<8.0)return 4;if(ms<10.8)return 5;if(ms<13.9)return 6;if(ms<17.2)return 7;if(ms<20.8)return 8;if(ms<24.5)return 9;if(ms<28.5)return 10;if(ms<32.7)return 11;return 12;}
+function sTL(seg,tb,di){
+ if(!seg.tl)return'';
+ const s=seg.tl;
+ const W=320,pL=38,pR=4,pT=8,iW=W-pL-pR,n=Math.min(s.rain.length,9);
+ const xs=Array.from({length:n},(_,i)=>pL+(iW*i/(n-1)));
+ const rY=pT,rH=24;
+ const dY=rY+rH+6,dH=10;
+ const arY=dY+dH+10,arH=48;
+ const wY=arY+arH+6,wH=36;
+ const xlY=wY+wH+14;
+ const H=xlY+4;
+ const RC={dry:'#4CAF50',damp:'#FFC107',wet:'#E53935'};
+ const rb=s.rain.map((v,i)=>{const bw=16,bh=Math.max(1,Math.round(v/100*rH)),c=v<20?'#4CAF50':v<50?'#FFC107':'#E53935';return'<rect x="'+(xs[i]-bw/2)+'" y="'+(rY+rH-bh)+'" width="'+bw+'" height="'+bh+'" rx="2" fill="'+c+'"/><text x="'+xs[i]+'" y="'+(rY-1)+'" text-anchor="middle" font-size="9" fill="#999">'+v+'</text>';}).join('');
+ const cw=iW/(n-1);
+ const dc=s.road.map((r,i)=>{const x=i===0?pL:pL+cw*(i-.5),w=(i===0||i===n-1)?cw/2:cw;return'<rect x="'+x+'" y="'+dY+'" width="'+w+'" height="'+dH+'" fill="'+(RC[r]||'#4CAF50')+'" opacity=".8"/>';}).join('');
+ const arrows=xs.map((x,i)=>{
+  const a=s.windAlign[i]||0,pct=Math.round(Math.abs(a)*100);
+  const isTail=a>0.15,isHead=a<-0.15;
+  const ay=arY+arH*0.4,pctY=arY+arH-2;
+  if(!isTail&&!isHead)return'<circle cx="'+x+'" cy="'+ay+'" r="5" fill="rgba(150,150,150,.4)"/><text x="'+x+'" y="'+pctY+'" text-anchor="middle" font-size="9" fill="#888">側風</text>';
+  const col=isTail?'#4CAF50':'#E53935',dir=isTail?1:-1;
+  const len=24,hw=9,hl=12;
+  const x1=x-dir*len/2,x2=x+dir*len/2;
+  return'<line x1="'+x1+'" y1="'+ay+'" x2="'+x2+'" y2="'+ay+'" stroke="'+col+'" stroke-width="4" stroke-linecap="round"/>'+
+   '<polygon points="'+x2+','+ay+' '+(x2-dir*hl)+','+(ay-hw/2)+' '+(x2-dir*hl)+','+(ay+hw/2)+'" fill="'+col+'"/>'+
+   '<text x="'+x+'" y="'+pctY+'" text-anchor="middle" font-size="9" fill="'+col+'" font-weight="700">'+pct+'%</text>';
+ }).join('');
+ const maxMs=12;
+ const windBars=s.windMs.map((v,i)=>{
+  const bw=14,bh=Math.max(3,Math.round(Math.min(v,maxMs)/maxMs*wH));
+  const bx=xs[i]-bw/2,by=wY+wH-bh;
+  const txtY=bh>=14?by+bh-3:by-2;
+  const txtFill=bh>=14?'rgba(255,255,255,.9)':'#9C8FD9';
+  return'<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="3" fill="#7E57C2" opacity=".85"/>'+
+   '<text x="'+xs[i]+'" y="'+txtY+'" text-anchor="middle" font-size="9" fill="'+txtFill+'" font-weight="600">'+v.toFixed(1)+'</text>';
+ }).join('');
+ const xl=xs.map((x,i)=>{if(i%2!==0)return'';const d=new Date(tb.getTime()+i*30*60000);return'<text x="'+x+'" y="'+xlY+'" text-anchor="middle" font-size="9" fill="#666">'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</text>';}).join('');
+ const vLine='<line x1="'+xs[0]+'" y1="'+(pT-2)+'" x2="'+xs[0]+'" y2="'+(wY+wH)+'" stroke="#e8e8e8" stroke-width=".5" stroke-dasharray="2 2"/>';
+ const lbls='<text x="'+(pL-4)+'" y="'+(rY+rH/2+3)+'" text-anchor="end" font-size="9" fill="#999">降雨%</text>'+
+  '<text x="'+(pL-4)+'" y="'+(dY+dH/2+3)+'" text-anchor="end" font-size="9" fill="#999">路面</text>'+
+  '<text x="'+(pL-4)+'" y="'+(arY+arH/2+3)+'" text-anchor="end" font-size="9" fill="#999">風向</text>'+
+  '<text x="'+(pL-4)+'" y="'+(wY+wH/2+3)+'" text-anchor="end" font-size="9" fill="#9C8FD9">風速</text>';
+ return'<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+vLine+rb+dc+arrows+windBars+lbls+xl+'</svg>';
+}
+function elevProfile(r, segsData){
+  const W=640,H=72,pL=8,pR=8,pT=10,pB=20,iW=W-pL-pR,iH=H-pT-pB;
+  const segs=r.segs;if(!segs||segs.length<2)return'';
+  const pts=[];let elev=0;pts.push({km:0,elev:0});
+  segs.forEach(seg=>{
+    const mM=seg.m.match(/([\d.]+)[\u2013-]([\d.]+)\s*km/);
+    const gM=seg.m.match(/[\u5761]\s*(\d+)%/);
+    if(!mM||!gM)return;
+    const kmEnd=parseFloat(mM[2]),grade=parseFloat(gM[1])/100;
+    const dist=kmEnd-(pts[pts.length-1].km||0);
+    elev+=dist*1000*grade;pts.push({km:kmEnd,elev});
+  });
+  const totalKm=pts[pts.length-1].km||r.dist||10;
+  const totalElev=Math.max(pts[pts.length-1].elev,50);
+  const xS=iW/totalKm,yS=iH/totalElev;
+  const toX=km=>pL+km*xS,toY=e=>pT+iH-e*yS;
+  const RC2={dry:'rgba(76,175,80,.55)',damp:'rgba(255,193,7,.55)',wet:'rgba(229,57,53,.55)'};
+  let fills='',lines='',divs='',labels='';
+  pts.forEach((p,i)=>{
+    if(i===0)return;
+    const prev=pts[i-1];
+    const x1=toX(prev.km),x2=toX(p.km),y1=toY(prev.elev),y2=toY(p.elev),yBase=toY(0);
+    const col=segsData&&segsData[i-1]?RC2[segsData[i-1].road]||RC2.dry:RC2.dry;
+    fills+='<path d="M'+x1+','+y1+' L'+x2+','+y2+' L'+x2+','+yBase+' L'+x1+','+yBase+' Z" fill="'+col+'"/>';
+    lines+=(i===1?'M'+x1+','+y1:'')+'L'+x2+','+y2;
+    if(i<pts.length-1)divs+='<line x1="'+x2+'" y1="'+pT+'" x2="'+x2+'" y2="'+yBase+'" stroke="rgba(255,255,255,.15)" stroke-width="1"/>';
+    const gM=segs[i-1].m.match(/[\u5761]\s*(\d+)%/);
+    if(gM){const mx=(x1+x2)/2,my=Math.min((y1+y2)/2-4,pT+iH-8);labels+='<text x="'+mx+'" y="'+Math.max(pT+10,my)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.75)">'+gM[1]+'%</text>';}
+  });
+  const lastPt=pts[pts.length-1];
+  const kmLabs='<text x="'+pL+'" y="'+(H-4)+'" font-size="9" fill="#666">0</text><text x="'+toX(lastPt.km)+'" y="'+(H-4)+'" text-anchor="end" font-size="9" fill="#666">'+lastPt.km.toFixed(1)+'km</text>';
+  const elevLab='<text x="'+(W-pR)+'" y="'+(pT+9)+'" text-anchor="end" font-size="9" fill="#999">+'+Math.round(totalElev)+'m</text>';
+  return '<div class="elev-card"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block"><rect width="'+W+'" height="'+H+'" rx="4" fill="rgba(0,0,0,.3)"/>'+fills+'<path d="'+lines+'" fill="none" stroke="rgba(180,210,255,.8)" stroke-width="1.5" stroke-linejoin="round"/>'+divs+labels+kmLabs+elevLab+'</svg></div>';
+}
+
+const RB={minLon:121.36,maxLon:121.70,minLat:25.02,maxLat:25.33};
+const RCW=640,RCH=420;
+const rtx=l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW;
+const rty=l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH;
+const rxy=(lo,la)=>[rtx(lo),rty(la)];
+let rMC=null,rTmr=null,rSt=0,rPl=true,rAid='feng';
+let radarFrames=[],radarHost='',rImgCache={};
+
+function bldMap(){
+ if(rMC)return;rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;const mc=rMC.getContext('2d');
+ mc.fillStyle='#08152a';mc.fillRect(0,0,RCW,RCH);
+ const poly=(pts,f)=>{mc.beginPath();mc.moveTo(...pts[0]);pts.slice(1).forEach(p=>mc.lineTo(...p));mc.closePath();mc.fillStyle=f;mc.fill();};
+ poly([rxy(121.36,25.33),rxy(121.45,25.33),rxy(121.50,25.31),rxy(121.54,25.30),rxy(121.60,25.29),rxy(121.70,25.27),rxy(121.70,25.33)],'#0a1e32');
+ poly([rxy(121.42,25.32),rxy(121.55,25.32),rxy(121.60,25.29),rxy(121.57,25.21),rxy(121.53,25.17),rxy(121.46,25.19),rxy(121.41,25.23)],'#0e3018');
+ poly([rxy(121.48,25.28),rxy(121.57,25.27),rxy(121.59,25.22),rxy(121.55,25.18),rxy(121.50,25.17),rxy(121.46,25.20),rxy(121.45,25.25)],'#133820');
+ poly([rxy(121.62,25.16),rxy(121.70,25.16),rxy(121.70,25.10),rxy(121.66,25.06),rxy(121.62,25.08),rxy(121.60,25.13)],'#0e2a14');
+ poly([rxy(121.36,25.02),rxy(121.70,25.02),rxy(121.70,25.12),rxy(121.65,25.09),rxy(121.60,25.10),rxy(121.54,25.09),rxy(121.48,25.10),rxy(121.44,25.12),rxy(121.40,25.15),rxy(121.36,25.17)],'#0d1e2e');
+ mc.lineWidth=1.2;mc.strokeStyle='rgba(110,155,180,.18)';
+ processedRoutes.forEach(r=>{if(!r.mp)return;mc.beginPath();mc.moveTo(...rxy(r.mp[0][0],r.mp[0][1]));r.mp.slice(1).forEach(p=>mc.lineTo(...rxy(p[0],p[1])));mc.stroke();});
+ mc.font='11px sans-serif';
+ [{n:'陽明山',lo:121.535,la:25.185},{n:'風櫃嘴',lo:121.593,la:25.155},{n:'金山',lo:121.476,la:25.225},{n:'三芝',lo:121.435,la:25.252},{n:'石門',lo:121.394,la:25.296},{n:'淡水',lo:121.462,la:25.168},{n:'五指山',lo:121.657,la:25.120}].forEach(l=>{
+  const[x,y]=rxy(l.lo,l.la);mc.beginPath();mc.arc(x,y,2.5,0,Math.PI*2);mc.fillStyle='rgba(255,255,255,.35)';mc.fill();mc.fillStyle='#5c8a68';mc.textAlign='left';mc.fillText(l.n,x+4,y-3);});
+}
+function drF(st){
+  const cv=document.getElementById('rCV');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  bldMap();ctx.drawImage(rMC,0,0);
+  const frameIdx=radarFrames.length>0?Math.min(Math.floor(st/16*radarFrames.length),radarFrames.length-1):0;
+  if(radarFrames.length>0&&frameIdx>=0){
+    const framePath=radarFrames[frameIdx];
+    const tileUrl=radarHost+framePath+'/512/7/107/54/2/1_1.png';
+    if(!rImgCache[tileUrl]){
+      const img=new Image();
+      img.onload=()=>{rImgCache[tileUrl]=img;drF(rSt);};
+      img.onerror=()=>{rImgCache[tileUrl]=null;};
+      img.src=tileUrl;rImgCache[tileUrl]='loading';
+    } else if(rImgCache[tileUrl]instanceof HTMLImageElement){
+      ctx.save();ctx.globalAlpha=0.72;
+      try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
+      ctx.restore();
+    }
+  }
+  const rtx=l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW;
+  const rty=l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH;
+  processedRoutes.forEach(r=>{if(!r.mp)return;
+    const isA=r.id===rAid,rain=r.days[curDI]?.segs[0]?.rain||0;
+    const col=rain<10?'rgba(68,220,102,.9)':rain<25?'rgba(255,220,0,.9)':rain<40?'rgba(255,140,0,.95)':'rgba(220,40,40,.95)';
+    ctx.beginPath();ctx.moveTo(rtx(r.mp[0][0]),rty(r.mp[0][1]));
+    r.mp.slice(1).forEach(p=>ctx.lineTo(rtx(p[0]),rty(p[1])));
+    ctx.strokeStyle=col;ctx.lineWidth=isA?4:2;ctx.globalAlpha=isA?1:.6;ctx.stroke();ctx.globalAlpha=1;
+  });
+  const ar=processedRoutes.find(x=>x.id===rAid);
+  if(ar?.mp){const lp=ar.mp[ar.mp.length-1];ctx.fillStyle='rgba(255,255,255,.9)';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(ar.name,rtx(lp[0]),rty(lp[1])-9);}
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(6,50,radarFrames.length>0?82:112,16);
+  ctx.fillStyle=radarFrames.length>0?'#4FC3F7':'#888';ctx.font='11px sans-serif';ctx.textAlign='left';
+  ctx.fillText(radarFrames.length>0?'降雨雷達 RainViewer':'路線天氣預報',10,62);
+  let displayTime='';
+  if(radarFrames.length>0&&radarData){
+    const allF=[...(radarData.radar?.past||[]),...(radarData.radar?.nowcast||[])];
+    const ft=allF[frameIdx]?.time;
+    if(ft){const d=new Date(ft*1000);displayTime=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  }
+  if(!displayTime){const dd=new Date(now.getTime()+st*15*60000);displayTime=String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');}
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 14px monospace';ctx.textAlign='left';ctx.fillText(displayTime,14,24);
+  const of=st*15;ctx.fillStyle='rgba(200,220,235,.55)';ctx.font='11px sans-serif';
+  ctx.fillText(st===0?'現在':'+'+( of>=60?Math.floor(of/60)+'h'+(of%60?String(of%60).padStart(2,'0')+'m':''):of+'m'),14,40);
+}
+
+
+function initR(rid){rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;bldMap();drF(0);
+  const tk=document.getElementById('rTicks');if(tk){tk.innerHTML='';for(let i=0;i<=4;i++){const d=new Date(now.getTime()+i*3600000),s=document.createElement('span');s.textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;tk.appendChild(s);}}
+  function rb(id){const el=document.getElementById(id);if(!el)return null;const n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return n;}
+  const pb=rb('rPlayBtn');if(pb)pb.onclick=()=>{rPl=!rPl;pb.textContent=rPl?'⏸':'▶';if(rPl){const fCount=radarFrames.length>0?radarFrames.length:16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);}else{clearInterval(rTmr);rTmr=null;}};
+  const sl=rb('rSlider');if(sl)sl.oninput=e=>{rPl=false;clearInterval(rTmr);rTmr=null;const p2=document.getElementById('rPlayBtn');if(p2)p2.textContent='▶';rSt=parseInt(e.target.value,10);drF(rSt);updR();};
+  rPl=true;if(document.getElementById('rPlayBtn'))document.getElementById('rPlayBtn').textContent='⏸';
+  rTmr=setInterval(()=>{rSt=(rSt+1)%16;drF(rSt);updR();},650);}
+function updR(){
+  const frameIdx=Math.min(Math.floor(rSt/16*Math.max(radarFrames.length-1,0)),radarFrames.length-1);
+  let displayTime='';
+  if(radarFrames.length>0&&frameIdx>=0&&radarData){
+    // Get time from radarData.radar.past/nowcast
+    const past=(radarData.radar&&radarData.radar.past)||[];
+    const nowcast=(radarData.radar&&radarData.radar.nowcast)||[];
+    const allFrames=[...past,...nowcast];
+    const frameTime=allFrames[frameIdx]&&allFrames[frameIdx].time;
+    if(frameTime){
+      const d=new Date(frameTime*1000);
+      displayTime=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }
+  }
+  if(!displayTime){
+    const dd=new Date(now.getTime()+rSt*15*60000);
+    displayTime=String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');
+  }
+  const te=document.getElementById('rTime');if(te)te.textContent=displayTime;
+  const of=rSt*15,oe=document.getElementById('rOff');
+  if(oe)oe.textContent=rSt===0?'現在':'+'+Math.floor(of/60)+'h'+(of%60?String(of%60).padStart(2,'0')+'m':'');
+  const se=document.getElementById('rSlider');if(se)se.value=rSt;
+  const ar=processedRoutes.find(x=>x.id===rAid);
+  const rain=ar?.days[curDI]?.segs[0]?.rain||0;
+  const risk=rain<10?'無降水·路況良好':rain<25?'輕雨機率·攜帶雨衣':rain<40?'降雨·路面漸濕':'大雨·不建議出發';
+  const se2=document.getElementById('rStatus');if(se2)se2.innerHTML='<b>降雨 '+rain+'%</b> · '+risk;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════════════════════════════════
+let processedRoutes=[],curRoute=null,curDI=0;
+
+function renderTabs(){
+  const el=document.getElementById('tabs');el.innerHTML='';
+  processedRoutes.forEach((r,i)=>{
+    const b=document.createElement('button');
+    const s=r.days[0]?.score||50;
+    b.className='tab'+(i===0?' active':'');b.dataset.id=r.id;
+    b.innerHTML=`${r.name}<span class="ts" style="color:${sC(s)}">${s} 分</span>`;
+    b.onclick=()=>sel(r.id);el.appendChild(b);
+  });
+}
+
+function sel(id){
+  curRoute=processedRoutes.find(r=>r.id===id);curDI=0;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.id===id));
+  render(curRoute);
+}
+
+function render(r){
+  const dts=[0,1,2].map(d=>{const dt=new Date(now);dt.setDate(dt.getDate()+d);return`${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`;});
+  document.getElementById('main').innerHTML=`
+<div class="route-hd"><div><h2>${r.name}</h2><div class="desc">${r.sub}</div></div><div class="stats"><span>距離<b>${r.dist}km</b></span> <span>爬升<b>${r.elev}m</b></span></div></div>
+<div class="day-row">${[{i:0,n:'今天'},{i:1,n:'明天'},{i:2,n:'後天'}].map(({i,n})=>{const s=r.days[i]?.score||50;return`<button class="dbtn${curDI===i?' active':''}" data-day="${i}"><span class="dn">${n}</span><span class="ds" style="${curDI!==i?'color:'+sC(s):''}">${s}</span><span class="dd">${dts[i]}</span></button>`;}).join('')}</div>
+<div class="src-info">資料來源：<b>${weatherSrc}</b> · 更新時間：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
+<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-wrap"><canvas id="rCV" width="640" height="420"></canvas></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
+<div id="day-content">${bldDay(r,curDI)}</div>`;
+  document.querySelectorAll('.dbtn').forEach(btn=>{btn.onclick=()=>{curDI=parseInt(btn.dataset.day);document.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.day)===curDI));document.getElementById('day-content').innerHTML=bldDay(r,curDI);bindSegs(r);};});
+  bindSegs(r);setTimeout(()=>initR(r.id),80);
+}
+
+function bldDay(r,di){
+  const day=r.days[di];if(!day)return'<p>資料載入中...</p>';
+  const sc=day,dn=Math.round(sc.segs.filter(s=>s.road==='dry').length/sc.segs.length*100);
+  const wc=sc.windowType;const tlL=di===0?'現在起 4 小時':di===1?'明天 06:00–10:00':'後天 06:00–10:00';
+  const tb=di===0?now:(()=>{const d=new Date(now);d.setDate(d.getDate()+di);d.setHours(6,0,0,0);return d;})();
+  const segsH=sc.segs.map((s,i)=>{
+    const k=kOf(s.w.a),p=Math.round(Math.abs(s.w.a)*100),pd=s.pr>=85?{t:'絕佳',c:'g'}:s.pr>=70?{t:'良好',c:'g'}:s.pr>=55?{t:'中等',c:'w'}:s.pr>=40?{t:'不建議',c:'w'}:{t:'避免',c:'b'};
+    const ht=s.tl?chint(s.tl.road):'';
+    const wf=k==='tail'?`left:50%;width:${p/2}%;`:k==='head'?`left:${50-p/2}%;width:${p/2}%;`:'left:48%;width:4%;';
+    const cb=s.cam?`<button class="sbtn cam" data-cam="${s.cam.url}"><span class="dot"></span>${s.cam.name}</button>`:`<button class="sbtn" disabled><span class="dot" style="background:#666"></span>無攝影機</button>`;
+    return`<div class="seg">
+<div class="seg-top"><div><p class="seg-name">${s.n}</p><span class="seg-meta">${s.m}</span></div><div class="temp-blk"><span class="big">${s.t}°</span><span class="sm">體感 ${s.f}°</span></div></div>
+<div class="wind-ind"><div class="wind-row"><span class="wtag ${k}">${wL(k)} ${p}%</span><span class="wspeed">${s.w.ms} m/s · ${s.w.dir}</span></div><div class="wbar"><div class="wbar-c"></div><div class="wfill ${k}" style="${wf}"></div></div><div class="wscale"><span>← 逆風</span><span>0</span><span>順風 →</span></div></div>
+<div class="road-box"><div class="road-hdr"><div class="road-lbl"><span>路面</span><span class="pill ${s.road==='dry'?'g':s.road==='damp'?'w':'b'}">${RT[s.road]}</span></div><span class="road-rain">降雨 ${s.rain}%</span></div><div class="road-desc">${s.rd}</div><div class="tl-period">${tlL}</div>${sTL(s,tb,di)}<div class="tl-leg"><span><span class="tl-sw" style="background:#4CAF50"></span>乾</span><span><span class="tl-sw" style="background:#FFC107"></span>微濕</span><span><span class="tl-sw" style="background:#E53935"></span>潮濕</span><span><span class="tl-sw" style="background:#7E57C2"></span>風速</span></div>${ht?`<div class="tl-hint"><b>${ht}</b></div>`:''}<div class="note"><b>騎乘備注：</b>${s.rd}</div><div class="tr-box"><b>🚗 交通路況：</b>${s.tr}</div></div>
+<div class="pr-line"><span class="pr-lbl">破紀錄指數</span><div class="pr-body"><span class="pr-val">${s.pr}</span><span class="pill ${pd.c}">${pd.t}</span></div></div>
+<div class="gear-box"><span class="tag">服裝</span><span class="txt">${gear(s.f,s.rain)}</span></div>
+<div class="seg-foot">${cb}<button class="sbtn" data-detail="${i}">展開分析 →</button></div></div>`;}).join('');
+  return`<div class="hero"><div class="score-ring">${sRing(sc.score)}<div class="score-num">${sc.score}</div></div><div class="hero-txt"><h3>${sc.verdict}</h3><p class="reason">${sc.reason}</p><span class="wchip ${wc}">${sc.windowLabel}</span></div></div>
+<div class="card"><div class="card-head"><h4>${r.name} 全線路面</h4><span class="pill ${sc.surf.stateCls==='good'?'g':sc.surf.stateCls==='warn'?'w':'b'}">${sc.surf.state}</span></div><div class="metrics"><div class="metric"><span class="lbl">目前乾段占比</span><span class="val">${dn}%</span><div class="mbar"><div class="mfill" style="width:${Math.max(3,dn)}%;background:${dn>=75?'#4CAF50':dn>=40?'#FFC107':'#E53935'}"></div></div></div><div class="metric"><span class="lbl">最薄弱路段</span><span class="val" style="font-size:12px">${sc.surf.weakest}</span></div></div><div class="callouts"><div class="co"><span class="co-tag ok">視窗</span><span>${sc.surf.window}</span></div><div class="co"><span class="co-tag warn">風險</span><span>${sc.surf.hazards}</span></div></div></div>
+<div class="band">分區段推演 <span class="hint">${sc.segs.length} 段 · ${tlL}</span></div>
+${elevProfile(r, sc.segs)}
+<div class="seg-list">${segsH}</div>`;
+}
+
+function bindSegs(r){
+  document.querySelectorAll('[data-cam]').forEach(btn=>{btn.onclick=()=>window.open(btn.dataset.cam,'_blank');});
+  document.querySelectorAll('[data-detail]').forEach(btn=>{btn.onclick=()=>{
+    const s=r.days[curDI]?.segs[parseInt(btn.dataset.detail)];
+    if(s)alert(`${r.name} · ${s.n}\n\n破紀錄指數: ${s.pr}/100\n溫度: ${s.t}°C (體感 ${s.f}°)\n降雨機率: ${s.rain}%\n風速: ${s.w.ms} m/s ${s.w.dir}\n路面: ${RT[s.road]}\n\n交通路況:\n${s.tr}`);};});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════════════════════
+async function boot(){
+  try{
+    const[raw]=await Promise.all([fetchWeather(),fetchRadar()]);
+    setText('處理氣象資料中...','計算路線評分');
+    processedRoutes=processWeather(raw);
+    document.getElementById('srcLabel').textContent=weatherSrc;
+    renderTabs();sel(processedRoutes[0].id);
+    document.getElementById('loadScreen').classList.add('hidden');
+    setTimeout(()=>document.getElementById('loadScreen').style.display='none',600);
+  }catch(e){
+    console.error('Boot error:',e);
+    showError('啟動失敗: '+e.message);
+    document.getElementById('loadScreen').classList.add('hidden');
+  }
+}
+boot();
+})();
+</script>
+</body>
+</html>
