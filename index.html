@@ -542,7 +542,9 @@ function processWeather(raw){
 }
 
 function findNowIdx(times){
-  const n=now.toISOString().slice(0,13);
+  // 自動校正：使用台北時區(UTC+8)對應API的Asia/Taipei時間
+  const taipeiNow=new Date(now.toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+  const n=taipeiNow.getFullYear()+'-'+String(taipeiNow.getMonth()+1).padStart(2,'0')+'-'+String(taipeiNow.getDate()).padStart(2,'0')+'T'+String(taipeiNow.getHours()).padStart(2,'0');
   for(let i=0;i<times.length;i++){if(times[i]&&times[i].startsWith(n))return i;}
   return 0;
 }
@@ -733,13 +735,31 @@ function drF(st){
       img.onerror=()=>{rImgCache[tileUrl]=null;};
       img.src=tileUrl;rImgCache[tileUrl]='loading';
     } else if(rImgCache[tileUrl]instanceof HTMLImageElement){
-      ctx.save();ctx.globalAlpha=1.0;ctx.globalCompositeOperation='multiply';
-      try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
-      ctx.restore();
-      // 再疊一次增加對比
-      ctx.save();ctx.globalAlpha=0.85;ctx.globalCompositeOperation='screen';
-      try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
-      ctx.restore();
+      // 深藍色雲層：先繪製到離屏 canvas 轉換為深藍色調
+      const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;
+      const offCtx=offC.getContext('2d');
+      try{
+        offCtx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);
+        // 將有顏色像素轉換為深藍色
+        const imgData=offCtx.getImageData(0,0,RCW,RCH);
+        const d=imgData.data;
+        for(let p=0;p<d.length;p+=4){
+          const a=d[p+3];
+          if(a>10){
+            // 根據原始亮度計算深藍色強度
+            const brightness=(d[p]*0.3+d[p+1]*0.59+d[p+2]*0.11)/255;
+            const intensity=Math.min(1,brightness*1.5+0.2);
+            d[p]=Math.round(10+intensity*30);    // R: 暗
+            d[p+1]=Math.round(20+intensity*60);  // G: 中
+            d[p+2]=Math.round(80+intensity*120); // B: 深藍
+            d[p+3]=Math.min(220,Math.round(a*1.2));
+          }
+        }
+        offCtx.putImageData(imgData,0,0);
+        ctx.save();ctx.globalAlpha=0.92;ctx.globalCompositeOperation='source-over';
+        ctx.drawImage(offC,0,0);
+        ctx.restore();
+      }catch(e){}
     }
   }
   processedRoutes.forEach(r=>{if(!r.mp)return;
