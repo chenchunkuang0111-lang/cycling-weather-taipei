@@ -649,6 +649,7 @@ function bldMap(){
     const mlx=window._merc.lx,mly=window._merc.ly;
     processedRoutes.forEach(r=>{
       if(!r.mp)return;
+      if(['danjin','yangjin','balaka'].includes(r.id))return;
       mc.beginPath();
       mc.moveTo(mlx(r.mp[0][0]),mly(r.mp[0][1]));
       r.mp.slice(1).forEach(p=>mc.lineTo(mlx(p[0]),mly(p[1])));
@@ -657,6 +658,7 @@ function bldMap(){
     const placed=[];
     processedRoutes.forEach(r=>{
       if(!r.mp)return;
+      if(['danjin','yangjin','balaka'].includes(r.id))return;
       const ep=r.mp[r.mp.length-1];
       const cx=mlx(ep[0]),cy=mly(ep[1]);
       if(placed.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<36))return;
@@ -696,16 +698,17 @@ function drF(st){
       img.onerror=()=>{rImgCache[tileUrl]=null;};
       img.src=tileUrl;rImgCache[tileUrl]='loading';
     } else if(rImgCache[tileUrl]instanceof HTMLImageElement){
-      ctx.save();ctx.globalAlpha=0.96;ctx.globalCompositeOperation='multiply';
+      ctx.save();ctx.globalAlpha=1.0;ctx.globalCompositeOperation='multiply';
       try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
       ctx.restore();
       // 再疊一次增加對比
-      ctx.save();ctx.globalAlpha=0.62;ctx.globalCompositeOperation='screen';
+      ctx.save();ctx.globalAlpha=0.85;ctx.globalCompositeOperation='screen';
       try{ctx.drawImage(rImgCache[tileUrl],66,353,91,100,0,0,RCW,RCH);}catch(e){}
       ctx.restore();
     }
   }
   processedRoutes.forEach(r=>{if(!r.mp)return;
+    if(['danjin','yangjin','balaka'].includes(r.id))return;
     const isA=r.id===rAid,rain=r.days[curDI]?.segs[0]?.rain||0;
     const col=rain<10?'rgba(68,220,102,.9)':rain<25?'rgba(255,220,0,.9)':rain<40?'rgba(255,140,0,.95)':'rgba(220,40,40,.95)';
     ctx.beginPath();ctx.moveTo(lx(r.mp[0][0]),ly(r.mp[0][1]));
@@ -715,7 +718,7 @@ function drF(st){
   const ar=processedRoutes.find(x=>x.id===rAid);
   if(ar?.mp){
     // 中途點標記（限 danjin / yangjin 顯示各段起點）
-    const showWaypoints=['danjin','yangjin'].includes(ar.id);
+    const showWaypoints=['danjin','yangjin'].includes(ar.id) && !['danjin','yangjin','balaka'].includes(ar.id);
     if(showWaypoints&&ar.segs){
       ar.segs.forEach((seg,si)=>{
         const frac=seg.elFrac||0;
