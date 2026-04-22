@@ -451,7 +451,7 @@ function windAlign(windDirDeg,climbBear){
 
 function processWeather(raw){
   const processed=[];
-  Object.values(ROUTES).forEach((route,ri)=>{
+  Object.values(ROUTES).forEach((route,ri)=>{try{
     const h=raw[ri]?.hourly;if(!h)return;
     const nowIdx=findNowIdx(h.time);
     // Build 3 day scenarios
@@ -461,21 +461,21 @@ function processWeather(raw){
       const idxs=[];for(let i=0;i<sliceLen;i++){const idx=startIdx+Math.round(i*0.5);if(idx<h.time.length)idxs.push(idx);else idxs.push(h.time.length-1);}
       const segsData=route.segs.map((seg,si)=>{
         const segIdx=idxs[Math.min(Math.round(si*2),idxs.length-1)];
-        const t=Math.round(h.temperature_2m[segIdx]||22);
-        const f=Math.round(h.apparent_temperature[segIdx]||t-2);
-        const rain=Math.round(h.precipitation_probability[segIdx]||0);
-        const ws=Math.round((h.wind_speed_10m[segIdx]||5)/3.6*10)/10;// km/h→m/s
-        const wd=h.wind_direction_10m[segIdx]||180;
+        const t=Math.round((h.temperature_2m||[])[segIdx]||22);
+        const f=Math.round((h.apparent_temperature||[])[segIdx]||t-2);
+        const rain=Math.round((h.precipitation_probability||[])[segIdx]||0);
+        const ws=Math.round(((h.wind_speed_10m||[])[segIdx]||5)/3.6*10)/10;// km/h→m/s
+        const wd=(h.wind_direction_10m||[])[segIdx]||180;
         const a=Math.round(windAlign(wd,seg.bear)*100)/100;
         const road=rain>=45?'wet':rain>=20?'damp':'dry';
         const pr=Math.max(10,Math.min(98,Math.round(85-rain*0.6+(a*ws*2.5)-(seg.elFrac*8))));
         // Build timeline
         const tl={rain:[],road:[],windMs:[],windAlign:[]};
         idxs.forEach(idx=>{
-          const rn=Math.round(h.precipitation_probability[idx]||0);
+          const rn=Math.round((h.precipitation_probability||[])[idx]||0);
           tl.rain.push(rn);tl.road.push(rn>=45?'wet':rn>=20?'damp':'dry');
-          tl.windMs.push(Math.round((h.wind_speed_10m[idx]||5)/3.6*10)/10);
-          tl.windAlign.push(Math.round(windAlign(h.wind_direction_10m[idx]||180,seg.bear)*100)/100);
+          tl.windMs.push(Math.round(((h.wind_speed_10m||[])[idx]||5)/3.6*10)/10);
+          tl.windAlign.push(Math.round(windAlign((h.wind_direction_10m||[])[idx]||180,seg.bear)*100)/100);
         });
         const rdTxt=road==='wet'?'潮濕·降雨中':road==='damp'?'微濕·有降雨機率':'乾燥·路面狀態良好';
         const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
@@ -502,7 +502,7 @@ function processWeather(raw){
               hazards:avgRain>=40?'降雨路滑·煞車增距':'午後雷陣雨·稜線風大'}};
     });
     processed.push({...route,days});
-  });
+  }catch(err){console.warn("Route error:",route&&route.name,err.message);}});
   return processed;
 }
 
