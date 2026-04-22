@@ -621,45 +621,69 @@ let rMC=null,rTmr=null,rSt=0,rPl=true,rAid='feng';
 let radarFrames=[],radarHost='',rImgCache={};
 
 function bldMap(){
- if(rMC)return;rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;const mc=rMC.getContext('2d');
- mc.fillStyle='#08152a';mc.fillRect(0,0,RCW,RCH);
- const poly=(pts,f)=>{mc.beginPath();mc.moveTo(...pts[0]);pts.slice(1).forEach(p=>mc.lineTo(...p));mc.closePath();mc.fillStyle=f;mc.fill();};
- poly([rxy(121.36,25.33),rxy(121.45,25.33),rxy(121.50,25.31),rxy(121.55,25.28),rxy(121.52,25.21),rxy(121.42,25.19),rxy(121.36,25.21)],'rgba(50,120,80,.35)');
- poly([rxy(121.42,25.32),rxy(121.55,25.32),rxy(121.60,25.29),rxy(121.62,25.24),rxy(121.55,25.18),rxy(121.46,25.20)],'rgba(45,110,75,.30)');
- poly([rxy(121.48,25.28),rxy(121.57,25.27),rxy(121.59,25.22),rxy(121.55,25.17),rxy(121.50,25.17)],'rgba(40,100,70,.40)');
- poly([rxy(121.62,25.16),rxy(121.70,25.16),rxy(121.70,25.10),rxy(121.65,25.08),rxy(121.62,25.10)],'rgba(45,105,75,.30)');
- poly([rxy(121.36,25.02),rxy(121.70,25.02),rxy(121.70,25.12),rxy(121.55,25.14),rxy(121.36,25.14)],'rgba(35,90,65,.25)');
- mc.font='10px sans-serif';mc.textAlign='left';mc.textBaseline='middle';
- processedRoutes.forEach(r=>{
-  if(!r.mp||!r.segs)return;
-  const names=r.segs.map(s=>s.n||s.name||"");
-  const step=Math.max(1,Math.floor(r.mp.length/Math.max(1,names.length)));
-  names.forEach((name,si)=>{
-   const i=Math.min(r.mp.length-1,si*step);
-   const[lo,la]=r.mp[i];
-   const[x,y]=rxy(lo,la);
-   mc.beginPath();mc.arc(x,y,3,0,Math.PI*2);mc.fillStyle='#ff9a55';mc.fill();
-   mc.strokeStyle='rgba(255,200,120,.9)';mc.lineWidth=1;mc.stroke();
-   mc.fillStyle='rgba(255,220,180,.95)';mc.shadowColor='rgba(0,0,0,.9)';mc.shadowBlur=3;
-   mc.fillText(name,x+5,y);mc.shadowBlur=0;
-  });
-  const[slo,sla]=r.mp[r.mp.length-1];const[sx,sy]=rxy(slo,sla);
-  mc.beginPath();mc.arc(sx,sy,4,0,Math.PI*2);mc.fillStyle='#ff4d4d';mc.fill();
-  mc.strokeStyle='#fff';mc.lineWidth=1;mc.stroke();
-  mc.fillStyle='#ffeaa0';mc.shadowColor='rgba(0,0,0,1)';mc.shadowBlur=3;
-  mc.font='bold 11px sans-serif';mc.fillText(r.name,sx+6,sy);mc.shadowBlur=0;mc.font='10px sans-serif';
- });
- mc.fillStyle='rgba(200,210,220,.55)';mc.font='11px sans-serif';mc.textAlign='center';
- [{n:'石門',lo:121.568,la:25.29},{n:'三芝',lo:121.504,la:25.258},{n:'淺水',lo:121.44,la:25.167},{n:'金山',lo:121.638,la:25.22},{n:'陽明山',lo:121.54,la:25.17},{n:'風櫃嘴',lo:121.603,la:25.137},{n:'五指山',lo:121.657,la:25.144}].forEach(l=>{
-  const[x,y]=rxy(l.lo,l.la);
-  mc.beginPath();mc.arc(x,y,2,0,Math.PI*2);mc.fillStyle='rgba(180,190,200,.6)';mc.fill();
-  mc.fillStyle='rgba(200,210,220,.55)';mc.fillText(l.n,x,y-6);
- });
+  if(rMC)return;
+  const z=12,TILE=256;
+  const OSM_XMIN=3428,OSM_YMIN=1749,OSM_COLS=5,OSM_ROWS=5;
+  function lonToTF(lo){return(lo+180)/360*Math.pow(2,z);}
+  function latToTF(la){const r=la*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z);}
+  const srcX0=(lonToTF(RB.minLon)-OSM_XMIN)*TILE;
+  const srcY0=(latToTF(RB.maxLat)-OSM_YMIN)*TILE;
+  const srcW0=(lonToTF(RB.maxLon)-lonToTF(RB.minLon))*TILE;
+  const srcH0=(latToTF(RB.minLat)-latToTF(RB.maxLat))*TILE;
+  const lx=lo=>(lonToTF(lo)-OSM_XMIN)*TILE;
+  const ly=la=>(latToTF(la)-OSM_YMIN)*TILE;
+  const tg2cx=px=>(px-srcX0)/srcW0*RCW;
+  const tg2cy=py=>(py-srcY0)/srcH0*RCH;
+  window._merc={lx:lo=>tg2cx(lx(lo)),ly:la=>tg2cy(ly(la))};
+  const tileW=OSM_COLS*TILE,tileH=OSM_ROWS*TILE;
+  const tc=document.createElement('canvas');tc.width=tileW;tc.height=tileH;
+  const tctx=tc.getContext('2d');
+  tctx.fillStyle='#dde8f0';tctx.fillRect(0,0,tileW,tileH);
+  rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;
+  const mc=rMC.getContext('2d');mc.fillStyle='#dde8f0';mc.fillRect(0,0,RCW,RCH);
+  let loaded=0;const total=OSM_COLS*OSM_ROWS;
+  function finish(){
+    mc.drawImage(tc,srcX0,srcY0,srcW0,srcH0,0,0,RCW,RCH);
+    const mlx=window._merc.lx,mly=window._merc.ly;
+    processedRoutes.forEach(r=>{
+      if(!r.mp)return;
+      mc.beginPath();
+      mc.moveTo(mlx(r.mp[0][0]),mly(r.mp[0][1]));
+      r.mp.slice(1).forEach(p=>mc.lineTo(mlx(p[0]),mly(p[1])));
+      mc.strokeStyle='rgba(60,160,255,0.45)';mc.lineWidth=2;mc.stroke();
+    });
+    const placed=[];
+    processedRoutes.forEach(r=>{
+      if(!r.mp)return;
+      const ep=r.mp[r.mp.length-1];
+      const cx=mlx(ep[0]),cy=mly(ep[1]);
+      if(placed.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<36))return;
+      placed.push([cx,cy]);
+      mc.beginPath();mc.arc(cx,cy,4,0,Math.PI*2);
+      mc.fillStyle='#e63232';mc.fill();mc.strokeStyle='rgba(255,255,255,0.9)';mc.lineWidth=1.5;mc.stroke();
+      const lbl=r.name.slice(0,4);
+      mc.font="bold 11px 'PingFang TC','Noto Sans TC',sans-serif";
+      mc.textAlign='left';mc.textBaseline='middle';
+      mc.shadowColor='rgba(255,255,255,0.9)';mc.shadowBlur=3;
+      mc.fillStyle='#111';mc.fillText(lbl,cx+6,cy);mc.shadowBlur=0;
+    });
+    drF(rSt);
+  }
+  function onLoad(){if(++loaded>=total)finish();}
+  for(let ty=0;ty<OSM_ROWS;ty++)for(let tx=0;tx<OSM_COLS;tx++){
+    const img=new Image();img.crossOrigin='anonymous';
+    const px=tx*TILE,py=ty*TILE;
+    img.onload=()=>{tctx.drawImage(img,px,py);onLoad();};img.onerror=onLoad;
+    img.src='https://tile.openstreetmap.org/'+z+'/'+(OSM_XMIN+tx)+'/'+(OSM_YMIN+ty)+'.png';
+  }
 }
 function drF(st){
   const cv=document.getElementById('rCV');if(!cv)return;
   const ctx=cv.getContext('2d');
   bldMap();ctx.drawImage(rMC,0,0);
+  const _m=window._merc;
+  const lx=_m?_m.lx:(l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW);
+  const ly=_m?_m.ly:(l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH);
   const frameIdx=radarFrames.length>0?Math.min(Math.floor(st/16*radarFrames.length),radarFrames.length-1):0;
   if(radarFrames.length>0&&frameIdx>=0){
     const framePath=radarFrames[frameIdx];
@@ -675,17 +699,25 @@ function drF(st){
       ctx.restore();
     }
   }
-  const rtx=l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW;
-  const rty=l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH;
   processedRoutes.forEach(r=>{if(!r.mp)return;
     const isA=r.id===rAid,rain=r.days[curDI]?.segs[0]?.rain||0;
     const col=rain<10?'rgba(68,220,102,.9)':rain<25?'rgba(255,220,0,.9)':rain<40?'rgba(255,140,0,.95)':'rgba(220,40,40,.95)';
-    ctx.beginPath();ctx.moveTo(rtx(r.mp[0][0]),rty(r.mp[0][1]));
-    r.mp.slice(1).forEach(p=>ctx.lineTo(rtx(p[0]),rty(p[1])));
+    ctx.beginPath();ctx.moveTo(lx(r.mp[0][0]),ly(r.mp[0][1]));
+    r.mp.slice(1).forEach(p=>ctx.lineTo(lx(p[0]),ly(p[1])));
     ctx.strokeStyle=col;ctx.lineWidth=isA?4:2;ctx.globalAlpha=isA?1:.6;ctx.stroke();ctx.globalAlpha=1;
   });
   const ar=processedRoutes.find(x=>x.id===rAid);
-  if(ar?.mp){const lp=ar.mp[ar.mp.length-1];ctx.fillStyle='rgba(255,255,255,.9)';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(ar.name,rtx(lp[0]),rty(lp[1])-9);}
+  if(ar?.mp){
+    const ep=ar.mp[ar.mp.length-1];
+    const ax=lx(ep[0]),ay=ly(ep[1]);
+    ctx.beginPath();ctx.arc(ax,ay,5,0,Math.PI*2);
+    ctx.fillStyle='#ff3333';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    const lbl=ar.name.slice(0,4);
+    ctx.font="bold 12px 'PingFang TC','Noto Sans TC',sans-serif";
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(0,0,0,0.9)';ctx.shadowBlur=3;
+    ctx.fillStyle='#fff';ctx.fillText(lbl,ax+7,ay);ctx.shadowBlur=0;
+  }
   ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(6,50,radarFrames.length>0?82:112,16);
   ctx.fillStyle=radarFrames.length>0?'#4FC3F7':'#888';ctx.font='11px sans-serif';ctx.textAlign='left';
   ctx.fillText(radarFrames.length>0?'降雨雷達 RainViewer':'路線天氣預報',10,62);
@@ -700,8 +732,6 @@ function drF(st){
   const of=st*15;ctx.fillStyle='rgba(200,220,235,.55)';ctx.font='11px sans-serif';
   ctx.fillText(st===0?'現在':'+'+( of>=60?Math.floor(of/60)+'h'+(of%60?String(of%60).padStart(2,'0')+'m':''):of+'m'),14,40);
 }
-
-
 function initR(rid){rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;bldMap();drF(0);
   const tk=document.getElementById('rTicks');if(tk){tk.innerHTML='';for(let i=0;i<=4;i++){const d=new Date(now.getTime()+i*3600000),s=document.createElement('span');s.textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;tk.appendChild(s);}}
   function rb(id){const el=document.getElementById(id);if(!el)return null;const n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return n;}
