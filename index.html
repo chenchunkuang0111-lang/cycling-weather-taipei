@@ -326,7 +326,7 @@ async function fetchWeather(){
   const lonStr=lons.join(',');
   try{
     setText('正在連線 Open-Meteo API...','來源：api.open-meteo.com（主要來源）');
-    const u='https://api.open-meteo.com/v1/forecast?latitude='+latStr+'&longitude='+lonStr+'&hourly=temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
+    const u='https://api.open-meteo.com/v1/forecast?latitude='+latStr+'&longitude='+lonStr+'&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
     const r=await fetch(u,{cache:'no-store'});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
@@ -339,7 +339,7 @@ async function fetchWeather(){
       setText('切換 Open-Meteo 單點模式...','來源：Open-Meteo（單點重試）');
       const results=[];
       for(const r of routeArr){
-        const u2='https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&hourly=temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
+        const u2='https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
         const rr=await fetch(u2,{cache:'no-store'});
         if(!rr.ok)throw new Error('HTTP '+rr.status);
         results.push(await rr.json());
@@ -451,7 +451,7 @@ function windAlign(windDirDeg,climbBear){
 
 function processWeather(raw){
   const processed=[];
-  ROUTES.forEach((route,ri)=>{
+  Object.values(ROUTES).forEach((route,ri)=>{
     const h=raw[ri]?.hourly;if(!h)return;
     const nowIdx=findNowIdx(h.time);
     // Build 3 day scenarios
