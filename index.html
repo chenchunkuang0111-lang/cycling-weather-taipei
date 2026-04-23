@@ -721,7 +721,7 @@ function drF(st){
       ov.appendChild(imgEl);wrap.insertBefore(ov,cv.nextSibling);
     }
     // Scale NCDR CSS params by sc (ratio of display width to canvas pixel width)
-    const base=radarSrc==='NCDR'?{w:3924,h:3032,x:-2141,y:-561}:{w:10353,h:10353,x:-6325,y:-2882};
+    const base=radarSrc==='NCDR'?{w:3854,h:3031,x:-2105,y:-560}:{w:10353,h:10353,x:-6325,y:-2882};
     const w=Math.round(base.w*sc),h=Math.round(base.h*sc),x=Math.round(base.x*sc),y=Math.round(base.y*sc);
     imgEl.style.cssText='position:absolute;width:'+w+'px;height:'+h+'px;left:'+x+'px;top:'+y+'px;opacity:1;pointer-events:none;';
     const fUrl=f?f.url:'';if(fUrl&&imgEl.src!==fUrl){imgEl.src=fUrl;}
@@ -739,7 +739,8 @@ function drF(st){
   // Draw administrative boundary lines on canvas (always visible above NCDR image)
   if(window._bdGeo&&window._merc){
     const mlx=window._merc.lx,mly=window._merc.ly;
-    ctx.save();
+    ctx.save();    ctx.beginPath();ctx.rect(0,0,RCW,RCH);ctx.clip();
+
     ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.2;ctx.lineJoin='round';
     window._bdGeo.features.forEach(feature=>{
       const geom=feature.geometry;
