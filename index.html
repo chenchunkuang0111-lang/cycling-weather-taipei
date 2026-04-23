@@ -699,35 +699,32 @@ function drF(st){
   const ctx=cv.getContext('2d');
   const W=cv.width,H=cv.height;
   ctx.clearRect(0,0,W,H);
+
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
+  const wrap=cv.parentElement;wrap.style.position='relative';
 
-  // 1. 衛星底圖（radar_nowcast_bk_hi.jpg，與 NCDR 圖使用相同投影，直接 100% 填滿）
+  // 1. 衛星底圖（CSS img 疊在 canvas 下面，不需要 CORS）
   const BK_URL='https://watch.ncdr.nat.gov.tw/appv2/module/nowcast/icon/radar_nowcast_bk_hi.jpg';
-  if(!rImgCache['_bk']){
-    const bkImg=new Image();bkImg.crossOrigin='anonymous';
-    bkImg.onload=()=>{rImgCache['_bk']=bkImg;drF(rSt);};
-    bkImg.onerror=()=>{rImgCache['_bk']=null;};
-    bkImg.src=BK_URL;rImgCache['_bk']='loading';
-  } else if(rImgCache['_bk'] instanceof HTMLImageElement){
-    ctx.drawImage(rImgCache['_bk'],0,0,W,H);
+  let bkEl=document.getElementById('radarBkImg');
+  if(!bkEl){
+    bkEl=document.createElement('img');bkEl.id='radarBkImg';
+    bkEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none;';
+    bkEl.src=BK_URL;
+    wrap.insertBefore(bkEl,cv);
   }
+  cv.style.position='relative';cv.style.zIndex='2';
 
-  // 2. NCDR 雷達圖疊加（直接 100% 填滿，因為投影完全覆蓋畫布）
+  // 2. NCDR 雷達圖（CSS img 疊在 canvas 下面，不需要 CORS）
   const fUrl=f?f.url:'';
-  if(fUrl){
-    if(!rImgCache[fUrl]){
-      const img=new Image();img.crossOrigin='anonymous';
-      img.onload=()=>{rImgCache[fUrl]=img;drF(rSt);};
-      img.onerror=()=>{rImgCache[fUrl]=null;};
-      img.src=fUrl;rImgCache[fUrl]='loading';
-    } else if(rImgCache[fUrl] instanceof HTMLImageElement){
-      ctx.save();ctx.globalAlpha=0.82;
-      ctx.drawImage(rImgCache[fUrl],0,0,W,H);
-      ctx.restore();
-    }
+  let dbzEl=document.getElementById('radarDbzImg');
+  if(!dbzEl){
+    dbzEl=document.createElement('img');dbzEl.id='radarDbzImg';
+    dbzEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:1;pointer-events:none;opacity:0.82;';
+    wrap.insertBefore(dbzEl,cv);
   }
+  if(fUrl&&dbzEl.src!==fUrl)dbzEl.src=fUrl;
 
-  // 3. 行政區界線（使用相同的 equirectangular 投影繪製）
+  // 3. 行政區界線（canvas 繪製，equirectangular 投影）
   if(window._bdGeo){
     ctx.save();
     ctx.beginPath();ctx.rect(0,0,W,H);ctx.clip();
