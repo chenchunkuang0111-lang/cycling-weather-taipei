@@ -721,7 +721,7 @@ function drF(st){
   if(!dbzEl){dbzEl=document.createElement('img');dbzEl.id='radarDbzImg';
     dbzEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:1;opacity:0.82;';
     wrap.insertBefore(dbzEl,cv);}
-  const fUrl=f?'https://watch.ncdr.nat.gov.tw/00_Wxmap/7F13_NOWCAST/'+f.path:null;
+  const fUrl=f?.url||null;
   if(fUrl&&dbzEl.src!==fUrl)dbzEl.src=fUrl;
 
   // 3. 台灣縣市邊界線 (canvas, equirectangular projection)
