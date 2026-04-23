@@ -484,6 +484,8 @@ function windAlign(windDirDeg,climbBear){
   return Math.cos(diff*Math.PI/180);
 }
 
+
+function bf(ms){return ms<0.3?0:ms<1.6?1:ms<3.4?2:ms<5.5?3:ms<8?4:ms<10.8?5:ms<13.9?6:ms<17.2?7:ms<20.8?8:ms<24.5?9:ms<28.5?10:ms<32.7?11:12;}
 function processWeather(raw){
   const processed=[];
   Object.values(ROUTES).forEach((route,ri)=>{
@@ -610,7 +612,7 @@ function sTL(seg,tb,di){
   const txtY=bh>=14?by+bh-3:by-2;
   const txtFill=bh>=14?'rgba(255,255,255,.9)':'#9C8FD9';
   return'<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="3" fill="#7E57C2" opacity=".85"/>'+
-   '<text x="'+xs[i]+'" y="'+txtY+'" text-anchor="middle" font-size="9" fill="'+txtFill+'" font-weight="600">'+v.toFixed(1)+' m/s'+'</text>';
+   '<text x="'+xs[i]+'" y="'+txtY+'" text-anchor="middle" font-size="9" fill="'+txtFill+'" font-weight="600">'+v.toFixed(1)+' m/s B'+bf(v)+'</text>';
  }).join('');
  const xl=xs.map((x,i)=>{if(i%2!==0)return'';const d=new Date(tb.getTime()+i*30*60000);return'<text x="'+x+'" y="'+xlY+'" text-anchor="middle" font-size="9" fill="#666">'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</text>';}).join('');
  const vLine='<line x1="'+xs[0]+'" y1="'+(pT-2)+'" x2="'+xs[0]+'" y2="'+(wY+wH)+'" stroke="#e8e8e8" stroke-width=".5" stroke-dasharray="2 2"/>';
@@ -906,7 +908,7 @@ function bldDay(r,di){
     const cb=s.cam?`<button class="sbtn cam" data-cam="${s.cam.url}"><span class="dot"></span>${s.cam.name}</button>`:`<button class="sbtn" disabled><span class="dot" style="background:#666"></span>無攝影機</button>`;
     return`<div class="seg">
 <div class="seg-top"><div><p class="seg-name">${s.n}</p><span class="seg-meta">${s.m}</span></div><div class="temp-blk"><span class="big">${s.t}°</span><span class="sm">體感 ${s.f}°</span></div></div>
-<div class="wind-ind"><div class="wind-row"><span class="wtag ${k}">${wL(k)} ${p}%</span><span class="wspeed">${s.w.ms} m/s · ${s.w.dir}</span></div><div class="wbar"><div class="wbar-c"></div><div class="wfill ${k}" style="${wf}"></div></div><div class="wscale"><span>← 逆風</span><span>0</span><span>順風 →</span></div></div>
+<div class="wind-ind"><div class="wind-row"><span class="wtag ${k}">${wL(k)} ${p}%</span><span class="wspeed">${s.w.ms} m/s（蒲福${bf(s.w.ms)}級）· ${s.w.dir}</span></div><div class="wbar"><div class="wbar-c"></div><div class="wfill ${k}" style="${wf}"></div></div><div class="wscale"><span>← 逆風</span><span>0</span><span>順風 →</span></div></div>
 <div class="road-box"><div class="road-hdr"><div class="road-lbl"><span>路面</span><span class="pill ${s.road==='dry'?'g':s.road==='damp'?'w':'b'}">${RT[s.road]}</span></div><span class="road-rain">降雨 ${s.rain}%</span></div><div class="road-desc">${s.rd}</div><div class="tl-period">${tlL}</div>${sTL(s,tb,di)}<div class="tl-leg"><span><span class="tl-sw" style="background:#4CAF50"></span>乾</span><span><span class="tl-sw" style="background:#FFC107"></span>微濕</span><span><span class="tl-sw" style="background:#E53935"></span>潮濕</span><span><span class="tl-sw" style="background:#7E57C2"></span>風速</span></div>${ht?`<div class="tl-hint"><b>${ht}</b></div>`:''}<div class="note"><b>騎乘備注：</b>${s.rd}</div><div class="tr-box"><b>🚗 交通路況：</b>${s.tr}</div></div>
 <div class="pr-line"><span class="pr-lbl">破紀錄指數</span><div class="pr-body"><span class="pr-val">${s.pr}</span><span class="pill ${pd.c}">${pd.t}</span></div></div>
 <div class="gear-box"><span class="tag">服裝</span><span class="txt">${gear(s.f,s.rain)}</span></div>
@@ -922,7 +924,7 @@ function bindSegs(r){
   document.querySelectorAll('[data-cam]').forEach(btn=>{btn.onclick=()=>window.open(btn.dataset.cam,'_blank');});
   document.querySelectorAll('[data-detail]').forEach(btn=>{btn.onclick=()=>{
     const s=r.days[curDI]?.segs[parseInt(btn.dataset.detail)];
-    if(s)alert(`${r.name} · ${s.n}\n\n破紀錄指數: ${s.pr}/100\n溫度: ${s.t}°C (體感 ${s.f}°)\n降雨機率: ${s.rain}%\n風速: ${s.w.ms} m/s ${s.w.dir}\n路面: ${RT[s.road]}\n\n交通路況:\n${s.tr}`);};});
+    if(s)alert(`${r.name} · ${s.n}\n\n破紀錄指數: ${s.pr}/100\n溫度: ${s.t}°C (體感 ${s.f}°)\n降雨機率: ${s.rain}%\n風速: ${s.w.ms} m/s 蒲福${bf(s.w.ms)}級 ${s.w.dir}\n路面: ${RT[s.road]}\n\n交通路況:\n${s.tr}`);};});
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
