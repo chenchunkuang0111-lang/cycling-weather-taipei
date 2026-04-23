@@ -707,6 +707,10 @@ function drF(st){
   ctx.clearRect(0,0,cv.width,cv.height);
   cv.style.position='relative';cv.style.zIndex='2';
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
+  // Compute scale: canvas CSS display width vs canvas pixel width
+  const cssW=cv.getBoundingClientRect().width||RCW;
+  const cssH=cssW/RCW*RCH;
+  const sc=cssW/RCW;
   if(radarSrc==='NCDR'||radarSrc==='CWA'){
     let imgEl=document.getElementById('ncdrOverlayImg');
     if(!imgEl){
@@ -716,8 +720,10 @@ function drF(st){
       imgEl=document.createElement('img');imgEl.id='ncdrOverlayImg';imgEl.style.pointerEvents='none';
       ov.appendChild(imgEl);wrap.insertBefore(ov,cv.nextSibling);
     }
-    const css=radarSrc==='NCDR'?{w:3924,h:3032,x:-2141,y:-561}:{w:10353,h:10353,x:-6325,y:-2882};
-    imgEl.style.cssText='position:absolute;width:'+css.w+'px;height:'+css.h+'px;left:'+css.x+'px;top:'+css.y+'px;opacity:1;pointer-events:none;';
+    // Scale NCDR CSS params by sc (ratio of display width to canvas pixel width)
+    const base=radarSrc==='NCDR'?{w:3924,h:3032,x:-2141,y:-561}:{w:10353,h:10353,x:-6325,y:-2882};
+    const w=Math.round(base.w*sc),h=Math.round(base.h*sc),x=Math.round(base.x*sc),y=Math.round(base.y*sc);
+    imgEl.style.cssText='position:absolute;width:'+w+'px;height:'+h+'px;left:'+x+'px;top:'+y+'px;opacity:1;pointer-events:none;';
     const fUrl=f?f.url:'';if(fUrl&&imgEl.src!==fUrl){imgEl.src=fUrl;}
   } else {
     const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.style.display='none';
@@ -730,10 +736,11 @@ function drF(st){
       }
     }
   }
+  // Draw administrative boundary lines on canvas (always visible above NCDR image)
   if(window._bdGeo&&window._merc){
     const mlx=window._merc.lx,mly=window._merc.ly;
     ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=0.7;ctx.lineJoin='round';
+    ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.2;ctx.lineJoin='round';
     window._bdGeo.features.forEach(feature=>{
       const geom=feature.geometry;
       const rings=geom.type==='Polygon'?geom.coordinates:geom.coordinates.reduce((a,p)=>a.concat(p),[]);
