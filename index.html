@@ -776,6 +776,7 @@ function updR(){
   const se2=document.getElementById('rStatus');if(se2)se2.innerHTML='<b>降雨 '+rain+'%</b> · '+risk;
 }
 
+let processedRoutes=[],curRoute=null,curDI=0;
 function renderTabs(){
   const el=document.getElementById('tabs');el.innerHTML='';
   processedRoutes.forEach((r,i)=>{
