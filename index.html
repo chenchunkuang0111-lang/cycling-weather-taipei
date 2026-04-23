@@ -504,8 +504,9 @@ function processWeather(raw){
         const t=Math.round((h.temperature_2m[segIdx]||22)+tempAdj);
         const f=Math.round((h.apparent_temperature[segIdx]||(h.temperature_2m[segIdx]||22)-2)+tempAdj);
         const rain=Math.round(h.precipitation_probability[segIdx]||0);
-        const ws=Math.round((h.wind_speed_10m[segIdx]||5)/3.6*10)/10;// km/h→m/s
-        const wd=h.wind_direction_10m[segIdx]||180;
+        // 風速/風向用出發時刻 startIdx，不加騎行偏移（顯示即時風況）
+        const ws=Math.round((h.wind_speed_10m[startIdx]||5)/3.6*10)/10;// km/h→m/s
+        const wd=h.wind_direction_10m[startIdx]||180;
         const a=Math.round(windAlign(wd,seg.bear)*100)/100;
         const road=rain>=45?'wet':rain>=20?'damp':'dry';
         const pr=Math.max(10,Math.min(98,Math.round(85-rain*0.6+(a*ws*2.5)-(seg.elFrac*8))));
