@@ -350,7 +350,7 @@ const ROUTES=[
 // ═══════════════════════════════════════════════════════════════════════════════
 // API LAYER: Triple fallback weather fetching
 // ═══════════════════════════════════════════════════════════════════════════════
-let weatherSrc='', weatherData=null, radarData=null;
+let weatherSrc='', weatherData=null, radarData=null, radarSrc='';
 const now=new Date();
 
 async function fetchWeather(){
@@ -459,22 +459,33 @@ function getDefaultWeather(){
 }
 
 async function fetchRadar(){
+  const NCDR_BASE='https://watch.ncdr.nat.gov.tw';
   try{
-    setText('載入降雨雷達資料...','來源：RainViewer API');
+    const now2=new Date();const lag=20,totMin=now2.getUTCHours()*60+now2.getUTCMinutes();
+    const baseMin=Math.floor((totMin-lag)/10)*10;const bHr=Math.floor(baseMin/60)%24,bMn=baseMin%60;
+    const baseDate=new Date(Date.UTC(now2.getUTCFullYear(),now2.getUTCMonth(),now2.getUTCDate(),bHr,bMn,0));
+    const fU=d=>{const y=d.getUTCFullYear(),m=String(d.getUTCMonth()+1).padStart(2,'0'),dy=String(d.getUTCDate()).padStart(2,'0'),h=String(d.getUTCHours()).padStart(2,'0'),mi=String(d.getUTCMinutes()).padStart(2,'0');return{YM:y+m,YMD:y+m+dy,full:y+m+dy+h+mi};};
+    const fTW=d=>{const tw=new Date(d.getTime()+28800000);return{YM:String(tw.getUTCFullYear())+String(tw.getUTCMonth()+1).padStart(2,'0'),YMD:String(tw.getUTCFullYear())+String(tw.getUTCMonth()+1).padStart(2,'0')+String(tw.getUTCDate()).padStart(2,'0')};};
+    const toTW=d=>new Date(d.getTime()+28800000);const frames=[];
+    for(let off=-30;off<0;off+=10){const t=new Date(baseDate.getTime()+off*60000);const u=fU(t),tw=fTW(t);frames.push({time:toTW(t),offset:off,type:'obs',url:NCDR_BASE+'/00_Wxmap/7F13_NOWCAST/OBS/'+tw.YM+'/'+tw.YMD+'/obs_s'+u.full+'.png'});}
+    const bU=fU(baseDate),bTW=fTW(baseDate);
+    for(let s=0;s<=12;s++){const t=new Date(baseDate.getTime()+s*600000);frames.push({time:toTW(t),offset:s*10,type:'nowcast',url:NCDR_BASE+'/00_Wxmap/7F13_NOWCAST/'+bTW.YM+'/'+bTW.YMD+'/'+bU.full+'/nowcast_'+bU.full+'_s'+String(s).padStart(2,'0')+'.png'});}
+    await new Promise((res,rej)=>{const img=new Image();img.onload=res;img.onerror=rej;img.src=frames[3].url;setTimeout(rej,8000);});
+    radarFrames=frames;radarHost=NCDR_BASE;radarSrc='NCDR';return;
+  }catch(e1){console.warn('NCDR failed:',e1.message);}
+  try{
+    const now2=new Date();const frames=[];
+    for(let off=-20;off<=0;off+=10){const t=new Date(now2.getTime()+off*60000);const y=t.getUTCFullYear(),m=String(t.getUTCMonth()+1).padStart(2,'0'),d=String(t.getUTCDate()).padStart(2,'0'),h=String(t.getUTCHours()).padStart(2,'0'),mi=String(Math.floor(t.getUTCMinutes()/10)*10).padStart(2,'0');const tw=new Date(t.getTime()+28800000);frames.push({time:tw,offset:off,type:'cwa',url:'https://www.cwa.gov.tw/Data/radar/CV1_TW_3600_'+y+m+d+h+mi+'.png'});}
+    await new Promise((res,rej)=>{const img=new Image();img.onload=res;img.onerror=rej;img.src=frames[frames.length-1].url;setTimeout(rej,8000);});
+    radarFrames=frames;radarHost='https://www.cwa.gov.tw';radarSrc='CWA';return;
+  }catch(e2){console.warn('CWA failed:',e2.message);}
+  try{
     const r=await fetchTimeout('https://api.rainviewer.com/public/weather-maps.json',8000);
-    radarData=await r.json();
-    const past=(radarData.radar&&radarData.radar.past)||[];
-    const nowcast=(radarData.radar&&radarData.radar.nowcast)||[];
-    // Store path strings (e.g. '/v2/radar/abc123')
-    radarFrames=[...past,...nowcast].map(f=>f.path).filter(Boolean);
-    radarHost=radarData.host||'https://tilecache.rainviewer.com';
-    console.log('Radar frames loaded:',radarFrames.length,'host:',radarHost);
-  }catch(e){
-    console.warn('Radar fetch failed:',e.message);
-    radarData=null;radarFrames=[];radarHost='';
-  }
+    radarData=await r.json();const past=(radarData.radar&&radarData.radar.past)||[];const nowcast=(radarData.radar&&radarData.radar.nowcast)||[];
+    radarFrames=[...past,...nowcast].map(f=>({time:new Date(f.time*1000),offset:0,type:'rainviewer',path:f.path}));
+    radarHost=radarData.host||'https://tilecache.rainviewer.com';radarSrc='RainViewer';
+  }catch(e3){console.warn('All radar sources failed:',e3.message);radarFrames=[];radarHost='';radarSrc='';}
 }
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // DATA PROCESSING: Convert raw API → route scores & segment data
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -731,138 +742,75 @@ function drF(st){
   const cv=document.getElementById('rCV');if(!cv)return;
   const ctx=cv.getContext('2d');
   bldMap();ctx.drawImage(rMC,0,0);
-  const _m=window._merc;
-  const lx=_m?_m.lx:(l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW);
-  const ly=_m?_m.ly:(l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH);
-  const frameIdx=radarFrames.length>0?Math.min(Math.floor(st/16*radarFrames.length),radarFrames.length-1):0;
-  if(radarFrames.length>0&&frameIdx>=0){
-    const framePath=radarFrames[frameIdx];
-    const tileUrl=radarHost+framePath+'/512/7/107/54/2/1_1.png';
-    if(!rImgCache[tileUrl]){
-      const img=new Image();
-      img.onload=()=>{rImgCache[tileUrl]=img;drF(rSt);};
-      img.onerror=()=>{rImgCache[tileUrl]=null;};
-      img.src=tileUrl;rImgCache[tileUrl]='loading';
-    } else if(rImgCache[tileUrl]instanceof HTMLImageElement){
-      // 雷達雲層：直接繪製 RainViewer 圖像並套用深藍色濾鏡
-      try{
-        // 第一步：繪製原始雷達圖（全圖縮放至畫布）
-        const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;
-        const offCtx=offC.getContext('2d');
-        offCtx.drawImage(rImgCache[tileUrl],0,0,RCW,RCH);
-        // 第二步：逐像素轉換為深藍色系
-        const imgData=offCtx.getImageData(0,0,RCW,RCH);
-        const pxd=imgData.data;
-        for(let p=0;p<pxd.length;p+=4){
-          const alpha=pxd[p+3];
-          if(alpha>8){
-            // 原始亮度（用於決定深藍強度）
-            const br=(pxd[p]*0.3+pxd[p+1]*0.59+pxd[p+2]*0.11)/255;
-            const iv=Math.min(1,br*1.8+0.15);
-            // 深藍色：R極暗，G偏暗，B主色
-            pxd[p]=Math.round(5+iv*20);      // R: 5~25（極暗）
-            pxd[p+1]=Math.round(15+iv*55);   // G: 15~70（偏暗）
-            pxd[p+2]=Math.round(100+iv*130); // B: 100~230（深藍）
-            pxd[p+3]=Math.min(230,Math.round(alpha*1.3));
-          }
-        }
-        offCtx.putImageData(imgData,0,0);
-        ctx.save();ctx.globalAlpha=0.88;ctx.globalCompositeOperation='source-over';
-        ctx.drawImage(offC,0,0);
-        ctx.restore();
-      }catch(e){}
-    }
-  }
-  processedRoutes.forEach(r=>{if(!r.mp)return;
-    if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
+  // Draw routes on canvas
+  const _m=window._merc;if(!_m)return;
+  const lx=_m.lx,ly=_m.ly;
+  processedRoutes.forEach(r=>{if(!r.mp)return;if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
     const isA=r.id===rAid,rain=r.days[curDI]?.segs[0]?.rain||0;
     const col=rain<10?'rgba(68,220,102,.9)':rain<25?'rgba(255,220,0,.9)':rain<40?'rgba(255,140,0,.95)':'rgba(220,40,40,.95)';
-    ctx.beginPath();ctx.moveTo(lx(r.mp[0][0]),ly(r.mp[0][1]));
-    r.mp.slice(1).forEach(p=>ctx.lineTo(lx(p[0]),ly(p[1])));
-    ctx.strokeStyle=col;ctx.lineWidth=isA?4:2;ctx.globalAlpha=isA?1:.6;ctx.stroke();ctx.globalAlpha=1;
-  });
-  const ar=processedRoutes.find(x=>x.id===rAid);
-  if(ar?.mp){
-    // 中途點標記（限 danjin / yangjin 顯示各段起點）
-    const showWaypoints=['danjin','yangjin'].includes(ar.id) && !['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(ar.id);
-    if(showWaypoints&&ar.segs){
-      ar.segs.forEach((seg,si)=>{
-        const frac=seg.elFrac||0;
-        const mpIdx=Math.round(frac*(ar.mp.length-1));
-        const wp=ar.mp[Math.min(mpIdx,ar.mp.length-1)];
-        const wx=lx(wp[0]),wy=ly(wp[1]);
-        // 小菱形點
-        ctx.beginPath();ctx.arc(wx,wy,3,0,Math.PI*2);
-        ctx.fillStyle='rgba(255,220,80,0.92)';ctx.fill();
-        ctx.strokeStyle='rgba(0,0,0,0.6)';ctx.lineWidth=0.8;ctx.stroke();
-        // 短標（最多4字）
-        const wlbl=seg.n.replace(/（.*?）/g,'').slice(0,4);
-        ctx.font="10px 'PingFang TC','Noto Sans TC',sans-serif";
-        ctx.textAlign='left';ctx.textBaseline='middle';
-        ctx.shadowColor='rgba(255,255,255,0.9)';ctx.shadowBlur=2;
-        ctx.fillStyle='#111';ctx.fillText(wlbl,wx+5,wy);ctx.shadowBlur=0;
-      });
-    }
-    const ep=ar.mp[ar.mp.length-1];
-    const ax=lx(ep[0]),ay=ly(ep[1]);
-    ctx.beginPath();ctx.arc(ax,ay,5,0,Math.PI*2);
-    ctx.fillStyle='#ff3333';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-    const lbl=ar.name.slice(0,4);
-    ctx.font="bold 12px 'PingFang TC','Noto Sans TC',sans-serif";
-    ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,0,0,0.9)';ctx.shadowBlur=3;
-    ctx.fillStyle='#fff';ctx.fillText(lbl,ax+7,ay);ctx.shadowBlur=0;
-  }
-  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(6,50,radarFrames.length>0?82:112,16);
-  ctx.fillStyle=radarFrames.length>0?'#4FC3F7':'#888';ctx.font='11px sans-serif';ctx.textAlign='left';
-  ctx.fillText(radarFrames.length>0?'降雨雷達 RainViewer':'路線天氣預報',10,62);
-  let displayTime='';
-  if(radarFrames.length>0&&radarData){
-    const allF=[...(radarData.radar?.past||[]),...(radarData.radar?.nowcast||[])];
-    const ft=allF[frameIdx]?.time;
-    if(ft){const d=new Date(ft*1000);displayTime=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
-  }
-  if(!displayTime){const dd=new Date(now.getTime()+st*15*60000);displayTime=String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');}
+    ctx.beginPath();ctx.moveTo(lx(r.mp[0][0]),ly(r.mp[0][1]));r.mp.slice(1).forEach(p=>ctx.lineTo(lx(p[0]),ly(p[1])));
+    ctx.strokeStyle=col;ctx.lineWidth=isA?4:2;ctx.globalAlpha=isA?1:.6;ctx.stroke();ctx.globalAlpha=1;});
+  const placed=[];processedRoutes.forEach(r=>{if(!r.mp)return;if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
+    const ep=r.mp[r.mp.length-1],cx=lx(ep[0]),cy=ly(ep[1]);
+    if(placed.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<36))return;placed.push([cx,cy]);
+    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle='#e63232';ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=1.5;ctx.stroke();
+    const lbl=r.name.slice(0,4);ctx.font="bold 11px 'PingFang TC','Noto Sans TC',sans-serif";ctx.textAlign='left';ctx.textBaseline='middle';ctx.shadowColor='rgba(255,255,255,0.9)';ctx.shadowBlur=3;ctx.fillStyle='#111';ctx.fillText(lbl,cx+6,cy);ctx.shadowBlur=0;});
+  // Time and source label
+  const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
+  const displayTime=f?String(f.time.getHours()).padStart(2,'0')+':'+String(f.time.getMinutes()).padStart(2,'0'):(()=>{const dd=new Date(now.getTime()+st*15*60000);return String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');})();
+  const offMin=f?f.offset:st*15;const offStr=offMin<0?offMin+'分':offMin===0?'現在':'+'+( offMin>=60?Math.floor(offMin/60)+'h'+(offMin%60?String(offMin%60).padStart(2,'0')+'m':''):offMin+'m');
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(6,50,radarSrc?90:112,16);
+  ctx.fillStyle=radarSrc?'#4FC3F7':'#888';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText(radarSrc?'雷達 '+radarSrc:'路線天氣預報',10,62);
   ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 14px monospace';ctx.textAlign='left';ctx.fillText(displayTime,14,24);
-  const of=st*15;ctx.fillStyle='rgba(200,220,235,.55)';ctx.font='11px sans-serif';
-  ctx.fillText(st===0?'現在':'+'+( of>=60?Math.floor(of/60)+'h'+(of%60?String(of%60).padStart(2,'0')+'m':''):of+'m'),14,40);
-}
-function initR(rid){rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;bldMap();drF(0);
-  const tk=document.getElementById('rTicks');if(tk){tk.innerHTML='';for(let i=0;i<=4;i++){const d=new Date(now.getTime()+i*3600000),s=document.createElement('span');s.textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;tk.appendChild(s);}}
-  function rb(id){const el=document.getElementById(id);if(!el)return null;const n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return n;}
-  const pb=rb('rPlayBtn');if(pb)pb.onclick=()=>{rPl=!rPl;pb.textContent=rPl?'⏸':'▶';if(rPl){const fCount=radarFrames.length>0?radarFrames.length:16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);}else{clearInterval(rTmr);rTmr=null;}};
-  const sl=rb('rSlider');if(sl)sl.oninput=e=>{rPl=false;clearInterval(rTmr);rTmr=null;const p2=document.getElementById('rPlayBtn');if(p2)p2.textContent='▶';rSt=parseInt(e.target.value,10);drF(rSt);updR();};
-  rPl=true;if(document.getElementById('rPlayBtn'))document.getElementById('rPlayBtn').textContent='⏸';
-  rTmr=setInterval(()=>{rSt=(rSt+1)%16;drF(rSt);updR();},650);}
-function updR(){
-  const frameIdx=Math.min(Math.floor(rSt/16*Math.max(radarFrames.length-1,0)),radarFrames.length-1);
-  let displayTime='';
-  if(radarFrames.length>0&&frameIdx>=0&&radarData){
-    // Get time from radarData.radar.past/nowcast
-    const past=(radarData.radar&&radarData.radar.past)||[];
-    const nowcast=(radarData.radar&&radarData.radar.nowcast)||[];
-    const allFrames=[...past,...nowcast];
-    const frameTime=allFrames[frameIdx]&&allFrames[frameIdx].time;
-    if(frameTime){
-      const d=new Date(frameTime*1000);
-      displayTime=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  ctx.fillStyle='rgba(200,220,235,.55)';ctx.font='11px sans-serif';ctx.fillText(offStr,14,40);
+  // Update NCDR/radar overlay img
+  if(radarSrc==='NCDR'||radarSrc==='CWA'){
+    let imgEl=document.getElementById('ncdrOverlayImg');
+    if(!imgEl){
+      const wrap=cv.parentElement;wrap.style.position='relative';
+      const ov=document.createElement('div');ov.id='ncdrOverlayDiv';
+      ov.style.cssText='position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;';
+      imgEl=document.createElement('img');imgEl.id='ncdrOverlayImg';imgEl.style.pointerEvents='none';
+      ov.appendChild(imgEl);wrap.insertBefore(ov,cv.nextSibling);
+    }
+    const css=radarSrc==='NCDR'?{w:12867,h:9928,x:-7924,y:-2269}:{w:10353,h:10353,x:-6325,y:-2882};
+    imgEl.style.cssText='position:absolute;width:'+css.w+'px;height:'+css.h+'px;left:'+css.x+'px;top:'+css.y+'px;opacity:0.82;pointer-events:none;';
+    const fUrl=f?f.url:'';if(fUrl&&imgEl.src!==fUrl){imgEl.src=fUrl;}
+  } else {
+    const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.style.display='none';
+    if(radarSrc==='RainViewer'&&radarFrames.length>0&&f&&f.path){
+      const frameIdx=Math.min(st,radarFrames.length-1);const framePath=radarFrames[frameIdx].path;
+      const tileUrl=radarHost+framePath+'/512/7/107/54/2/1_1.png';
+      if(!rImgCache[tileUrl]){const img=new Image();img.onload=()=>{rImgCache[tileUrl]=img;drF(rSt);};img.onerror=()=>{rImgCache[tileUrl]=null;};img.src=tileUrl;rImgCache[tileUrl]='loading';}
+      else if(rImgCache[tileUrl]instanceof HTMLImageElement){
+        try{const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;const offCtx=offC.getContext('2d');offCtx.drawImage(rImgCache[tileUrl],0,0,RCW,RCH);const imgData=offCtx.getImageData(0,0,RCW,RCH);const pxd=imgData.data;for(let p=0;p<pxd.length;p+=4){const alpha=pxd[p+3];if(alpha>8){const br=(pxd[p]*0.3+pxd[p+1]*0.59+pxd[p+2]*0.11)/255;const iv=Math.min(1,br*1.8+0.15);pxd[p]=Math.round(5+iv*20);pxd[p+1]=Math.round(15+iv*55);pxd[p+2]=Math.round(100+iv*130);pxd[p+3]=Math.min(230,Math.round(alpha*1.3));}}offCtx.putImageData(imgData,0,0);ctx.save();ctx.globalAlpha=0.88;ctx.drawImage(offC,0,0);ctx.restore();}catch(e){}
+      }
     }
   }
-  if(!displayTime){
-    const dd=new Date(now.getTime()+rSt*15*60000);
-    displayTime=String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');
-  }
+}
+function initR(rid){
+  rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;bldMap();drF(0);
+  const tk=document.getElementById('rTicks');
+  if(tk){tk.innerHTML='';const fCount=radarFrames.length||16;const step=Math.max(1,Math.floor(fCount/5));for(let i=0;i<fCount;i+=step){const f=radarFrames[i];if(!f)continue;const s=document.createElement('span');const h=f.time.getHours(),m=f.time.getMinutes();s.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');tk.appendChild(s);}}
+  function rb(id){const el=document.getElementById(id);if(!el)return null;const n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return n;}
+  const pb=rb('rPlayBtn');if(pb)pb.onclick=()=>{rPl=!rPl;pb.textContent=rPl?'⏸':'▶';if(rPl){const fCount=radarFrames.length||16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);}else{clearInterval(rTmr);rTmr=null;}};
+  const sl=rb('rSlider');if(sl){sl.max=(radarFrames.length||16)-1;sl.oninput=e=>{rPl=false;clearInterval(rTmr);rTmr=null;const p2=document.getElementById('rPlayBtn');if(p2)p2.textContent='▶';rSt=parseInt(e.target.value,10);drF(rSt);updR();};}
+  rPl=true;const pb2=document.getElementById('rPlayBtn');if(pb2)pb2.textContent='⏸';
+  const fCount=radarFrames.length||16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);
+}
+function updR(){
+  const fCount=radarFrames.length||16;const idx=Math.min(rSt,fCount-1);const f=radarFrames[idx];
+  let displayTime='';
+  if(f){const h=f.time.getHours(),m=f.time.getMinutes();displayTime=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+  else{const dd=new Date(now.getTime()+rSt*15*60000);displayTime=String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');}
   const te=document.getElementById('rTime');if(te)te.textContent=displayTime;
-  const of=rSt*15,oe=document.getElementById('rOff');
-  if(oe)oe.textContent=rSt===0?'現在':'+'+Math.floor(of/60)+'h'+(of%60?String(of%60).padStart(2,'0')+'m':'');
-  const se=document.getElementById('rSlider');if(se)se.value=rSt;
-  const ar=processedRoutes.find(x=>x.id===rAid);
-  const rain=ar?.days[curDI]?.segs[0]?.rain||0;
+  const offMin=f?f.offset:rSt*15;const oe=document.getElementById('rOff');
+  if(oe)oe.textContent=offMin<0?offMin+'分':offMin===0?'現在':'+'+( offMin>=60?Math.floor(offMin/60)+'h'+(offMin%60?String(offMin%60).padStart(2,'0')+'m':''):offMin+'m');
+  const se=document.getElementById('rSlider');if(se){se.max=fCount-1;se.value=rSt;}
+  const ar=processedRoutes.find(x=>x.id===rAid);const rain=ar?.days[curDI]?.segs[0]?.rain||0;
   const risk=rain<10?'無降水·路況良好':rain<25?'輕雨機率·攜帶雨衣':rain<40?'降雨·路面漸濕':'大雨·不建議出發';
   const se2=document.getElementById('rStatus');if(se2)se2.innerHTML='<b>降雨 '+rain+'%</b> · '+risk;
 }
-
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN RENDER
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -890,7 +838,7 @@ function render(r){
   document.getElementById('main').innerHTML=`
 <div class="route-hd"><div><h2>${r.name}</h2><div class="desc">${r.sub}</div></div><div class="stats"><span>距離<b>${r.dist}km</b></span> <span>爬升<b>${r.elev}m</b></span></div></div>
 <div class="day-row">${[{i:0,n:'今天'},{i:1,n:'明天'},{i:2,n:'後天'}].map(({i,n})=>{const s=r.days[i]?.score||50;return`<button class="dbtn${curDI===i?' active':''}" data-day="${i}"><span class="dn">${n}</span><span class="ds" style="${curDI!==i?'color:'+sC(s):''}">${s}</span><span class="dd">${dts[i]}</span></button>`;}).join('')}</div>
-<div class="src-info">資料來源：<b>${weatherSrc}</b> · 更新時間：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
+<div class="src-info">資料來源：<b>${weatherSrc}</b> · 雷達：<b>${radarSrc||'--'}</b> · 更新時間：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
 <div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-wrap"><canvas id="rCV" width="640" height="420"></canvas></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
 <div id="day-content">${bldDay(r,curDI)}</div>`;
   document.querySelectorAll('.dbtn').forEach(btn=>{btn.onclick=()=>{curDI=parseInt(btn.dataset.day);document.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.day)===curDI));document.getElementById('day-content').innerHTML=bldDay(r,curDI);bindSegs(r);};});
