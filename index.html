@@ -669,7 +669,7 @@ function elevProfile(r, segsData){
   return '<div class="elev-card"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block"><rect width="'+W+'" height="'+H+'" rx="4" fill="rgba(0,0,0,.3)"/>'+fills+'<path d="'+lines+'" fill="none" stroke="rgba(180,210,255,.8)" stroke-width="1.5" stroke-linejoin="round"/>'+divs+labels+kmLabs+elevLab+'</svg></div>';
 }
 
-const RB={minLon:121.36,maxLon:121.70,minLat:25.02,maxLat:25.33};
+const RB={minLon:120.88,maxLon:122.02,minLat:24.83,maxLat:25.56};
 const RCW=640,RCH=420;
 const rtx=l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW;
 const rty=l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH;
@@ -679,8 +679,8 @@ let radarFrames=[],radarHost='',rImgCache={};
 
 function bldMap(){
   if(rMC)return;
-  const z=12,TILE=256;
-  const OSM_XMIN=3428,OSM_YMIN=1749,OSM_COLS=5,OSM_ROWS=5;
+  const z=11,TILE=256;
+  const OSM_XMIN=1711,OSM_YMIN=873,OSM_COLS=9,OSM_ROWS=7;
   function lonToTF(lo){return(lo+180)/360*Math.pow(2,z);}
   function latToTF(la){const r=la*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z);}
   const srcX0=(lonToTF(RB.minLon)-OSM_XMIN)*TILE;
@@ -773,7 +773,7 @@ function drF(st){
       imgEl=document.createElement('img');imgEl.id='ncdrOverlayImg';imgEl.style.pointerEvents='none';
       ov.appendChild(imgEl);wrap.insertBefore(ov,cv.nextSibling);
     }
-    const css=radarSrc==='NCDR'?{w:12867,h:9928,x:-7924,y:-2269}:{w:10353,h:10353,x:-6325,y:-2882};
+    const css=radarSrc==='NCDR'?{w:3924,h:3032,x:-2141,y:-561}:{w:10353,h:10353,x:-6325,y:-2882};
     imgEl.style.cssText='position:absolute;width:'+css.w+'px;height:'+css.h+'px;left:'+css.x+'px;top:'+css.y+'px;opacity:0.82;pointer-events:none;';
     const fUrl=f?f.url:'';if(fUrl&&imgEl.src!==fUrl){imgEl.src=fUrl;}
   } else {
