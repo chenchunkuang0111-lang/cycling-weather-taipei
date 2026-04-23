@@ -669,79 +669,69 @@ function elevProfile(r, segsData){
   return '<div class="elev-card"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block"><rect width="'+W+'" height="'+H+'" rx="4" fill="rgba(0,0,0,.3)"/>'+fills+'<path d="'+lines+'" fill="none" stroke="rgba(180,210,255,.8)" stroke-width="1.5" stroke-linejoin="round"/>'+divs+labels+kmLabs+elevLab+'</svg></div>';
 }
 
-const RB={minLon:120.88,maxLon:122.02,minLat:24.83,maxLat:25.56};
-const RCW=640,RCH=420;
-const rtx=l=>(l-RB.minLon)/(RB.maxLon-RB.minLon)*RCW;
-const rty=l=>(1-(l-RB.minLat)/(RB.maxLat-RB.minLat))*RCH;
-const rxy=(lo,la)=>[rtx(lo),rty(la)];
+// ═══════════════════════════════════════════════════════════════════════════════
+// RADAR MAP: 採用 NCDR 落雨小幫手相同方式 (equirectangular 投影)
+// ═══════════════════════════════════════════════════════════════════════════════
+// NCDR 地理範圍（完全覆蓋投影畫布）
+const NCDR_DOMAIN={slon:117.1595,elon:123.9804,slat:21.2646,elat:26.5353};
+// canvas 顯示設定（與 NCDR 3300x2550 比例一致）
+const RCW=640,RCH=495;
+// D3 equirectangular 投影（與落雨小幫手相同：center=[120.57,23.9], scale=4200*(w/500)）
+const PROJ_CENTER=[120.57,23.9];
+const DEG2RAD=Math.PI/180;
+function projX(lon,w){return(lon-PROJ_CENTER[0])*(4200*(w/500))*DEG2RAD+w/2;}
+function projY(lat,h){return(PROJ_CENTER[1]-lat)*(4200*(h/500))*DEG2RAD+h/2;}
+
 let rMC=null,rTmr=null,rSt=0,rPl=true,rAid='feng';
 let radarFrames=[],radarHost='',rImgCache={};
 
 function bldMap(){
-  if(rMC)return;
-  const z=11,TILE=256;
-  const OSM_XMIN=1711,OSM_YMIN=873;
-  function lonToTF(lo){return(lo+180)/360*Math.pow(2,z);}
-  function latToTF(la){const r=la*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z);}
-  const srcX0=(lonToTF(RB.minLon)-OSM_XMIN)*TILE;
-  const srcY0=(latToTF(RB.maxLat)-OSM_YMIN)*TILE;
-  const srcW0=(lonToTF(RB.maxLon)-lonToTF(RB.minLon))*TILE;
-  const srcH0=(latToTF(RB.minLat)-latToTF(RB.maxLat))*TILE;
-  const lx=lo=>(lonToTF(lo)-OSM_XMIN)*TILE;
-  const ly=la=>(latToTF(la)-OSM_YMIN)*TILE;
-  const tg2cx=px=>(px-srcX0)/srcW0*RCW;
-  const tg2cy=py=>(py-srcY0)/srcH0*RCH;
-  window._merc={lx:lo=>tg2cx(lx(lo)),ly:la=>tg2cy(ly(la))};
-  rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;
+  if(rMC)return;rMC=true;
   if(!window._bdGeo&&!window._bdLoading){
     window._bdLoading=true;
     fetch('https://raw.githubusercontent.com/chenchunkuang0111-lang/cycling-weather-taipei/main/boundary.json')
       .then(r=>r.json()).then(j=>{window._bdGeo=j;window._bdLoading=false;drF(rSt);}).catch(()=>{window._bdLoading=false;});
   }
-  drF(rSt);
 }
 
 function drF(st){
   const cv=document.getElementById('rCV');if(!cv)return;
   const ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,cv.width,cv.height);
-  cv.style.position='relative';cv.style.zIndex='2';
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
-  // Compute scale: canvas CSS display width vs canvas pixel width
-  const cssW=cv.getBoundingClientRect().width||RCW;
-  const cssH=cssW/RCW*RCH;
-  const sc=cssW/RCW;
-  if(radarSrc==='NCDR'||radarSrc==='CWA'){
-    let imgEl=document.getElementById('ncdrOverlayImg');
-    if(!imgEl){
-      const wrap=cv.parentElement;wrap.style.position='relative';
-      const ov=document.createElement('div');ov.id='ncdrOverlayDiv';
-      ov.style.cssText='position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;';
-      imgEl=document.createElement('img');imgEl.id='ncdrOverlayImg';imgEl.style.pointerEvents='none';
-      ov.appendChild(imgEl);wrap.insertBefore(ov,cv.nextSibling);
-    }
-    // Scale NCDR CSS params by sc (ratio of display width to canvas pixel width)
-    const base=radarSrc==='NCDR'?{w:3854,h:3031,x:-2105,y:-560}:{w:10353,h:10353,x:-6325,y:-2882};
-    const w=Math.round(base.w*sc),h=Math.round(base.h*sc),x=Math.round(base.x*sc),y=Math.round(base.y*sc);
-    imgEl.style.cssText='position:absolute;width:'+w+'px;height:'+h+'px;left:'+x+'px;top:'+y+'px;opacity:1;pointer-events:none;';
-    const fUrl=f?f.url:'';if(fUrl&&imgEl.src!==fUrl){imgEl.src=fUrl;}
-  } else {
-    const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.style.display='none';
-    if(radarSrc==='RainViewer'&&radarFrames.length>0&&f&&f.path){
-      const frameIdx=Math.min(st,radarFrames.length-1);const framePath=radarFrames[frameIdx].path;
-      const tileUrl=radarHost+framePath+'/512/7/107/54/2/1_1.png';
-      if(!rImgCache[tileUrl]){const img=new Image();img.onload=()=>{rImgCache[tileUrl]=img;drF(rSt);};img.onerror=()=>{rImgCache[tileUrl]=null;};img.src=tileUrl;rImgCache[tileUrl]='loading';}
-      else if(rImgCache[tileUrl]instanceof HTMLImageElement){
-        try{const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;const offCtx=offC.getContext('2d');offCtx.drawImage(rImgCache[tileUrl],0,0,RCW,RCH);const imgData=offCtx.getImageData(0,0,RCW,RCH);const pxd=imgData.data;for(let p=0;p<pxd.length;p+=4){const alpha=pxd[p+3];if(alpha>8){const br=(pxd[p]*0.3+pxd[p+1]*0.59+pxd[p+2]*0.11)/255;const iv=Math.min(1,br*1.8+0.15);pxd[p]=Math.round(5+iv*20);pxd[p+1]=Math.round(15+iv*55);pxd[p+2]=Math.round(100+iv*130);pxd[p+3]=Math.min(230,Math.round(alpha*1.3));}}offCtx.putImageData(imgData,0,0);ctx.save();ctx.globalAlpha=0.88;ctx.drawImage(offC,0,0);ctx.restore();}catch(e){}
-      }
+
+  // 1. 衛星底圖（radar_nowcast_bk_hi.jpg，與 NCDR 圖使用相同投影，直接 100% 填滿）
+  const BK_URL='https://watch.ncdr.nat.gov.tw/appv2/module/nowcast/icon/radar_nowcast_bk_hi.jpg';
+  if(!rImgCache['_bk']){
+    const bkImg=new Image();bkImg.crossOrigin='anonymous';
+    bkImg.onload=()=>{rImgCache['_bk']=bkImg;drF(rSt);};
+    bkImg.onerror=()=>{rImgCache['_bk']=null;};
+    bkImg.src=BK_URL;rImgCache['_bk']='loading';
+  } else if(rImgCache['_bk'] instanceof HTMLImageElement){
+    ctx.drawImage(rImgCache['_bk'],0,0,W,H);
+  }
+
+  // 2. NCDR 雷達圖疊加（直接 100% 填滿，因為投影完全覆蓋畫布）
+  const fUrl=f?f.url:'';
+  if(fUrl){
+    if(!rImgCache[fUrl]){
+      const img=new Image();img.crossOrigin='anonymous';
+      img.onload=()=>{rImgCache[fUrl]=img;drF(rSt);};
+      img.onerror=()=>{rImgCache[fUrl]=null;};
+      img.src=fUrl;rImgCache[fUrl]='loading';
+    } else if(rImgCache[fUrl] instanceof HTMLImageElement){
+      ctx.save();ctx.globalAlpha=0.82;
+      ctx.drawImage(rImgCache[fUrl],0,0,W,H);
+      ctx.restore();
     }
   }
-  // Draw administrative boundary lines on canvas (always visible above NCDR image)
-  if(window._bdGeo&&window._merc){
-    const mlx=window._merc.lx,mly=window._merc.ly;
-    ctx.save();    ctx.beginPath();ctx.rect(0,0,RCW,RCH);ctx.clip();
 
-    ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.2;ctx.lineJoin='round';
+  // 3. 行政區界線（使用相同的 equirectangular 投影繪製）
+  if(window._bdGeo){
+    ctx.save();
+    ctx.beginPath();ctx.rect(0,0,W,H);ctx.clip();
+    ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=1.0;ctx.lineJoin='round';
     window._bdGeo.features.forEach(feature=>{
       const geom=feature.geometry;
       const rings=geom.type==='Polygon'?geom.coordinates:geom.coordinates.reduce((a,p)=>a.concat(p),[]);
@@ -749,7 +739,7 @@ function drF(st){
         if(ring.length<2)return;
         ctx.beginPath();
         ring.forEach(([lo,la],i)=>{
-          const px=mlx(lo),py=mly(la);
+          const px=projX(lo,W),py=projY(la,H);
           if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
         });
         ctx.closePath();ctx.stroke();
@@ -760,7 +750,9 @@ function drF(st){
 }
 
 function initR(rid){
-  rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;bldMap();drF(0);
+  rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;
+  const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.remove();
+  bldMap();drF(0);
   const tk=document.getElementById('rTicks');
   if(tk){tk.innerHTML='';const fCount=radarFrames.length||16;const step=Math.max(1,Math.floor(fCount/5));for(let i=0;i<fCount;i+=step){const f=radarFrames[i];if(!f)continue;const s=document.createElement('span');const h=f.time.getHours(),m=f.time.getMinutes();s.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');tk.appendChild(s);}}
   function rb(id){const el=document.getElementById(id);if(!el)return null;const n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return n;}
@@ -769,6 +761,7 @@ function initR(rid){
   rPl=true;const pb2=document.getElementById('rPlayBtn');if(pb2)pb2.textContent='⏸';
   const fCount=radarFrames.length||16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);
 }
+
 function updR(){
   const fCount=radarFrames.length||16;const idx=Math.min(rSt,fCount-1);const f=radarFrames[idx];
   let displayTime='';
@@ -782,10 +775,6 @@ function updR(){
   const risk=rain<10?'無降水·路況良好':rain<25?'輕雨機率·攜帶雨衣':rain<40?'降雨·路面漸濕':'大雨·不建議出發';
   const se2=document.getElementById('rStatus');if(se2)se2.innerHTML='<b>降雨 '+rain+'%</b> · '+risk;
 }
-// ═══════════════════════════════════════════════════════════════════════════════
-// MAIN RENDER
-// ═══════════════════════════════════════════════════════════════════════════════
-let processedRoutes=[],curRoute=null,curDI=0;
 
 function renderTabs(){
   const el=document.getElementById('tabs');el.innerHTML='';
@@ -810,7 +799,7 @@ function render(r){
 <div class="route-hd"><div><h2>${r.name}</h2><div class="desc">${r.sub}</div></div><div class="stats"><span>距離<b>${r.dist}km</b></span> <span>爬升<b>${r.elev}m</b></span></div></div>
 <div class="day-row">${[{i:0,n:'今天'},{i:1,n:'明天'},{i:2,n:'後天'}].map(({i,n})=>{const s=r.days[i]?.score||50;return`<button class="dbtn${curDI===i?' active':''}" data-day="${i}"><span class="dn">${n}</span><span class="ds" style="${curDI!==i?'color:'+sC(s):''}">${s}</span><span class="dd">${dts[i]}</span></button>`;}).join('')}</div>
 <div class="src-info">資料來源：<b>${weatherSrc}</b> · 雷達：<b>${radarSrc||'--'}</b> · 更新時間：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
-<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-wrap"><canvas id="rCV" width="640" height="420"></canvas></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
+<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-wrap"><canvas id="rCV" width="640" height="495">/canvas></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
 <div id="day-content">${bldDay(r,curDI)}</div>`;
   document.querySelectorAll('.dbtn').forEach(btn=>{btn.onclick=()=>{curDI=parseInt(btn.dataset.day);document.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.day)===curDI));document.getElementById('day-content').innerHTML=bldDay(r,curDI);bindSegs(r);};});
   bindSegs(r);setTimeout(()=>initR(r.id),80);
