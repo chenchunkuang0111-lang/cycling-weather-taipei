@@ -693,6 +693,11 @@ function bldMap(){
   const tg2cy=py=>(py-srcY0)/srcH0*RCH;
   window._merc={lx:lo=>tg2cx(lx(lo)),ly:la=>tg2cy(ly(la))};
   rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;
+  if(!window._bdGeo&&!window._bdLoading){
+    window._bdLoading=true;
+    fetch('https://raw.githubusercontent.com/chenchunkuang0111-lang/cycling-weather-taipei/main/boundary.json')
+      .then(r=>r.json()).then(j=>{window._bdGeo=j;window._bdLoading=false;drF(rSt);}).catch(()=>{window._bdLoading=false;});
+  }
   drF(rSt);
 }
 
@@ -700,6 +705,7 @@ function drF(st){
   const cv=document.getElementById('rCV');if(!cv)return;
   const ctx=cv.getContext('2d');
   ctx.clearRect(0,0,cv.width,cv.height);
+  cv.style.position='relative';cv.style.zIndex='2';
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
   if(radarSrc==='NCDR'||radarSrc==='CWA'){
     let imgEl=document.getElementById('ncdrOverlayImg');
@@ -723,6 +729,25 @@ function drF(st){
         try{const offC=document.createElement('canvas');offC.width=RCW;offC.height=RCH;const offCtx=offC.getContext('2d');offCtx.drawImage(rImgCache[tileUrl],0,0,RCW,RCH);const imgData=offCtx.getImageData(0,0,RCW,RCH);const pxd=imgData.data;for(let p=0;p<pxd.length;p+=4){const alpha=pxd[p+3];if(alpha>8){const br=(pxd[p]*0.3+pxd[p+1]*0.59+pxd[p+2]*0.11)/255;const iv=Math.min(1,br*1.8+0.15);pxd[p]=Math.round(5+iv*20);pxd[p+1]=Math.round(15+iv*55);pxd[p+2]=Math.round(100+iv*130);pxd[p+3]=Math.min(230,Math.round(alpha*1.3));}}offCtx.putImageData(imgData,0,0);ctx.save();ctx.globalAlpha=0.88;ctx.drawImage(offC,0,0);ctx.restore();}catch(e){}
       }
     }
+  }
+  if(window._bdGeo&&window._merc){
+    const mlx=window._merc.lx,mly=window._merc.ly;
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=0.7;ctx.lineJoin='round';
+    window._bdGeo.features.forEach(feature=>{
+      const geom=feature.geometry;
+      const rings=geom.type==='Polygon'?geom.coordinates:geom.coordinates.reduce((a,p)=>a.concat(p),[]);
+      rings.forEach(ring=>{
+        if(ring.length<2)return;
+        ctx.beginPath();
+        ring.forEach(([lo,la],i)=>{
+          const px=mlx(lo),py=mly(la);
+          if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+        });
+        ctx.closePath();ctx.stroke();
+      });
+    });
+    ctx.restore();
   }
 }
 
