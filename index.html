@@ -66,7 +66,7 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 .co-tag{flex-shrink:0;font-size:9px;font-weight:500;padding:3px 7px;border-radius:4px;min-width:42px;text-align:center}
 .co-tag.weak{background:#3a1212;color:#EF9A9A}.co-tag.ok{background:#1b3a1b;color:#81C784}.co-tag.warn{background:#3d2f0a;color:#FFD54F}
 .radar-crop{overflow:hidden;border-radius:10px;margin-bottom:10px;aspect-ratio:1.4273;width:100%}
-.radar-crop .radar-wrap{border-radius:0;overflow:visible;position:relative;margin-bottom:0}
+.radar-crop .radar-wrap{border-radius:0;overflow:visible;position:relative;margin-bottom:0;width:308.6%;margin-left:-132.7%;margin-top:-49.4%}
 .radar-wrap canvas{display:block;width:100%}
 .radar-ctrl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .radar-time{font-size:14px;font-weight:500;font-family:'SF Mono',monospace}
@@ -125,7 +125,7 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 </div>
 <div class="error-banner" id="errBanner"></div>
 <header>
-  <div><h1>騎士氣象台</h1><button id="refreshBtn" class="refresh-btn" title="刷新頁面" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
+  <div><div style="display:flex;align-items:center;gap:6px"><h1>騎士氣象台</h1><button id="refreshBtn" class="refresh-btn" title="刷新頁面" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
   <div class="live-badge"><div class="live-dot"></div><span id="srcLabel">LIVE</span></div>
 </header>
 <div class="tabs" id="tabs"></div>
