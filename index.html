@@ -22,6 +22,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','PingFang TC','Noto S
 header{padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:flex-start}
 header h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
 header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
+.refresh-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;color:var(--fg2);font-size:16px;line-height:1;transition:color .2s,background .2s;margin-left:4px;margin-top:-2px}
+.refresh-btn:hover{color:var(--fg);background:var(--bg3)}
+.refresh-btn.spinning svg{animation:spin .7s linear infinite}
 .live-badge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);padding:4px 10px;border:1px solid #1b3a1b;border-radius:20px}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -62,7 +65,8 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 .co{display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.45}
 .co-tag{flex-shrink:0;font-size:9px;font-weight:500;padding:3px 7px;border-radius:4px;min-width:42px;text-align:center}
 .co-tag.weak{background:#3a1212;color:#EF9A9A}.co-tag.ok{background:#1b3a1b;color:#81C784}.co-tag.warn{background:#3d2f0a;color:#FFD54F}
-.radar-wrap{border-radius:10px;overflow:hidden;position:relative;margin-bottom:10px}
+.radar-crop{overflow:hidden;border-radius:10px;margin-bottom:10px;aspect-ratio:1.4273;width:100%}
+.radar-crop .radar-wrap{border-radius:0;overflow:visible;position:relative;margin-bottom:0}
 .radar-wrap canvas{display:block;width:100%}
 .radar-ctrl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .radar-time{font-size:14px;font-weight:500;font-family:'SF Mono',monospace}
@@ -121,7 +125,7 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 </div>
 <div class="error-banner" id="errBanner"></div>
 <header>
-  <div><h1>騎士氣象台</h1><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
+  <div><h1>騎士氣象台</h1><button id="refreshBtn" class="refresh-btn" title="刷新頁面" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
   <div class="live-badge"><div class="live-dot"></div><span id="srcLabel">LIVE</span></div>
 </header>
 <div class="tabs" id="tabs"></div>
@@ -675,7 +679,7 @@ function elevProfile(r, segsData){
 // NCDR 地理範圍（完全覆蓋投影畫布）
 const NCDR_DOMAIN={slon:117.1595,elon:123.9804,slat:21.2646,elat:26.5353};
 // canvas 顯示設定（與 NCDR 3300x2550 比例一致）
-const RCW=640,RCH=495;
+const RCW=1920,RCH=1485;
 // D3 equirectangular 投影（與落雨小幫手相同：center=[120.57,23.9], scale=4200*(w/500)）
 const PROJ_CENTER=[120.57,23.9];
 const DEG2RAD=Math.PI/180;
@@ -797,7 +801,7 @@ function render(r){
 <div class="route-hd"><div><h2>${r.name}</h2><div class="desc">${r.sub}</div></div><div class="stats"><span>距離<b>${r.dist}km</b></span> <span>爬升<b>${r.elev}m</b></span></div></div>
 <div class="day-row">${[{i:0,n:'今天'},{i:1,n:'明天'},{i:2,n:'後天'}].map(({i,n})=>{const s=r.days[i]?.score||50;return`<button class="dbtn${curDI===i?' active':''}" data-day="${i}"><span class="dn">${n}</span><span class="ds" style="${curDI!==i?'color:'+sC(s):''}">${s}</span><span class="dd">${dts[i]}</span></button>`;}).join('')}</div>
 <div class="src-info">資料來源：<b>${weatherSrc}</b> · 雷達：<b>${radarSrc||'--'}</b> · 更新時間：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
-<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-wrap"><canvas id="rCV" width="640" height="495">/canvas></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
+<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-crop"><div class="radar-wrap"><canvas id="rCV" width="1920" height="1485">/canvas></div></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
 <div id="day-content">${bldDay(r,curDI)}</div>`;
   document.querySelectorAll('.dbtn').forEach(btn=>{btn.onclick=()=>{curDI=parseInt(btn.dataset.day);document.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.day)===curDI));document.getElementById('day-content').innerHTML=bldDay(r,curDI);bindSegs(r);};});
   bindSegs(r);setTimeout(()=>initR(r.id),80);
