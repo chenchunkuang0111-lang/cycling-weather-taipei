@@ -680,7 +680,7 @@ let radarFrames=[],radarHost='',rImgCache={};
 function bldMap(){
   if(rMC)return;
   const z=11,TILE=256;
-  const OSM_XMIN=1711,OSM_YMIN=873,OSM_COLS=9,OSM_ROWS=7;
+  const OSM_XMIN=1711,OSM_YMIN=873;
   function lonToTF(lo){return(lo+180)/360*Math.pow(2,z);}
   function latToTF(la){const r=la*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z);}
   const srcX0=(lonToTF(RB.minLon)-OSM_XMIN)*TILE;
@@ -692,89 +692,26 @@ function bldMap(){
   const tg2cx=px=>(px-srcX0)/srcW0*RCW;
   const tg2cy=py=>(py-srcY0)/srcH0*RCH;
   window._merc={lx:lo=>tg2cx(lx(lo)),ly:la=>tg2cy(ly(la))};
-  const tileW=OSM_COLS*TILE,tileH=OSM_ROWS*TILE;
-  const tc=document.createElement('canvas');tc.width=tileW;tc.height=tileH;
-  const tctx=tc.getContext('2d');
-  tctx.fillStyle='#dde8f0';tctx.fillRect(0,0,tileW,tileH);
   rMC=document.createElement('canvas');rMC.width=RCW;rMC.height=RCH;
-  const mc=rMC.getContext('2d');mc.fillStyle='#dde8f0';mc.fillRect(0,0,RCW,RCH);
-  let loaded=0;const total=OSM_COLS*OSM_ROWS;
-  function finish(){
-    mc.drawImage(tc,srcX0,srcY0,srcW0,srcH0,0,0,RCW,RCH);
-    // 底圖淡化：白色蒙版降低彩度
-    mc.save();mc.globalAlpha=0.38;mc.fillStyle='#fff';mc.fillRect(0,0,RCW,RCH);mc.restore();
-    const mlx=window._merc.lx,mly=window._merc.ly;
-    processedRoutes.forEach(r=>{
-      if(!r.mp)return;
-      if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
-      mc.beginPath();
-      mc.moveTo(mlx(r.mp[0][0]),mly(r.mp[0][1]));
-      r.mp.slice(1).forEach(p=>mc.lineTo(mlx(p[0]),mly(p[1])));
-      mc.strokeStyle='rgba(60,160,255,0.45)';mc.lineWidth=2;mc.stroke();
-    });
-    const placed=[];
-    processedRoutes.forEach(r=>{
-      if(!r.mp)return;
-      if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
-      const ep=r.mp[r.mp.length-1];
-      const cx=mlx(ep[0]),cy=mly(ep[1]);
-      if(placed.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<36))return;
-      placed.push([cx,cy]);
-      mc.beginPath();mc.arc(cx,cy,4,0,Math.PI*2);
-      mc.fillStyle='#e63232';mc.fill();mc.strokeStyle='rgba(255,255,255,0.9)';mc.lineWidth=1.5;mc.stroke();
-      const lbl=r.name.slice(0,4);
-      mc.font="bold 11px 'PingFang TC','Noto Sans TC',sans-serif";
-      mc.textAlign='left';mc.textBaseline='middle';
-      mc.shadowColor='rgba(255,255,255,0.9)';mc.shadowBlur=3;
-      mc.fillStyle='#111';mc.fillText(lbl,cx+6,cy);mc.shadowBlur=0;
-    });
-    drF(rSt);
-  }
-  function onLoad(){if(++loaded>=total)finish();}
-  for(let ty=0;ty<OSM_ROWS;ty++)for(let tx=0;tx<OSM_COLS;tx++){
-    const img=new Image();img.crossOrigin='anonymous';
-    const px=tx*TILE,py=ty*TILE;
-    img.onload=()=>{tctx.drawImage(img,px,py);onLoad();};img.onerror=onLoad;
-    img.src='https://tile.openstreetmap.org/'+z+'/'+(OSM_XMIN+tx)+'/'+(OSM_YMIN+ty)+'.png';
-  }
+  drF(rSt);
 }
+
 function drF(st){
   const cv=document.getElementById('rCV');if(!cv)return;
   const ctx=cv.getContext('2d');
-  bldMap();ctx.drawImage(rMC,0,0);
-  // Draw routes on canvas
-  const _m=window._merc;if(!_m)return;
-  const lx=_m.lx,ly=_m.ly;
-  processedRoutes.forEach(r=>{if(!r.mp)return;if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
-    const isA=r.id===rAid,rain=r.days[curDI]?.segs[0]?.rain||0;
-    const col=rain<10?'rgba(68,220,102,.9)':rain<25?'rgba(255,220,0,.9)':rain<40?'rgba(255,140,0,.95)':'rgba(220,40,40,.95)';
-    ctx.beginPath();ctx.moveTo(lx(r.mp[0][0]),ly(r.mp[0][1]));r.mp.slice(1).forEach(p=>ctx.lineTo(lx(p[0]),ly(p[1])));
-    ctx.strokeStyle=col;ctx.lineWidth=isA?4:2;ctx.globalAlpha=isA?1:.6;ctx.stroke();ctx.globalAlpha=1;});
-  const placed=[];processedRoutes.forEach(r=>{if(!r.mp)return;if(['danjin','yangjin','balaka','tatajia','siyuan','wuling'].includes(r.id))return;
-    const ep=r.mp[r.mp.length-1],cx=lx(ep[0]),cy=ly(ep[1]);
-    if(placed.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<36))return;placed.push([cx,cy]);
-    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle='#e63232';ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=1.5;ctx.stroke();
-    const lbl=r.name.slice(0,4);ctx.font="bold 11px 'PingFang TC','Noto Sans TC',sans-serif";ctx.textAlign='left';ctx.textBaseline='middle';ctx.shadowColor='rgba(255,255,255,0.9)';ctx.shadowBlur=3;ctx.fillStyle='#111';ctx.fillText(lbl,cx+6,cy);ctx.shadowBlur=0;});
-  // Time and source label
+  ctx.clearRect(0,0,cv.width,cv.height);
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
-  const displayTime=f?String(f.time.getHours()).padStart(2,'0')+':'+String(f.time.getMinutes()).padStart(2,'0'):(()=>{const dd=new Date(now.getTime()+st*15*60000);return String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');})();
-  const offMin=f?f.offset:st*15;const offStr=offMin<0?offMin+'分':offMin===0?'現在':'+'+( offMin>=60?Math.floor(offMin/60)+'h'+(offMin%60?String(offMin%60).padStart(2,'0')+'m':''):offMin+'m');
-  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(6,50,radarSrc?90:112,16);
-  ctx.fillStyle=radarSrc?'#4FC3F7':'#888';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText(radarSrc?'雷達 '+radarSrc:'路線天氣預報',10,62);
-  ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 14px monospace';ctx.textAlign='left';ctx.fillText(displayTime,14,24);
-  ctx.fillStyle='rgba(200,220,235,.55)';ctx.font='11px sans-serif';ctx.fillText(offStr,14,40);
-  // Update NCDR/radar overlay img
   if(radarSrc==='NCDR'||radarSrc==='CWA'){
     let imgEl=document.getElementById('ncdrOverlayImg');
     if(!imgEl){
       const wrap=cv.parentElement;wrap.style.position='relative';
       const ov=document.createElement('div');ov.id='ncdrOverlayDiv';
-      ov.style.cssText='position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;';
+      ov.style.cssText='position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;';
       imgEl=document.createElement('img');imgEl.id='ncdrOverlayImg';imgEl.style.pointerEvents='none';
       ov.appendChild(imgEl);wrap.insertBefore(ov,cv.nextSibling);
     }
     const css=radarSrc==='NCDR'?{w:3924,h:3032,x:-2141,y:-561}:{w:10353,h:10353,x:-6325,y:-2882};
-    imgEl.style.cssText='position:absolute;width:'+css.w+'px;height:'+css.h+'px;left:'+css.x+'px;top:'+css.y+'px;opacity:0.82;pointer-events:none;';
+    imgEl.style.cssText='position:absolute;width:'+css.w+'px;height:'+css.h+'px;left:'+css.x+'px;top:'+css.y+'px;opacity:1;pointer-events:none;';
     const fUrl=f?f.url:'';if(fUrl&&imgEl.src!==fUrl){imgEl.src=fUrl;}
   } else {
     const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.style.display='none';
@@ -788,6 +725,7 @@ function drF(st){
     }
   }
 }
+
 function initR(rid){
   rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;bldMap();drF(0);
   const tk=document.getElementById('rTicks');
