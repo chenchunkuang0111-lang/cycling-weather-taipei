@@ -612,7 +612,7 @@ function sTL(seg,tb,di){
   const txtY=bh>=14?by+bh-3:by-2;
   const txtFill=bh>=14?'rgba(255,255,255,.9)':'#9C8FD9';
   return'<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="3" fill="#7E57C2" opacity=".85"/>'+
-   '<text x="'+xs[i]+'" y="'+txtY+'" text-anchor="middle" font-size="9" fill="'+txtFill+'" font-weight="600">'+v.toFixed(1)+' m/s B'+bf(v)+'</text>';
+   '<text x="'+xs[i]+'" y="'+txtY+'" text-anchor="middle" font-size="9" fill="'+txtFill+'" font-weight="600">'+v.toFixed(1)+' m/s'+'</text>'+'<text x="'+xs[i]+'" y="'+(txtY+10)+'" text-anchor="middle" font-size="8" fill="'+txtFill+'" font-weight="500">B'+bf(v)+'</text>';
  }).join('');
  const xl=xs.map((x,i)=>{if(i%2!==0)return'';const d=new Date(tb.getTime()+i*30*60000);return'<text x="'+x+'" y="'+xlY+'" text-anchor="middle" font-size="9" fill="#666">'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</text>';}).join('');
  const vLine='<line x1="'+xs[0]+'" y1="'+(pT-2)+'" x2="'+xs[0]+'" y2="'+(wY+wH)+'" stroke="#e8e8e8" stroke-width=".5" stroke-dasharray="2 2"/>';
