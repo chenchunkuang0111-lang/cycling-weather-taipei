@@ -22,9 +22,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','PingFang TC','Noto S
 header{padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:flex-start}
 header h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
 header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
-.refresh-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;color:var(--fg2);font-size:16px;line-height:1;transition:color .2s,background .2s;margin-left:4px;margin-top:-2px}
-.refresh-btn:hover{color:var(--fg);background:var(--bg3)}
-.refresh-btn.spinning svg{animation:spin .7s linear infinite}
+.refresh-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:calc(100% - 32px);margin:0 16px 8px;padding:9px 0;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;color:var(--fg2);font-size:13px;font-weight:500;letter-spacing:.3px;transition:background .2s,color .2s}
+.refresh-btn:hover{background:var(--bg2);color:var(--fg)}
+.refresh-btn.spinning .ri-icon{animation:spin .7s linear infinite}
 .live-badge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);padding:4px 10px;border:1px solid #1b3a1b;border-radius:20px}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -125,9 +125,10 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 </div>
 <div class="error-banner" id="errBanner"></div>
 <header>
-  <div><div style="display:flex;align-items:center;gap:6px"><h1>騎士氣象台</h1><button id="refreshBtn" class="refresh-btn" title="刷新頁面" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
+  <div><h1>騎士氣象台</h1><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
   <div class="live-badge"><div class="live-dot"></div><span id="srcLabel">LIVE</span></div>
 </header>
+<button id="refreshBtn" class="refresh-btn" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><span class="ri-icon">↺</span>重新整理</button>
 <div class="tabs" id="tabs"></div>
 <div id="main"></div>
 
@@ -707,41 +708,39 @@ function drF(st){
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
   const wrap=cv.parentElement;wrap.style.position='relative';
 
-  // 1. 衛星底圖（CSS img 疊在 canvas 下面，不需要 CORS）
-  const BK_URL='https://watch.ncdr.nat.gov.tw/appv2/module/nowcast/icon/radar_nowcast_bk_hi.jpg';
+  // 1. 衛星底圖 (CSS img, bypass CORS)
   let bkEl=document.getElementById('radarBkImg');
-  if(!bkEl){
-    bkEl=document.createElement('img');bkEl.id='radarBkImg';
-    bkEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none;';
-    bkEl.src=BK_URL;
-    wrap.insertBefore(bkEl,cv);
-  }
-  cv.style.position='relative';cv.style.zIndex='2';
+  if(!bkEl){bkEl=document.createElement('img');bkEl.id='radarBkImg';
+    bkEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;';
+    wrap.insertBefore(bkEl,cv);}
+  const BK_URL='https://watch.ncdr.nat.gov.tw/appv2/module/nowcast/icon/radar_nowcast_bk_hi.jpg';
+  if(bkEl.src!==BK_URL)bkEl.src=BK_URL;
 
-  // 2. NCDR 雷達圖（CSS img 疊在 canvas 下面，不需要 CORS）
-  const fUrl=f?f.url:'';
+  // 2. NCDR雷達回波圖 (CSS img, bypass CORS)
   let dbzEl=document.getElementById('radarDbzImg');
-  if(!dbzEl){
-    dbzEl=document.createElement('img');dbzEl.id='radarDbzImg';
-    dbzEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:1;pointer-events:none;opacity:0.82;';
-    wrap.insertBefore(dbzEl,cv);
-  }
+  if(!dbzEl){dbzEl=document.createElement('img');dbzEl.id='radarDbzImg';
+    dbzEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:1;opacity:0.82;';
+    wrap.insertBefore(dbzEl,cv);}
+  const fUrl=f?'https://watch.ncdr.nat.gov.tw/00_Wxmap/7F13_NOWCAST/'+f.path:null;
   if(fUrl&&dbzEl.src!==fUrl)dbzEl.src=fUrl;
 
-  // 3. 行政區界線（canvas 繪製，equirectangular 投影）
+  // 3. 台灣縣市邊界線 (canvas, equirectangular projection)
+  cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;z-index:2;';
   if(window._bdGeo){
     ctx.save();
     ctx.beginPath();ctx.rect(0,0,W,H);ctx.clip();
-    ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=1.0;ctx.lineJoin='round';
-    window._bdGeo.features.forEach(feature=>{
-      const geom=feature.geometry;
-      const rings=geom.type==='Polygon'?geom.coordinates:geom.coordinates.reduce((a,p)=>a.concat(p),[]);
-      rings.forEach(ring=>{
-        if(ring.length<2)return;
+    ctx.strokeStyle='rgba(255,255,255,0.92)';ctx.lineWidth=2.8;ctx.lineJoin='round';ctx.lineCap='round';
+    window._bdGeo.features.forEach(ft=>{
+      const geom=ft.geometry;if(!geom)return;
+      const polys=geom.type==='MultiPolygon'?geom.coordinates:
+                  geom.type==='Polygon'?[geom.coordinates]:[];
+      polys.forEach(poly=>{
+        const ring=poly[0];
+        if(!ring||ring.length<2)return;
         ctx.beginPath();
         ring.forEach(([lo,la],i)=>{
           const px=projX(lo,W),py=projY(la,H);
-          if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+          i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
         });
         ctx.closePath();ctx.stroke();
       });
@@ -749,7 +748,6 @@ function drF(st){
     ctx.restore();
   }
 }
-
 function initR(rid){
   rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;
   const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.remove();
