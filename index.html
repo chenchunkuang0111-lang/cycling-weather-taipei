@@ -844,7 +844,7 @@ function initCamVideos(){
     var url=v.getAttribute('data-livecam');
     if(!url)return;
     fetch(url).then(function(r){return r.text();}).then(function(h){
-      var m=h.match(/const url = "([^"]+\.m3u8)"/);
+      var m=h.match(/const url = "([^"]+)"/);
       if(!m)return;
       if(typeof Hls!=='undefined'&&Hls.isSupported()){
         var hls=new Hls({maxBufferLength:10,enableWorker:false});
