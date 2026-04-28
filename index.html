@@ -846,12 +846,19 @@ function initCamVideos(){
     fetch(url).then(function(r){return r.text();}).then(function(h){
       var m=h.match(/const url = "([^"]+)"/);
       if(!m)return;
-      if(typeof Hls!=='undefined'&&Hls.isSupported()){
+      var su=m[1];
+      var isMjpeg=su.indexOf('.m3u8')<0&&(su.indexOf('cctv-ss')>-1||su.indexOf('thb.gov')>-1||su.indexOf('mjpeg')>-1);
+      if(isMjpeg){
+        var img=document.createElement('img');
+        img.src=su;
+        img.style.cssText='width:100%;height:200px;display:block;background:#000;object-fit:fill;';
+        if(v.parentNode)v.parentNode.replaceChild(img,v);
+      }else if(typeof Hls!=='undefined'&&Hls.isSupported()){
         var hls=new Hls({maxBufferLength:10,enableWorker:false});
-        hls.loadSource(m[1]);hls.attachMedia(v);
+        hls.loadSource(su);hls.attachMedia(v);
         hls.on(Hls.Events.MANIFEST_PARSED,function(){v.play();});
       }else if(v.canPlayType('application/vnd.apple.mpegurl')){
-        v.src=m[1];v.play();
+        v.src=su;v.play();
       }
     }).catch(function(){});
   });
