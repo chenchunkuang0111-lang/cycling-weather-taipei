@@ -66,7 +66,7 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 .co-tag{flex-shrink:0;font-size:9px;font-weight:500;padding:3px 7px;border-radius:4px;min-width:42px;text-align:center}
 .co-tag.weak{background:#3a1212;color:#EF9A9A}.co-tag.ok{background:#1b3a1b;color:#81C784}.co-tag.warn{background:#3d2f0a;color:#FFD54F}
 .radar-crop{overflow:hidden;border-radius:10px;margin-bottom:10px;aspect-ratio:1.4273;width:100%}
-.radar-crop .radar-wrap{border-radius:0;overflow:visible;position:relative;margin-bottom:0;width:294%;height:324.8%;margin-left:-152.6%;margin-top:-37%}
+.radar-crop .radar-wrap{border-radius:0;overflow:visible;position:relative;margin-bottom:0;width:294%;height:324.8%;margin-left:-137%;margin-top:-45%}
 .radar-wrap canvas{display:block;width:100%}
 .radar-ctrl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .radar-time{font-size:14px;font-weight:500;font-family:'SF Mono',monospace}
@@ -118,6 +118,8 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 .elev-card svg{display:block}
 .cam-live-box{margin-top:10px;border-radius:10px;overflow:hidden;background:#000;line-height:0;position:relative}
 .cam-live-box video{width:100%;display:block;background:#000;min-height:150px}
+.cam-reload-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;transition:background .2s}
+.cam-reload-btn:hover{background:rgba(0,0,0,.8)}
 .cam-live-lnk{position:absolute;bottom:6px;right:8px;font-size:10px;color:rgba(255,255,255,.65);text-decoration:none;background:rgba(0,0,0,.55);padding:2px 6px;border-radius:4px;z-index:2}
 .cam-live-lnk:hover{color:#fff;background:rgba(0,0,0,.8)}
 .cam-live-none{padding:20px;text-align:center;color:#555;font-size:12px}
@@ -483,13 +485,13 @@ async function fetchRadar(){
     const bU=fU(baseDate),bTW=fTW(baseDate);
     for(let s=0;s<=12;s++){const t=new Date(baseDate.getTime()+s*600000);frames.push({time:toTW(t),offset:s*10,type:'nowcast',url:NCDR_BASE+'/00_Wxmap/7F13_NOWCAST/'+bTW.YM+'/'+bTW.YMD+'/'+bU.full+'/nowcast_'+bU.full+'_s'+String(s).padStart(2,'0')+'.png'});}
     await new Promise((res,rej)=>{const img=new Image();img.onload=res;img.onerror=rej;img.src=frames[3].url;setTimeout(rej,8000);});
-    radarFrames=frames;radarHost=NCDR_BASE;radarSrc='NCDR';return;
+    radarFrames=frames;radarHost=NCDR_BASE;radarSrc='NCDR';radarFetchTime=Date.now();return;
   }catch(e1){console.warn('NCDR failed:',e1.message);}
   try{
     const now2=new Date();const frames=[];
     for(let off=-20;off<=0;off+=10){const t=new Date(now2.getTime()+off*60000);const y=t.getUTCFullYear(),m=String(t.getUTCMonth()+1).padStart(2,'0'),d=String(t.getUTCDate()).padStart(2,'0'),h=String(t.getUTCHours()).padStart(2,'0'),mi=String(Math.floor(t.getUTCMinutes()/10)*10).padStart(2,'0');const tw=new Date(t.getTime()+28800000);frames.push({time:tw,offset:off,type:'cwa',url:'https://www.cwa.gov.tw/Data/radar/CV1_TW_3600_'+y+m+d+h+mi+'.png'});}
     await new Promise((res,rej)=>{const img=new Image();img.onload=res;img.onerror=rej;img.src=frames[frames.length-1].url;setTimeout(rej,8000);});
-    radarFrames=frames;radarHost='https://www.cwa.gov.tw';radarSrc='CWA';return;
+    radarFrames=frames;radarHost='https://www.cwa.gov.tw';radarSrc='CWA';radarFetchTime=Date.now();return;
   }catch(e2){console.warn('CWA failed:',e2.message);}
   try{
     const r=await fetchTimeout('https://api.rainviewer.com/public/weather-maps.json',8000);
@@ -691,11 +693,11 @@ const RCW=1920,RCH=1485;
 // D3 equirectangular \u6295\u5F71\uFF08\u8207\u843D\u96E8\u5C0F\u5E6B\u624B\u76F8\u540C\uFF1Acenter=[120.57,23.9], scale=4200*(w/500)\uFF09
 const PROJ_CENTER=[120.57,23.9];
 const DEG2RAD=Math.PI/180;
-function projX(lon,w){return(lon-PROJ_CENTER[0])*(4200*(w/500))*DEG2RAD+w/2;}
-function projY(lat,h){return(PROJ_CENTER[1]-lat)*(4200*(h/500))*DEG2RAD+h/2;}
+function projX(lon,w){return(lon-117.1595)/(123.9804-117.1595)*w;}
+function projY(lat,h){return(26.5353-lat)/(26.5353-21.2646)*h;}
 
 let rMC=null,rTmr=null,rSt=0,rPl=true,rAid='feng';
-let radarFrames=[],radarHost='',rImgCache={};
+let radarFrames=[],radarHost='',rImgCache={},radarFetchTime=0;
 
 function bldMap(){
   if(rMC)return;rMC=true;
@@ -755,9 +757,10 @@ function drF(st){
     ctx.restore();
   }
 }
-function initR(rid){
+async function initR(rid){
   rAid=rid;if(rTmr){clearInterval(rTmr);rTmr=null;}rSt=0;
   const oldOv=document.getElementById('ncdrOverlayDiv');if(oldOv)oldOv.remove();
+  if(Date.now()-radarFetchTime>600000){rMC=null;await fetchRadar();}
   bldMap();drF(0);
   const tk=document.getElementById('rTicks');
   if(tk){tk.innerHTML='';const fCount=radarFrames.length||16;const step=Math.max(1,Math.floor(fCount/5));for(let i=0;i<fCount;i+=step){const f=radarFrames[i];if(!f)continue;const s=document.createElement('span');const h=f.time.getHours(),m=f.time.getMinutes();s.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');tk.appendChild(s);}}
@@ -828,7 +831,7 @@ function bldDay(r,di){
 <div class="road-box"><div class="road-hdr"><div class="road-lbl"><span>\u8DEF\u9762</span><span class="pill ${s.road==='dry'?'g':s.road==='damp'?'w':'b'}">${RT[s.road]}</span></div><span class="road-rain">\u964D\u96E8 ${s.rain}%</span></div><div class="road-desc">${s.rd}</div><div class="tl-period">${tlL}</div>${sTL(s,tb,di)}<div class="tl-leg"><span><span class="tl-sw" style="background:#4CAF50"></span>\u4E7E</span><span><span class="tl-sw" style="background:#FFC107"></span>\u5FAE\u6FD5</span><span><span class="tl-sw" style="background:#E53935"></span>\u6F6E\u6FD5</span><span><span class="tl-sw" style="background:#7E57C2"></span>\u98A8\u901F</span></div>${ht?`<div class="tl-hint"><b>${ht}</b></div>`:''}<div class="note"><b>\u9A0E\u4E58\u5099\u6CE8\uFF1A</b>${s.rd}</div><div class="tr-box"><b>\uD83D\uDE97 \u4EA4\u901A\u8DEF\u6CC1\uFF1A</b>${s.tr}</div></div>
 <div class="pr-line"><span class="pr-lbl">\u7834\u7D00\u9304\u6307\u6578</span><div class="pr-body"><span class="pr-val">${s.pr}</span><span class="pill ${pd.c}">${pd.t}</span></div></div>
 
-${s.cam?`<div class="cam-live-box"><video id="cv-${s.cam.id}" autoplay muted playsinline style="width:100%;height:200px;display:block;background:#111;object-fit:fill" data-livecam="${s.cam.url}"></video><a class="cam-live-lnk" href="${s.cam.url}" target="_blank">${s.cam.name}</a></div>`:``}</div></div></div>`;}).join('');
+${s.cam?`<div class="cam-live-box"><video id="cv-${s.cam.id}" autoplay muted playsinline style="width:100%;height:200px;display:block;background:#111;object-fit:fill" data-livecam="${s.cam.url}"></video><button class="cam-reload-btn" onclick="reloadAllCams()" title="\u91CD\u65B0\u8F09\u5165">&#x21BA;</button><a class="cam-live-lnk" href="${s.cam.url}" target="_blank">${s.cam.name}</a></div>`:``}</div></div></div>`;}).join('');
   return`<div class="hero"><div class="score-ring">${sRing(sc.score)}<div class="score-num">${sc.score}</div></div><div class="hero-txt"><h3>${sc.verdict}</h3><p class="reason">${sc.reason}</p><span class="wchip ${wc}">${sc.windowLabel}</span></div></div>
 <div class="card"><div class="card-head"><h4>${r.name} \u5168\u7DDA\u8DEF\u9762</h4><span class="pill ${sc.surf.stateCls==='good'?'g':sc.surf.stateCls==='warn'?'w':'b'}">${sc.surf.state}</span></div><div class="metrics"><div class="metric"><span class="lbl">\u76EE\u524D\u4E7E\u6BB5\u5360\u6BD4</span><span class="val">${dn}%</span><div class="mbar"><div class="mfill" style="width:${Math.max(3,dn)}%;background:${dn>=75?'#4CAF50':dn>=40?'#FFC107':'#E53935'}"></div></div></div><div class="metric"><span class="lbl">\u6700\u8584\u5F31\u8DEF\u6BB5</span><span class="val" style="font-size:12px">${sc.surf.weakest}</span></div></div><div class="callouts"><div class="co"><span class="co-tag ok">\u8996\u7A97</span><span>${sc.surf.window}</span></div><div class="co"><span class="co-tag warn">\u98A8\u96AA</span><span>${sc.surf.hazards}</span></div></div></div>
 <div class="band">\u5206\u5340\u6BB5\u63A8\u6F14 <span class="hint">${sc.segs.length} \u6BB5 \u00B7 ${tlL}</span></div>
@@ -838,6 +841,24 @@ ${elevProfile(r, sc.segs)}
 
 function bindSegs(r){
   document.querySelectorAll('[data-cam]').forEach(btn=>{btn.onclick=()=>window.open(btn.dataset.cam,'_blank');});
+}
+function reloadAllCams(){
+ document.querySelectorAll('.cam-live-box').forEach(function(box){
+  var ifr=box.querySelector('iframe');var imgEl=box.querySelector('img');var vid=box.querySelector('video[data-livecam]');
+  if(ifr){var s=ifr.src;ifr.src='';setTimeout(function(){ifr.src=s;},50);}
+  else if(imgEl&&imgEl.src&&!imgEl.src.startsWith('data')){var s2=imgEl.src.split('?')[0];imgEl.src='';setTimeout(function(){imgEl.src=s2+'?t='+Date.now();},50);}
+  else if(vid){var url=vid.getAttribute('data-livecam');if(!url)return;
+   fetch(url).then(function(r){return r.text();}).then(function(h){
+    var su='';var m=h.match(/const url = "([^"]+)"/);if(m)su=m[1];
+    if(!su){var yt=h.match(/youtube-nocookie\.com\/embed\/([a-zA-Z0-9_-]+)/);
+     if(yt){var fr=document.createElement('iframe');fr.src='https://www.youtube-nocookie.com/embed/'+yt[1]+'?autoplay=1&mute=1';fr.allow='autoplay;encrypted-media';fr.style.cssText='display:block;width:100%;height:200px;border:0;background:#000;';vid.parentNode.replaceChild(fr,vid);return;}}
+    if(!su)return;
+    var isMjpeg=su.indexOf('.m3u8')<0&&(su.indexOf('cctv-ss')>-1||su.indexOf('thb.gov')>-1||su.indexOf('mjpg')>-1||su.indexOf('mjpeg')>-1);
+    if(isMjpeg){var img2=document.createElement('img');img2.src=su+'?t='+Date.now();img2.style.cssText='width:100%;display:block;min-height:200px;object-fit:cover;background:#000;';vid.parentNode.replaceChild(img2,vid);}
+    else if(window.Hls&&Hls.isSupported()){var hls=new Hls();hls.loadSource(su);hls.attachMedia(vid);vid.muted=true;vid.play().catch(function(){});}
+    else if(vid.canPlayType('application/vnd.apple.mpegurl')){vid.src=su;vid.muted=true;vid.play().catch(function(){});}
+   });}
+ });
 }
 function initCamVideos(){
  document.querySelectorAll('.cam-live-box video[data-livecam],.cam-live-box img[data-livecam],.cam-live-box iframe[data-livecam]').forEach(function(v){
