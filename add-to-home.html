@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>北部單車氣象台 · 加入手機主畫面</title>
+<link rel="manifest" href="/cycling-weather-taipei/index.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;
+background:#0a0a0a;color:#e8e8e8;line-height:1.6;min-height:100vh;
+display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.box{max-width:480px;width:100%;background:#141414;border:1px solid #2a2a2a;
+border-radius:16px;padding:28px 22px;text-align:center}
+.icon{width:84px;height:84px;border-radius:20px;
+background:linear-gradient(135deg,#4CAF50,#2E7D32);
+display:flex;align-items:center;justify-content:center;
+margin:0 auto 16px;font-size:42px;box-shadow:0 8px 24px rgba(76,175,80,.3)}
+h1{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.credit{font-size:12px;opacity:.7;margin-bottom:18px}
+.tagline{font-size:14px;color:#999;margin-bottom:24px}
+.tabs{display:flex;gap:6px;background:#1e1e1e;border-radius:10px;padding:4px;margin-bottom:18px}
+.tab{flex:1;padding:9px 8px;border-radius:8px;font-size:13px;font-weight:600;
+cursor:pointer;background:transparent;color:#aaa;border:none;transition:all .2s}
+.tab.active{background:#2a2a2a;color:#fff}
+.panel{display:none;text-align:left}
+.panel.active{display:block}
+.step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;
+background:#1a1a1a;padding:12px 14px;border-radius:10px}
+.step-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;
+background:#4CAF50;color:#000;font-weight:700;font-size:13px;
+display:flex;align-items:center;justify-content:center}
+.step-text{font-size:13.5px;line-height:1.55;color:#ddd}
+.step-text b{color:#fff}
+.share-icon{display:inline-flex;align-items:center;justify-content:center;
+width:18px;height:18px;vertical-align:-3px;color:#4CAF50}
+.cta{display:block;width:100%;padding:14px;background:#4CAF50;color:#000;
+text-decoration:none;font-weight:700;text-align:center;border-radius:10px;
+margin-top:8px;font-size:15px;letter-spacing:.5px}
+.cta:active{background:#43A047}
+.cta.secondary{background:transparent;color:#888;border:1px solid #2a2a2a;margin-top:10px;font-weight:500}
+.note{font-size:11.5px;color:#666;margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="box">
+<div class="icon">🚴</div>
+<h1>北部單車氣象台</h1>
+<div class="credit">（Design by 米咕嚕）</div>
+<div class="tagline">台北公路車·即時三日預測含交通分析</div>
+<div class="tabs">
+<button class="tab" data-tab="ios">iPhone (Safari)</button>
+<button class="tab" data-tab="android">Android (Chrome)</button>
+</div>
+<div class="panel" id="panel-ios">
+<div class="step"><div class="step-num">1</div><div class="step-text">使用 <b>Safari</b> 浜覽器開啟本頁</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text">點下方中間的 <b>分享圖示</b> <span class="share-icon">↑</span></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text">向下滑動，點選 <b>「加到主畫面」</b></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-text">右上角點 <b>「新增」</b>，完成！</div></div>
+</div>
+<div class="panel" id="panel-android">
+<div class="step"><div class="step-num">1</div><div class="step-text">使用 <b>Chrome</b> 浜覽器開啟本頁</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text">點右上角 <b>⋮</b> (選單)</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text">點選 <b>「安裝應用程式」</b> 或 <b>「加入主畫面」</b></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-text">確認名稱後點 <b>「安裝」</b>，完成！</div></div>
+</div>
+<a href="./" class="cta">🌏 直接開啟網站</a>
+<div class="note">加入主畫面後，點擊圖示可像一般 App 全螢幕使用，跳出再回來會自動重新整理。</div>
+</div>
+<script>
+(function(){
+var ua = navigator.userAgent;
+var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+var isAndroid = /Android/.test(ua);
+var defaultTab = isAndroid && !isIOS ? "android" : "ios";
+function activate(name){
+document.querySelectorAll(".tab").forEach(function(t){
+t.classList.toggle("active", t.dataset.tab === name);
+});
+document.querySelectorAll(".panel").forEach(function(p){
+p.classList.toggle("active", p.id === "panel-" + name);
+});
+}
+document.querySelectorAll(".tab").forEach(function(t){
+t.addEventListener("click", function(){ activate(t.dataset.tab); });
+});
+activate(defaultTab);
+var standalone = window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
+if(standalone){ location.replace("./"); }
+})();
+</script>
+</body>
+</html>
