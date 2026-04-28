@@ -115,7 +115,16 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 .band .hint{font-size:10px;color:var(--fg3);font-weight:400}
 
 .elev-card{margin:8px 0 0 0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.25)}
-.elev-card svg{display:block}</style>
+.elev-card svg{display:block}
+.cam-live-box{margin-top:10px;border-radius:10px;overflow:hidden;background:var(--bg3);border:1px solid var(--bdr)}
+.cam-live-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:#0a1520;border-bottom:1px solid #162035}
+.cam-live-title{font-size:11px;font-weight:500;color:var(--blue);display:flex;align-items:center;gap:6px}
+.cam-live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+.cam-live-hdr a{font-size:10px;color:#42A5F5;opacity:.7;text-decoration:none}
+.cam-live-hdr a:hover{opacity:1}
+.cam-live-embed{width:100%;background:#000;line-height:0}
+.cam-live-dist{font-size:10px;color:var(--fg3);padding:10px 12px;text-align:center}
+</style>
 </head>
 <body>
 <div class="loading-overlay" id="loadScreen">
@@ -148,13 +157,13 @@ const ROUTES=[
    cam:{name:'楓林橋路口',url:'https://livecam.tw/cam/BOT236/'},
    tr:'至善路三段故宮主幹道，09:00 後遊覽車大量湧入；建議 08:00 前通過，下山車速快靠右行駛。'},
   {n:'萬溪産業道路中段',m:'2.5–5.8 km · 坡 9% · NNE',bear:20,elFrac:.33,
-   cam:null,
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'車流極少，偶有農用車；路幅約 4m，彎道視線短，遇對向機車需靠右減速讓行。'},
   {n:'萬溪上段陡坡',m:'5.8–8.5 km · 坡 11% · N',bear:350,elFrac:.66,
-   cam:null,
+   cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
    tr:'路幅最窄處僅單線通行；下坡機車速度快，衝頂前確認無來車，選寬處讓行。'},
   {n:'稜線至風櫃嘴涼亭',m:'8.5–10.8 km · 坡 6% · NNE',bear:20,elFrac:1,
-   cam:null,
+   cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
    tr:'假日機車族聚集風櫃嘴涼亭，停車混亂；下坡前先觀察人車動態，避免高速衝入停車區。'},
  ]},
 {id:'leng',name:'冷水坑',sub:'至善路口→平等里→冷水坑',dist:11.4,elev:658,
@@ -162,15 +171,15 @@ const ROUTES=[
  lat:25.125,lon:121.557,bear:10,
  segs:[
   {n:'至善路三段口',m:'0–3 km · 坡 3% · N',bear:0,elFrac:0,
-   cam:{name:'故宮路口',url:'https://www.google.com/maps/search/?api=1&query=25.082,121.540'},
+   cam:{name:'故宮路-至善路口',url:'https://livecam.tw/cam/BOT236/'},
    tr:'故宮幹道 09:00 後遊覽車頻繁；靠右側，進出故宮路口放慢注意盲彎。'},
   {n:'平等里茶園',m:'3–6.2 km · 坡 6% · N',bear:5,elFrac:.33,cam:null,
    tr:'農用車偶爾出現；彎道多，預判對向來車，農機具體積大注意會車空間。'},
   {n:'內雙溪→冷擎',m:'6.2–9.4 km · 坡 8% · NNW',bear:340,elFrac:.66,
-   cam:{name:'內雙溪橋',url:'https://www.google.com/maps/search/?api=1&query=25.14,121.565'},
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'車輛極少；橋面鐵格柵雨後特別滑，過橋降速慢行。'},
   {n:'冷水坑遊客中心',m:'9.4–11.4 km · 坡 5% · NW',bear:315,elFrac:1,
-   cam:{name:'冷水坑停車場',url:'https://www.google.com/maps/search/?api=1&query=25.168,121.575'},
+   cam:{name:'冷水坑停車場-陽明山',url:'https://livecam.tw/cam/lsktcc/'},
    tr:'假日遊覽車集中，停車場出入頻繁；下坡前觀察出口車輛，勿高速通過入口區。'},
  ]},
 {id:'yangde',name:'仰德小油',sub:'劍潭→仰德大道→小油坑',dist:14.8,elev:805,
@@ -178,16 +187,16 @@ const ROUTES=[
  lat:25.130,lon:121.535,bear:5,
  segs:[
   {n:'文化大學起登',m:'0–3.5 km · 坡 6% · N',bear:0,elFrac:0,
-   cam:{name:'文大門口',url:'https://www.google.com/maps/search/?api=1&query=25.100,121.512'},
+   cam:{name:'仰德大道二段2巷口',url:'https://livecam.tw/cam/BOT282/'},
    tr:'仰德大道通勤幹道 07-08 點尖峰，路邊停車多注意門殺；公車進出頻繁保持距離。'},
   {n:'仰德大道三段',m:'3.5–7.8 km · 坡 7% · N',bear:5,elFrac:.33,
-   cam:{name:'永公路口',url:'https://www.google.com/maps/search/?api=1&query=25.125,121.525'},
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'09:00 後車流銳減；下坡方向車速偏快，靠右爬升，直線路段視野佳可預判對向車況。'},
   {n:'陽明山公車總站',m:'7.8–11 km · 坡 5% · NNE',bear:15,elFrac:.66,
-   cam:{name:'第二停車場',url:'https://www.google.com/maps/search/?api=1&query=25.155,121.540'},
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'公車路線密集，注意停靠站盲區和乘客橫越；公車迴轉體積大，待其完成再繞行。'},
   {n:'陽金→小油坑',m:'11–14.8 km · 坡 9% · NE',bear:40,elFrac:1,
-   cam:{name:'小油坑觀景台',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   cam:{name:'小油坑停車場-陽明山',url:'https://livecam.tw/cam/xyktcc/'},
    tr:'假日觀光遊覽車多但上坡速慢；注意遊覽車寬幅轉彎盲角，下坡衝速前確認稜線視野。'},
  ]},
 {id:'xingyi',name:'行義小油',sub:'行義路→紗帽路→小油坑',dist:13.1,elev:782,
@@ -195,15 +204,15 @@ const ROUTES=[
  lat:25.142,lon:121.525,bear:345,
  segs:[
   {n:'行義路溫泉區',m:'0–2.5 km · 坡 4% · N',bear:350,elFrac:0,
-   cam:{name:'行義路口',url:'https://www.google.com/maps/search/?api=1&query=25.102,121.500'},
+   cam:{name:'石牌路-立農街2段',url:'https://livecam.tw/cam/BOT406/'},
    tr:'溫泉區假日下午最忙，清晨無車；不規則停車多注意突然開門。'},
-  {n:'紗帽路前山段',m:'2.5–6.8 km · 坡 7% · N',bear:0,elFrac:.33,cam:null,
+  {n:'紗帽路前山段',m:'2.5–6.8 km · 坡 7% · N',bear:0,elFrac:.33,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'車流大減，主要居民用車；彎多靠右，注意機車逆向使用路肩。'},
   {n:'紗帽接陽投',m:'6.8–10.2 km · 坡 8% · NNW',bear:340,elFrac:.66,
-   cam:{name:'陽投路口',url:'https://www.google.com/maps/search/?api=1&query=25.145,121.520'},
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'陽投公路路面較寬，自用車偶有超速；注意側風路段車輛壓線，保持右側行駛。'},
   {n:'小油坑停車場',m:'10.2–13.1 km · 坡 9% · NE',bear:40,elFrac:1,
-   cam:{name:'小油坑觀景',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   cam:{name:'小油坑停車場-陽明山',url:'https://livecam.tw/cam/xyktcc/'},
    tr:'假日觀光車進出繁忙，旅遊巴士大轉彎占全路幅；停車場入口降速讓行。'},
  ]},
 {id:'balaka',name:'巴拉卡',sub:'三芝 101甲→大屯鞍部',dist:17.3,elev:784,
@@ -211,15 +220,15 @@ const ROUTES=[
  lat:25.218,lon:121.494,bear:135,
  segs:[
   {n:'三芝起登',m:'0–4.2 km · 坡 4% · SE',bear:135,elFrac:0,
-   cam:{name:'三芝市區',url:'https://www.google.com/maps/search/?api=1&query=25.255,121.432'},
+   cam:{name:'三芝淡金公路(台2)',url:'https://livecam.tw/cam/NWT0213/'},
    tr:'101甲商業卡車偶有，保持安全距離；市區路口多注意行人和機車搶道。'},
-  {n:'中段林道',m:'4.2–9.5 km · 坡 6% · SE',bear:130,elFrac:.33,cam:null,
+  {n:'中段林道',m:'4.2–9.5 km · 坡 6% · SE',bear:130,elFrac:.33,cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
    tr:'林道幾乎無車，偶有農用車；注意路面落土和倒竹。'},
   {n:'二子坪入口段',m:'9.5–13.8 km · 坡 7% · SE',bear:140,elFrac:.66,
-   cam:{name:'二子坪入口',url:'https://www.google.com/maps/search/?api=1&query=25.185,121.530'},
+   cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
    tr:'公車停靠時注意乘客動向；霧天公車能見度低，遇公車先等待完全通過再追。'},
   {n:'大屯山鞍部',m:'13.8–17.3 km · 坡 8% · ESE',bear:110,elFrac:1,
-   cam:{name:'大屯鞍部',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'公車迴轉站假日遊客密集；大霧時與公車保持充分距離，下坡謹慎。'},
  ]},
 {id:'yangjin',name:'陽金',sub:'金山→馬槽→小油坑鞍部',dist:15.0,elev:720,
@@ -227,15 +236,15 @@ const ROUTES=[
  lat:25.200,lon:121.524,bear:155,
  segs:[
   {n:'金山老街起步',m:'0–3.8 km · 坡 3% · SSE',bear:160,elFrac:0,
-   cam:{name:'金山中山路',url:'https://www.google.com/maps/search/?api=1&query=25.222,121.478'},
+   cam:{name:'金山環金路(台2)中山路',url:'https://livecam.tw/cam/NWT0236/'},
    tr:'夏日海水浴場遊客車多；路口多注意行人，機車隨意切換車道。'},
   {n:'磺港→馬槽',m:'3.8–8.5 km · 坡 6% · SE',bear:140,elFrac:.33,
-   cam:{name:'馬槽橋',url:'https://www.google.com/maps/search/?api=1&query=25.205,121.510'},
+   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'陽金公路大型遊覽車頻繁；上坡被超車風險高靠右，注意遊覽車下坡衝速的迎面風壓。'},
-  {n:'馬槽至竹仔山',m:'8.5–12 km · 坡 8% · SE',bear:130,elFrac:.66,cam:null,
+  {n:'馬槽至竹仔山',m:'8.5–12 km · 坡 8% · SE',bear:130,elFrac:.66,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'觀光車下山車速快，彎道對向車多；霧中注意車燈方向，聽到引擎聲先靠邊停候。'},
   {n:'竹仔山至鞍部',m:'12–15 km · 坡 7% · SSE',bear:150,elFrac:1,
-   cam:{name:'小油坑鞍部',url:'https://www.google.com/maps/search/?api=1&query=25.180,121.560'},
+   cam:{name:'小油坑停車場-陽明山',url:'https://livecam.tw/cam/xyktcc/'},
    tr:'鞍部停車複雜，公車遊覽車同時進出；下坡前於高點觀察確認安全後再通過。'},
  ]},
 {id:'zhzheng',name:'中正山',sub:'行義路→紗帽路→中正山',dist:8.2,elev:546,
@@ -243,13 +252,13 @@ const ROUTES=[
  lat:25.118,lon:121.498,bear:330,
  segs:[
   {n:'行義路溫泉口',m:'0–1.8 km · 坡 5% · N',bear:350,elFrac:0,
-   cam:{name:'陽明醫院口',url:'https://www.google.com/maps/search/?api=1&query=25.102,121.505'},
+   cam:{name:'石牌路-立農街2段',url:'https://livecam.tw/cam/BOT406/'},
    tr:'清晨通暢；不規則停車密集注意車門突然打開。'},
-  {n:'紗帽路支線',m:'1.8–4.2 km · 坡 7% · NW',bear:320,elFrac:.33,cam:null,
+  {n:'紗帽路支線',m:'1.8–4.2 km · 坡 7% · NW',bear:320,elFrac:.33,cam:{name:'仰德大道二段2巷口',url:'https://livecam.tw/cam/BOT282/'},
    tr:'鄰里小道幾乎無車；偶有機車，彎道中線保持。'},
-  {n:'中正山産道口',m:'4.2–6.5 km · 坡 9% · NW',bear:315,elFrac:.66,cam:null,
+  {n:'中正山産道口',m:'4.2–6.5 km · 坡 9% · NW',bear:315,elFrac:.66,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'産道入口後零車流，偶有登山客停車路肩；路幅極窄下坡前確認無來車。'},
-  {n:'中正山瞭望台',m:'6.5–8.2 km · 坡 10% · NNW',bear:340,elFrac:1,cam:null,
+  {n:'中正山瞭望台',m:'6.5–8.2 km · 坡 10% · NNW',bear:340,elFrac:1,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
    tr:'健行步道與公路交叉；注意徒步者走入路面，鳴鈴預告後再通過。'},
  ]},
 {id:'xiwan',name:'汐萬五指',sub:'汐止→汐萬路→五指山',dist:10.5,elev:590,
@@ -257,14 +266,14 @@ const ROUTES=[
  lat:25.098,lon:121.657,bear:0,
  segs:[
   {n:'汐萬路起登',m:'0–2.5 km · 坡 4% · N',bear:355,elFrac:0,
-   cam:{name:'汐萬大同口',url:'https://www.google.com/maps/search/?api=1&query=25.070,121.660'},
+   cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
    tr:'通勤車流 07-08 點集中，之後快速減少；砂石車出入量大保持車距。'},
-  {n:'汐萬中段林道',m:'2.5–6 km · 坡 7% · N',bear:0,elFrac:.33,cam:null,
+  {n:'汐萬中段林道',m:'2.5–6 km · 坡 7% · N',bear:0,elFrac:.33,cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
    tr:'林道車流極少；彎道盲點多注意下坡機車高速衝出，爬升靠右行駛。'},
   {n:'五指山公墓入口',m:'6–8.2 km · 坡 8% · N',bear:5,elFrac:.66,
-   cam:{name:'公墓入口',url:'https://www.google.com/maps/search/?api=1&query=25.110,121.655'},
+   cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
    tr:'清明掃墓季節人車暴增，平日幾乎無車；清明前後避開此路線。'},
-  {n:'五指山稜線',m:'8.2–10.5 km · 坡 6% · NNE',bear:20,elFrac:1,cam:null,
+  {n:'五指山稜線',m:'8.2–10.5 km · 坡 6% · NNE',bear:20,elFrac:1,cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
    tr:'無一般車輛，健行者多；下坡前鳴鈴警示步道交叉口，注意碎石制動。'},
  ]},
 {id:'dahu',name:'大湖五指',sub:'內湖大湖→碧山→五指山',dist:7.8,elev:622,
@@ -272,14 +281,14 @@ const ROUTES=[
  lat:25.096,lon:121.638,bear:30,
  segs:[
   {n:'大湖山莊街起步',m:'0–1.8 km · 坡 5% · NE',bear:30,elFrac:0,
-   cam:{name:'大湖公園',url:'https://www.google.com/maps/search/?api=1&query=25.068,121.622'},
+   cam:{name:'東湖隧道北向0K+295M',url:'https://livecam.tw/cam/BOT102/'},
    tr:'住宅區晨間通勤車流集中，路邊停車多；注意突然開門，靠左離停車帶 1m 以上。'},
-  {n:'碧山路口轉入',m:'1.8–3.5 km · 坡 8% · NE',bear:35,elFrac:.33,cam:null,
+  {n:'碧山路口轉入',m:'1.8–3.5 km · 坡 8% · NE',bear:35,elFrac:.33,cam:{name:'東湖隧道北向1K+500M',url:'https://livecam.tw/cam/BOT107/'},
    tr:'碧山路有機車和自用車；轉彎前確認後方車輛，避免轉彎中被後車超越。'},
-  {n:'陡坡髮夾彎區',m:'3.5–5.8 km · 坡 12% · NNE',bear:20,elFrac:.66,cam:null,
+  {n:'陡坡髮夾彎區',m:'3.5–5.8 km · 坡 12% · NNE',bear:20,elFrac:.66,cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
    tr:'上坡車流少但下坡快速機車多；彎道視野受限，聽引擎聲先靠右讓，注意來車衝出彎角。'},
   {n:'五指山公墓段',m:'5.8–7.8 km · 坡 7% · NE',bear:30,elFrac:1,
-   cam:{name:'公墓觀景',url:'https://www.google.com/maps/search/?api=1&query=25.125,121.655'},
+   cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
    tr:'清明節人車大增，其他幾乎無車；墓區工程車偶出現，注意沙塵影響抓地力。'},
  ]},
 ,
@@ -288,19 +297,19 @@ const ROUTES=[
  lat:25.225,lon:121.476,bear:0,
  segs:[
   {n:'承德路七段麥當勞',m:'0–8 km · 坡 1% · N',bear:0,elFrac:0,
-   cam:{name:'承德路七段口',url:'https://www.google.com/maps/search/?api=1&query=25.100,121.514'},
+   cam:{name:'承德路6段-福國路口',url:'https://livecam.tw/cam/BOT366/'},
    tr:'淡水河濱路段平日通勤車流，假日單車客密集；注意紅燈路口左轉車，保持直線行駛靠右。'},
   {n:'紅樹林捷運站',m:'8–24 km · 坡 1% · NNW',bear:340,elFrac:.12,
-   cam:{name:'紅樹林站',url:'https://www.google.com/maps/search/?api=1&query=25.158,121.462'},
+   cam:{name:'淡水淡金路中正東路口',url:'https://livecam.tw/cam/NWT0175/'},
    tr:'淡金公路平坦海濱路段；假日機車多，注意路口行人橫越，風強時側風明顯。'},
   {n:'三芝金芝門市',m:'24–42 km · 坡 3% · N',bear:5,elFrac:.30,
-   cam:{name:'三芝市區',url:'https://www.google.com/maps/search/?api=1&query=25.252,121.435'},
+   cam:{name:'三芸淡金公路(台2)',url:'https://livecam.tw/cam/NWT0213/'},
    tr:'三芝市區路口多；卡車出入加油站注意，假日遊客車在此休息補給，路側停車雜亂。'},
   {n:'石門郵局',m:'42–54 km · 坡 2% · NNE',bear:20,elFrac:.48,
-   cam:{name:'石門市區',url:'https://www.google.com/maps/search/?api=1&query=25.296,121.394'},
+   cam:{name:'石門淡金公路石門洞(E)',url:'https://livecam.tw/cam/CCTV-11-0020-028-002/'},
    tr:'北海岸路段側風強烈；101縣道與台2線路口注意轉向車，下坡車速快保持右側行駛。'},
   {n:'金山環金門市',m:'54–65 km · 坡 2% · SE',bear:140,elFrac:.65,
-   cam:{name:'金山中山路',url:'https://www.google.com/maps/search/?api=1&query=25.225,121.476'},
+   cam:{name:'金山區台2、台2甲',url:'https://livecam.tw/cam/NWT0237/'},
    tr:'金山市區補給後折返；溫泉旅館出入車較多，假日海水浴場遊客多，補給後原路折返。'},
   {n:'石門郵局（折返）',m:'65–76 km · 坡 2% · SSW',bear:200,elFrac:.78,
    cam:null,
@@ -312,7 +321,7 @@ const ROUTES=[
    cam:null,
    tr:'返程進入淡水市區路段；17:00後通勤車增加，靠右行駛，機車道注意並行。'},
   {n:'承德路七段麥當勞（返抵）',m:'84–86 km · 坡 1% · S',bear:180,elFrac:1,
-   cam:{name:'承德路七段終點',url:'https://www.google.com/maps/search/?api=1&query=25.100,121.514'},
+   cam:{name:'承德路6段-福國路口',url:'https://livecam.tw/cam/BOT366/'},
    tr:'返抵起點；慢速冷卻，注意路口左轉車，完成後補充飲食。'},
  ]},
 {id:'tatajia',name:'塔塔加',sub:'水里商工→愛玉橋→望高茶園→塔塔加遊客中心',dist:62.0,elev:2014,
@@ -820,8 +829,8 @@ function bldDay(r,di){
 <div class="wind-ind"><div class="wind-row"><span class="wtag ${k}">${wL(k)} ${p}%</span><span class="wspeed">${s.w.ms} m/s（${bf(s.w.ms)}級）· ${s.w.dir}</span></div><div class="wbar"><div class="wbar-c"></div><div class="wfill ${k}" style="${wf}"></div></div><div class="wscale"><span>← 逆風</span><span>0</span><span>順風 →</span></div></div>
 <div class="road-box"><div class="road-hdr"><div class="road-lbl"><span>路面</span><span class="pill ${s.road==='dry'?'g':s.road==='damp'?'w':'b'}">${RT[s.road]}</span></div><span class="road-rain">降雨 ${s.rain}%</span></div><div class="road-desc">${s.rd}</div><div class="tl-period">${tlL}</div>${sTL(s,tb,di)}<div class="tl-leg"><span><span class="tl-sw" style="background:#4CAF50"></span>乾</span><span><span class="tl-sw" style="background:#FFC107"></span>微濕</span><span><span class="tl-sw" style="background:#E53935"></span>潮濕</span><span><span class="tl-sw" style="background:#7E57C2"></span>風速</span></div>${ht?`<div class="tl-hint"><b>${ht}</b></div>`:''}<div class="note"><b>騎乘備注：</b>${s.rd}</div><div class="tr-box"><b>🚗 交通路況：</b>${s.tr}</div></div>
 <div class="pr-line"><span class="pr-lbl">破紀錄指數</span><div class="pr-body"><span class="pr-val">${s.pr}</span><span class="pill ${pd.c}">${pd.t}</span></div></div>
-<div class="gear-box"><span class="tag">服裝</span><span class="txt">${gear(s.f,s.rain)}</span></div>
-<div class="seg-foot">${cb}<button class="sbtn" data-detail="${i}">展開分析 →</button></div></div>`;}).join('');
+
+<div class="cam-live-box"><div class="cam-live-hdr"><span class="cam-live-title"><span class="cam-live-dot"></span>${s.cam?s.cam.name:'即時影像'}</span>${s.cam?'<a href="'+s.cam.url+'" target="_blank">livecam.tw ↗</a>':''}</div>${s.cam?'<div class="cam-live-embed"><iframe src="'+s.cam.url+'" loading="lazy" scrolling="no" allow="fullscreen" style="width:100%;height:200px;border:none;display:block"></iframe></div><div class="cam-live-dist">即時影像來源：交通部公路局 CCTV</div>':'<div class="cam-live-dist">此路段暫無附近即時攝影機</div>'}</div></div></div>`;}).join('');
   return`<div class="hero"><div class="score-ring">${sRing(sc.score)}<div class="score-num">${sc.score}</div></div><div class="hero-txt"><h3>${sc.verdict}</h3><p class="reason">${sc.reason}</p><span class="wchip ${wc}">${sc.windowLabel}</span></div></div>
 <div class="card"><div class="card-head"><h4>${r.name} 全線路面</h4><span class="pill ${sc.surf.stateCls==='good'?'g':sc.surf.stateCls==='warn'?'w':'b'}">${sc.surf.state}</span></div><div class="metrics"><div class="metric"><span class="lbl">目前乾段占比</span><span class="val">${dn}%</span><div class="mbar"><div class="mfill" style="width:${Math.max(3,dn)}%;background:${dn>=75?'#4CAF50':dn>=40?'#FFC107':'#E53935'}"></div></div></div><div class="metric"><span class="lbl">最薄弱路段</span><span class="val" style="font-size:12px">${sc.surf.weakest}</span></div></div><div class="callouts"><div class="co"><span class="co-tag ok">視窗</span><span>${sc.surf.window}</span></div><div class="co"><span class="co-tag warn">風險</span><span>${sc.surf.hazards}</span></div></div></div>
 <div class="band">分區段推演 <span class="hint">${sc.segs.length} 段 · ${tlL}</span></div>
@@ -830,10 +839,7 @@ ${elevProfile(r, sc.segs)}
 }
 
 function bindSegs(r){
-  document.querySelectorAll('[data-cam]').forEach(btn=>{btn.onclick=()=>window.open(btn.dataset.cam,'_blank');});
-  document.querySelectorAll('[data-detail]').forEach(btn=>{btn.onclick=()=>{
-    const s=r.days[curDI]?.segs[parseInt(btn.dataset.detail)];
-    if(s)alert(`${r.name} · ${s.n}\n\n破紀錄指數: ${s.pr}/100\n溫度: ${s.t}°C (體感 ${s.f}°)\n降雨機率: ${s.rain}%\n風速: ${s.w.ms} m/s ${bf(s.w.ms)}級 ${s.w.dir}\n路面: ${RT[s.road]}\n\n交通路況:\n${s.tr}`);};});
+  document.querySelectorAll('[data-cam]').forEach(btn=>{btn.onclick=()=>window.open(btn.dataset.cam,'_
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
