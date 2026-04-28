@@ -480,7 +480,7 @@ async function fetchRadar(){
     const baseDate=new Date(Date.UTC(now2.getUTCFullYear(),now2.getUTCMonth(),now2.getUTCDate(),bHr,bMn,0));
     const fU=d=>{const y=d.getUTCFullYear(),m=String(d.getUTCMonth()+1).padStart(2,'0'),dy=String(d.getUTCDate()).padStart(2,'0'),h=String(d.getUTCHours()).padStart(2,'0'),mi=String(d.getUTCMinutes()).padStart(2,'0');return{YM:y+m,YMD:y+m+dy,full:y+m+dy+h+mi};};
     const fTW=d=>{const tw=new Date(d.getTime()+28800000);return{YM:String(tw.getUTCFullYear())+String(tw.getUTCMonth()+1).padStart(2,'0'),YMD:String(tw.getUTCFullYear())+String(tw.getUTCMonth()+1).padStart(2,'0')+String(tw.getUTCDate()).padStart(2,'0')};};
-    const toTW=d=>new Date(d.getTime()+28800000);const frames=[];
+    const toTW=d=>d;const frames=[];
     for(let off=-30;off<0;off+=10){const t=new Date(baseDate.getTime()+off*60000);const u=fU(t),tw=fTW(t);frames.push({time:toTW(t),offset:off,type:'obs',url:NCDR_BASE+'/00_Wxmap/7F13_NOWCAST/OBS/'+tw.YM+'/'+tw.YMD+'/obs_s'+u.full+'.png'});}
     const bU=fU(baseDate),bTW=fTW(baseDate);
     for(let s=0;s<=12;s++){const t=new Date(baseDate.getTime()+s*600000);frames.push({time:toTW(t),offset:s*10,type:'nowcast',url:NCDR_BASE+'/00_Wxmap/7F13_NOWCAST/'+bTW.YM+'/'+bTW.YMD+'/'+bU.full+'/nowcast_'+bU.full+'_s'+String(s).padStart(2,'0')+'.png'});}
