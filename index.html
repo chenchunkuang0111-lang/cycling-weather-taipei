@@ -134,7 +134,7 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 </div>
 <div class="error-banner" id="errBanner"></div>
 <header>
-  <div><h1>&#x5317;&#x90E8;&#x55AE;&#x8ECA;&#x6C23;&#x8C61;&#x53F0;</h1><div class="sub">&#x53F0;&#x5317;&#x516C;&#x8DEF;&#x8ECA; &#xB7; &#x5373;&#x6642;&#x4E09;&#x65E5;&#x9810;&#x6E2C;&#x542B;&#x4EA4;&#x901A;&#x5206;&#x6790;</div></div>
+  <div><h1>&#x5317;&#x90E8;&#x55AE;&#x8ECA;&#x6C23;&#x8C61;&#x53F0;<span style="font-size:.55em;font-weight:400;letter-spacing:0;margin-left:6px;opacity:.85">&#xFF08;Design by &#x7C73;&#x54AB;&#x565A;&#xFF09;</span></h1><div class="sub">&#x53F0;&#x5317;&#x516C;&#x8DEF;&#x8ECA; &#xB7; &#x5373;&#x6642;&#x4E09;&#x65E5;&#x9810;&#x6E2C;&#x542B;&#x4EA4;&#x901A;&#x5206;&#x6790;</div></div>
   <div class="live-badge"><div class="live-dot"></div><span id="srcLabel">LIVE</span></div>
 </header>
 <button id="refreshBtn" class="refresh-btn" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><span class="ri-icon">&#x21BA;</span>&#x91CD;&#x65B0;&#x6574;&#x7406;</button>
@@ -149,39 +149,6 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 // CONFIG: 9 Routes with coordinates, climb bearing, camera links
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const ROUTES=[
-{id:'feng',name:'\u98A8\u6AC3\u5634',sub:'\u6953\u6797\u6A4B\u2192\u842C\u6EAA\u7523\u696D\u9053\u8DEF\u2192\u98A8\u6AC3\u5634\u6DBC\u4EAD',dist:10.8,elev:620,
- mp:[[121.5827,25.1190],[121.5840,25.1215],[121.5868,25.1245],[121.5890,25.1275],[121.5905,25.1305],[121.5922,25.1328],[121.5955,25.1340],[121.5985,25.1355],[121.6010,25.1365],[121.6029,25.1371]],
- lat:25.127,lon:121.583,bear:350,
- segs:[
-  {n:'\u6953\u6797\u6A4B\u8D77\u767B\u6BB5',m:'0\u20132.5 km \u00B7 \u5761 5% \u00B7 N',bear:350,elFrac:0,
-   cam:{name:'\u6953\u6797\u6A4B\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT236/'},
-   tr:'\u81F3\u5584\u8DEF\u4E09\u6BB5\u6545\u5BAE\u4E3B\u5E79\u9053\uFF0C09:00 \u5F8C\u904A\u89BD\u8ECA\u5927\u91CF\u6E67\u5165\uFF1B\u5EFA\u8B70 08:00 \u524D\u901A\u904E\uFF0C\u4E0B\u5C71\u8ECA\u901F\u5FEB\u9760\u53F3\u884C\u99DB\u3002'},
-  {n:'\u842C\u6EAA\u7523\u696D\u9053\u8DEF\u4E2D\u6BB5',m:'2.5\u20135.8 km \u00B7 \u5761 9% \u00B7 NNE',bear:20,elFrac:.33,
-   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'\u8ECA\u6D41\u6975\u5C11\uFF0C\u5076\u6709\u8FB2\u7528\u8ECA\uFF1B\u8DEF\u5E45\u7D04 4m\uFF0C\u5F4E\u9053\u8996\u7DDA\u77ED\uFF0C\u9047\u5C0D\u5411\u6A5F\u8ECA\u9700\u9760\u53F3\u6E1B\u901F\u8B93\u884C\u3002'},
-  {n:'\u842C\u6EAA\u4E0A\u6BB5\u9661\u5761',m:'5.8\u20138.5 km \u00B7 \u5761 11% \u00B7 N',bear:350,elFrac:.66,
-   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
-   tr:'\u8DEF\u5E45\u6700\u7A84\u8655\u50C5\u55AE\u7DDA\u901A\u884C\uFF1B\u4E0B\u5761\u6A5F\u8ECA\u901F\u5EA6\u5FEB\uFF0C\u885D\u9802\u524D\u78BA\u8A8D\u7121\u4F86\u8ECA\uFF0C\u9078\u5BEC\u8655\u8B93\u884C\u3002'},
-  {n:'\u7A1C\u7DDA\u81F3\u98A8\u6AC3\u5634\u6DBC\u4EAD',m:'8.5\u201310.8 km \u00B7 \u5761 6% \u00B7 NNE',bear:20,elFrac:1,
-   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
-   tr:'\u5047\u65E5\u6A5F\u8ECA\u65CF\u805A\u96C6\u98A8\u6AC3\u5634\u6DBC\u4EAD\uFF0C\u505C\u8ECA\u6DF7\u4E82\uFF1B\u4E0B\u5761\u524D\u5148\u89C0\u5BDF\u4EBA\u8ECA\u52D5\u614B\uFF0C\u907F\u514D\u9AD8\u901F\u885D\u5165\u505C\u8ECA\u5340\u3002'},
- ]},
-{id:'leng',name:'\u51B7\u6C34\u5751',sub:'\u81F3\u5584\u8DEF\u53E3\u2192\u5E73\u7B49\u91CC\u2192\u51B7\u6C34\u5751',dist:11.4,elev:658,
- mp:[[121.5470,25.1015],[121.5495,25.1055],[121.5525,25.1105],[121.5560,25.1158],[121.5585,25.1215],[121.5612,25.1285],[121.5640,25.1365],[121.5670,25.1480],[121.5690,25.1580],[121.5695,25.1665]],
- lat:25.125,lon:121.557,bear:10,
- segs:[
-  {n:'\u81F3\u5584\u8DEF\u4E09\u6BB5\u53E3',m:'0\u20133 km \u00B7 \u5761 3% \u00B7 N',bear:0,elFrac:0,
-   cam:{name:'\u6545\u5BAE\u8DEF-\u81F3\u5584\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT236/'},
-   tr:'\u6545\u5BAE\u5E79\u9053 09:00 \u5F8C\u904A\u89BD\u8ECA\u983B\u7E41\uFF1B\u9760\u53F3\u5074\uFF0C\u9032\u51FA\u6545\u5BAE\u8DEF\u53E3\u653E\u6162\u6CE8\u610F\u76F2\u5F4E\u3002'},
-  {n:'\u5E73\u7B49\u91CC\u8336\u5712',m:'3\u20136.2 km \u00B7 \u5761 6% \u00B7 N',bear:5,elFrac:.33,cam:{name:'\u683C\u81F4\u8DEF\u51F1\u65CB\u8DEF',url:'https://livecam.tw/cam/BOT373/'},
-   tr:'\u8FB2\u7528\u8ECA\u5076\u723E\u51FA\u73FE\uFF1B\u5F4E\u9053\u591A\uFF0C\u9810\u5224\u5C0D\u5411\u4F86\u8ECA\uFF0C\u8FB2\u6A5F\u5177\u9AD4\u7A4D\u5927\u6CE8\u610F\u6703\u8ECA\u7A7A\u9593\u3002'},
-  {n:'\u5167\u96D9\u6EAA\u2192\u51B7\u64CE',m:'6.2\u20139.4 km \u00B7 \u5761 8% \u00B7 NNW',bear:340,elFrac:.66,
-   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'\u8ECA\u8F1B\u6975\u5C11\uFF1B\u6A4B\u9762\u9435\u683C\u67F5\u96E8\u5F8C\u7279\u5225\u6ED1\uFF0C\u904E\u6A4B\u964D\u901F\u6162\u884C\u3002'},
-  {n:'\u51B7\u6C34\u5751\u904A\u5BA2\u4E2D\u5FC3',m:'9.4\u201311.4 km \u00B7 \u5761 5% \u00B7 NW',bear:315,elFrac:1,
-   cam:{name:'\u51B7\u6C34\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/lsktcc/'},
-   tr:'\u5047\u65E5\u904A\u89BD\u8ECA\u96C6\u4E2D\uFF0C\u505C\u8ECA\u5834\u51FA\u5165\u983B\u7E41\uFF1B\u4E0B\u5761\u524D\u89C0\u5BDF\u51FA\u53E3\u8ECA\u8F1B\uFF0C\u52FF\u9AD8\u901F\u901A\u904E\u5165\u53E3\u5340\u3002'},
- ]},
 {id:'yangde',name:'\u4EF0\u5FB7\u5C0F\u6CB9',sub:'\u528D\u6F6D\u2192\u4EF0\u5FB7\u5927\u9053\u2192\u5C0F\u6CB9\u5751',dist:14.8,elev:805,
  mp:[[121.5235,25.0843],[121.5260,25.0930],[121.5290,25.1015],[121.5325,25.1090],[121.5370,25.1180],[121.5410,25.1280],[121.5442,25.1370],[121.5460,25.1475],[121.5478,25.1580],[121.5490,25.1680],[121.5478,25.1750],[121.5460,25.1790]],
  lat:25.130,lon:121.535,bear:5,
@@ -214,6 +181,39 @@ const ROUTES=[
   {n:'\u5C0F\u6CB9\u5751\u505C\u8ECA\u5834',m:'10.2\u201313.1 km \u00B7 \u5761 9% \u00B7 NE',bear:40,elFrac:1,
    cam:{name:'\u5C0F\u6CB9\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/xyktcc/'},
    tr:'\u5047\u65E5\u89C0\u5149\u8ECA\u9032\u51FA\u7E41\u5FD9\uFF0C\u65C5\u904A\u5DF4\u58EB\u5927\u8F49\u5F4E\u5360\u5168\u8DEF\u5E45\uFF1B\u505C\u8ECA\u5834\u5165\u53E3\u964D\u901F\u8B93\u884C\u3002'},
+ ]},
+{id:'feng',name:'\u98A8\u6AC3\u5634',sub:'\u6953\u6797\u6A4B\u2192\u842C\u6EAA\u7523\u696D\u9053\u8DEF\u2192\u98A8\u6AC3\u5634\u6DBC\u4EAD',dist:10.8,elev:620,
+ mp:[[121.5827,25.1190],[121.5840,25.1215],[121.5868,25.1245],[121.5890,25.1275],[121.5905,25.1305],[121.5922,25.1328],[121.5955,25.1340],[121.5985,25.1355],[121.6010,25.1365],[121.6029,25.1371]],
+ lat:25.127,lon:121.583,bear:350,
+ segs:[
+  {n:'\u6953\u6797\u6A4B\u8D77\u767B\u6BB5',m:'0\u20132.5 km \u00B7 \u5761 5% \u00B7 N',bear:350,elFrac:0,
+   cam:{name:'\u6953\u6797\u6A4B\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT236/'},
+   tr:'\u81F3\u5584\u8DEF\u4E09\u6BB5\u6545\u5BAE\u4E3B\u5E79\u9053\uFF0C09:00 \u5F8C\u904A\u89BD\u8ECA\u5927\u91CF\u6E67\u5165\uFF1B\u5EFA\u8B70 08:00 \u524D\u901A\u904E\uFF0C\u4E0B\u5C71\u8ECA\u901F\u5FEB\u9760\u53F3\u884C\u99DB\u3002'},
+  {n:'\u842C\u6EAA\u7523\u696D\u9053\u8DEF\u4E2D\u6BB5',m:'2.5\u20135.8 km \u00B7 \u5761 9% \u00B7 NNE',bear:20,elFrac:.33,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u8ECA\u6D41\u6975\u5C11\uFF0C\u5076\u6709\u8FB2\u7528\u8ECA\uFF1B\u8DEF\u5E45\u7D04 4m\uFF0C\u5F4E\u9053\u8996\u7DDA\u77ED\uFF0C\u9047\u5C0D\u5411\u6A5F\u8ECA\u9700\u9760\u53F3\u6E1B\u901F\u8B93\u884C\u3002'},
+  {n:'\u842C\u6EAA\u4E0A\u6BB5\u9661\u5761',m:'5.8\u20138.5 km \u00B7 \u5761 11% \u00B7 N',bear:350,elFrac:.66,
+   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
+   tr:'\u8DEF\u5E45\u6700\u7A84\u8655\u50C5\u55AE\u7DDA\u901A\u884C\uFF1B\u4E0B\u5761\u6A5F\u8ECA\u901F\u5EA6\u5FEB\uFF0C\u885D\u9802\u524D\u78BA\u8A8D\u7121\u4F86\u8ECA\uFF0C\u9078\u5BEC\u8655\u8B93\u884C\u3002'},
+  {n:'\u7A1C\u7DDA\u81F3\u98A8\u6AC3\u5634\u6DBC\u4EAD',m:'8.5\u201310.8 km \u00B7 \u5761 6% \u00B7 NNE',bear:20,elFrac:1,
+   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
+   tr:'\u5047\u65E5\u6A5F\u8ECA\u65CF\u805A\u96C6\u98A8\u6AC3\u5634\u6DBC\u4EAD\uFF0C\u505C\u8ECA\u6DF7\u4E82\uFF1B\u4E0B\u5761\u524D\u5148\u89C0\u5BDF\u4EBA\u8ECA\u52D5\u614B\uFF0C\u907F\u514D\u9AD8\u901F\u885D\u5165\u505C\u8ECA\u5340\u3002'},
+ ]},
+{id:'leng',name:'\u51B7\u6C34\u5751',sub:'\u81F3\u5584\u8DEF\u53E3\u2192\u5E73\u7B49\u91CC\u2192\u51B7\u6C34\u5751',dist:11.4,elev:658,
+ mp:[[121.5470,25.1015],[121.5495,25.1055],[121.5525,25.1105],[121.5560,25.1158],[121.5585,25.1215],[121.5612,25.1285],[121.5640,25.1365],[121.5670,25.1480],[121.5690,25.1580],[121.5695,25.1665]],
+ lat:25.125,lon:121.557,bear:10,
+ segs:[
+  {n:'\u81F3\u5584\u8DEF\u4E09\u6BB5\u53E3',m:'0\u20133 km \u00B7 \u5761 3% \u00B7 N',bear:0,elFrac:0,
+   cam:{name:'\u6545\u5BAE\u8DEF-\u81F3\u5584\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT236/'},
+   tr:'\u6545\u5BAE\u5E79\u9053 09:00 \u5F8C\u904A\u89BD\u8ECA\u983B\u7E41\uFF1B\u9760\u53F3\u5074\uFF0C\u9032\u51FA\u6545\u5BAE\u8DEF\u53E3\u653E\u6162\u6CE8\u610F\u76F2\u5F4E\u3002'},
+  {n:'\u5E73\u7B49\u91CC\u8336\u5712',m:'3\u20136.2 km \u00B7 \u5761 6% \u00B7 N',bear:5,elFrac:.33,cam:{name:'\u683C\u81F4\u8DEF\u51F1\u65CB\u8DEF',url:'https://livecam.tw/cam/BOT373/'},
+   tr:'\u8FB2\u7528\u8ECA\u5076\u723E\u51FA\u73FE\uFF1B\u5F4E\u9053\u591A\uFF0C\u9810\u5224\u5C0D\u5411\u4F86\u8ECA\uFF0C\u8FB2\u6A5F\u5177\u9AD4\u7A4D\u5927\u6CE8\u610F\u6703\u8ECA\u7A7A\u9593\u3002'},
+  {n:'\u5167\u96D9\u6EAA\u2192\u51B7\u64CE',m:'6.2\u20139.4 km \u00B7 \u5761 8% \u00B7 NNW',bear:340,elFrac:.66,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u8ECA\u8F1B\u6975\u5C11\uFF1B\u6A4B\u9762\u9435\u683C\u67F5\u96E8\u5F8C\u7279\u5225\u6ED1\uFF0C\u904E\u6A4B\u964D\u901F\u6162\u884C\u3002'},
+  {n:'\u51B7\u6C34\u5751\u904A\u5BA2\u4E2D\u5FC3',m:'9.4\u201311.4 km \u00B7 \u5761 5% \u00B7 NW',bear:315,elFrac:1,
+   cam:{name:'\u51B7\u6C34\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/lsktcc/'},
+   tr:'\u5047\u65E5\u904A\u89BD\u8ECA\u96C6\u4E2D\uFF0C\u505C\u8ECA\u5834\u51FA\u5165\u983B\u7E41\uFF1B\u4E0B\u5761\u524D\u89C0\u5BDF\u51FA\u53E3\u8ECA\u8F1B\uFF0C\u52FF\u9AD8\u901F\u901A\u904E\u5165\u53E3\u5340\u3002'},
  ]},
 {id:'balaka',name:'\u5DF4\u62C9\u5361',sub:'\u4E09\u829D 101\u7532\u2192\u5927\u5C6F\u978D\u90E8',dist:17.3,elev:784,
  mp:[[121.5005,25.2582],[121.5065,25.2500],[121.5120,25.2410],[121.5175,25.2315],[121.5225,25.2220],[121.5270,25.2130],[121.5305,25.2050],[121.5330,25.1975],[121.5315,25.1930],[121.5290,25.1880],[121.5270,25.1850]],
@@ -254,7 +254,7 @@ const ROUTES=[
   {n:'\u884C\u7FA9\u8DEF\u6EAB\u6CC9\u53E3',m:'0\u20131.8 km \u00B7 \u5761 5% \u00B7 N',bear:350,elFrac:0,
    cam:{name:'\u77F3\u724C\u8DEF-\u7ACB\u8FB2\u88572\u6BB5',url:'https://livecam.tw/cam/BOT406/'},
    tr:'\u6E05\u6668\u901A\u66A2\uFF1B\u4E0D\u898F\u5247\u505C\u8ECA\u5BC6\u96C6\u6CE8\u610F\u8ECA\u9580\u7A81\u7136\u6253\u958B\u3002'},
-  {n:'\u7D17\u5E3D\u8DEF\u652F\u7DDA',m:'1.8\u20134.2 km \u00B7 \u5761 7% \u00B7 NW',bear:320,elFrac:.33,cam:{name:'\u967D\u660E\u66F8\u5C4B\u9060\u773A\u53F0\u5317',url:'https://livecam.tw/cam/ymswyttbpd/'},
+  {n:'\u7D17\u5E3D\u8DEF\u652F\u7DDA',m:'1.8\u20134.2 km \u00B7 \u5761 7% \u00B7 NW',bear:320,elFrac:.33,cam:{name:'\u683C\u81F4\u8DEF\u51F1\u65CB\u8DEF',url:'https://livecam.tw/cam/BOT373/'},
    tr:'\u9130\u91CC\u5C0F\u9053\u5E7E\u4E4E\u7121\u8ECA\uFF1B\u5076\u6709\u6A5F\u8ECA\uFF0C\u5F4E\u9053\u4E2D\u7DDA\u4FDD\u6301\u3002'},
   {n:'\u4E2D\u6B63\u5C71\u7523\u9053\u53E3',m:'4.2\u20136.5 km \u00B7 \u5761 9% \u00B7 NW',bear:315,elFrac:.66,cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
    tr:'\u7523\u9053\u5165\u53E3\u5F8C\u96F6\u8ECA\u6D41\uFF0C\u5076\u6709\u767B\u5C71\u5BA2\u505C\u8ECA\u8DEF\u80A9\uFF1B\u8DEF\u5E45\u6975\u7A84\u4E0B\u5761\u524D\u78BA\u8A8D\u7121\u4F86\u8ECA\u3002'},
@@ -355,9 +355,8 @@ const ROUTES=[
   {n:'\u9727\u793E',m:'12\u201318 km \u00B7 \u5761 4% \u00B7 NNE',bear:20,elFrac:.33,cam:{name:'\u9727\u793E-\u5967\u842C\u5927\u8DEF\u53E3',url:'https://livecam.tw/cam/CCTV-26-0140-079-001/'},tr:'\u9727\u793E\u88DC\u7D66\u6700\u5F8C\u6A5F\u6703\uFF1B\u5546\u5BB6\u96C6\u4E2D\uFF0C\u88DC\u5145\u6C34\u5206\u8207\u98DF\u7269\uFF0C\u51AC\u5B63\u6668\u9593\u9727\u6C23\u6FC3\u6CE8\u610F\u8996\u7DDA\u3002'},
   {n:'\u6700\u9AD8\u5C0F\u4E03',m:'18\u201324 km \u00B7 \u5761 8% \u00B7 NE',bear:40,elFrac:.50,cam:{name:'\u9752\u9752\u8349\u539F\u5165\u53E3\u8655',url:'https://livecam.tw/cam/CCTV-26-014A-009-001/'},tr:'\u5168\u53F0\u6700\u9AD87-Eleven\u88DC\u7D66\u7AD9\uFF1B\u5047\u65E5\u904A\u5BA2\u6975\u591A\uFF0C\u6CE8\u610F\u505C\u8ECA\u5834\u9032\u51FA\u8ECA\u8F1B\uFF0C\u8DEF\u80A9\u505C\u8ECA\u6DF7\u4E82\u3002'},
   {n:'\u7FE0\u5CF0',m:'24\u201328 km \u00B7 \u5761 9% \u00B7 NE',bear:35,elFrac:.67,cam:{name:'\u7FE0\u5CF0\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/CCTV-26-014A-017-001/'},tr:'\u9661\u5761\u9023\u7E8C\u9AEE\u593E\u5F4E\uFF1B\u904A\u89BD\u8ECA\u4E0B\u5761\u901F\u5EA6\u5FEB\uFF0C\u5F4E\u9053\u5167\u5074\u6CE8\u610F\u4F86\u8ECA\uFF0C\u5F37\u98A8\u8DEF\u6BB5\u3002'},
-  {n:'\u9CF6\u5CF0',m:'28\u201331 km \u00B7 \u5761 9% \u00B7 NNE',bear:25,elFrac:.78,cam:{name:'\u5408\u6B61\u5C71\u6606\u967D\u505C\u8ECA\u5834',url:'https://livecam.tw/cam/CCTV-26-014A-029-001/'},tr:'\u9CF6\u5CF0\u89C0\u666F\u53F0\u4EBA\u6C23\u9AD8\uFF1B\u505C\u8ECA\u5834\u4EBA\u8ECA\u96DC\u4E82\uFF0C\u5FEB\u901F\u901A\u904E\u4E0D\u5728\u6B64\u4E45\u505C\uFF0C\u7A1C\u7DDA\u5F37\u98A8\u5074\u5439\u3002'},
-  {n:'\u6606\u967D',m:'31\u201334 km \u00B7 \u5761 7% \u00B7 NE',bear:40,elFrac:.89,cam:{name:'\u53F014\u753232K\u6C34\u6676\u5BAE\u65C1',url:'https://livecam.tw/cam/CCTV-26-014A-032-003/'},tr:'\u6606\u967D\u505C\u8ECA\u5834\u6D77\u62D43275m\uFF1B\u9AD8\u5C71\u75C7\u6CE8\u610F\uFF0C\u88DC\u7D66\u6C34\u5F8C\u7DE9\u8E29\uFF0C\u5BD2\u6D41\u6642\u8DEF\u9762\u53EF\u80FD\u7D50\u51B0\u3002'},
-  {n:'\u6B66\u5DBA\u724C\u6A13',m:'34\u201336 km \u00B7 \u5761 5% \u00B7 NE',bear:45,elFrac:1,cam:{name:'\u5408\u6B61\u5C71\u6B66\u5DBA\u4EAD',url:'https://livecam.tw/cam/CCTV-26-014A-031-001/'},tr:'\u7D42\u9EDE\u6B66\u5DBA3275m\uFF1B\u6C23\u6EAB\u4F4E\u98A8\u5927\uFF0C\u62CD\u7167\u5F8C\u7ACB\u5373\u7A7F\u4E0A\u4FDD\u6696\u5916\u5957\uFF0C\u4E0B\u5761\u524D\u78BA\u8A8D\u715E\u8ECA\u72C0\u614B\u3002'}
+  {n:'\u6606\u967D',m:'31\u201334 km \u00B7 \u5761 7% \u00B7 NE',bear:40,elFrac:.89,cam:{name:'\u5408\u6B61\u5C71\u6606\u967D\u505C\u8ECA\u5834',url:'https://livecam.tw/cam/CCTV-26-014A-029-001/'},tr:'\u6606\u967D\u505C\u8ECA\u5834\u6D77\u62D43275m\uFF1B\u9AD8\u5C71\u75C7\u6CE8\u610F\uFF0C\u88DC\u7D66\u6C34\u5F8C\u7DE9\u8E29\uFF0C\u5BD2\u6D41\u6642\u8DEF\u9762\u53EF\u80FD\u7D50\u51B0\u3002'},
+  {n:'\u6B66\u5DBA\u724C\u6A13',m:'34\u201336 km \u00B7 \u5761 5% \u00B7 NE',bear:45,elFrac:1,cam:{name:'\u5408\u6B61\u5C71-\u6B66\u5DBA\u4EAD',url:'https://livecam.tw/cam/CCTV-26-014A-031-001/'},tr:'\u7D42\u9EDE\u6B66\u5DBA3275m\uFF1B\u6C23\u6EAB\u4F4E\u98A8\u5927\uFF0C\u62CD\u7167\u5F8C\u7ACB\u5373\u7A7F\u4E0A\u4FDD\u6696\u5916\u5957\uFF0C\u4E0B\u5761\u524D\u78BA\u8A8D\u715E\u8ECA\u72C0\u614B\u3002'}
  ]}
 ];
 
@@ -923,5 +922,93 @@ async function boot(){
 boot();
 })();
 </script>
+
+<style>
+.cam-live-box{position:relative}
+.wm-overlay{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  color:#fff;font-weight:900;
+  font-size:clamp(13px,3.8vw,22px);
+  letter-spacing:.5px;
+  text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 12px rgba(0,0,0,.7);
+  background:rgba(0,0,0,.42);
+  padding:6px 10px;border-radius:8px;
+  pointer-events:none;z-index:5;
+  white-space:nowrap;text-align:center;
+  max-width:92%;
+}
+</style>
+<script>
+(function(){
+  const WM_TEXT = '同氣候帶影像供參考';
+  const WM_MAP = {
+    feng:[1,2,3],
+    leng:[1,2],
+    balaka:[1,2],
+    yangjin:[1,2],
+    zhzheng:[1,2,3]
+  };
+  function getActiveRouteId(){
+    const a = document.querySelector('#tabs .tab.active, #tabs .active, #tabs button.active');
+    if(!a) return null;
+    return a.dataset.id || a.dataset.route || a.id || (a.textContent||'').trim();
+  }
+  function applyWatermarks(){
+    // Try to detect current route by checking which tab is active
+    const activeTab = document.querySelector('#tabs .tab.active, #tabs .active, #tabs button.active, #tabs [aria-selected="true"]');
+    if(!activeTab) return;
+    // Match active tab text/data to known routes
+    let routeId = activeTab.dataset.id || activeTab.dataset.route;
+    if(!routeId){
+      // Try by text content matching
+      const txt = (activeTab.textContent||'').trim();
+      const map = {
+        '風櫃嘴':'feng',
+        '冷水坑':'leng',
+        '仰德小油':'yangde',
+        '行義小油':'xingyi',
+        '巴拉卡':'balaka',
+        '陽金':'yangjin',
+        '中正山':'zhzheng'
+      };
+      routeId = map[txt] || null;
+    }
+    const wmIdx = WM_MAP[routeId];
+    const segs = document.querySelectorAll('#main .seg, .seg');
+    segs.forEach((seg, idx)=>{
+      const box = seg.querySelector('.cam-live-box');
+      if(!box) return;
+      const old = box.querySelector('.wm-overlay');
+      if(old) old.remove();
+      if(wmIdx && wmIdx.includes(idx)){
+        const wm = document.createElement('div');
+        wm.className = 'wm-overlay';
+        wm.textContent = WM_TEXT;
+        box.appendChild(wm);
+      }
+    });
+  }
+  let timer = null;
+  function schedule(){
+    clearTimeout(timer);
+    timer = setTimeout(applyWatermarks, 120);
+  }
+  function init(){
+    schedule();
+    const main = document.querySelector('#main');
+    if(main){
+      new MutationObserver(schedule).observe(main, {childList:true, subtree:true});
+    }
+    document.addEventListener('click', e=>{
+      if(e.target.closest('#tabs')) setTimeout(schedule, 200);
+    });
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else { init(); }
+})();
+</script>
+
 </body>
 </html>
