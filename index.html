@@ -860,6 +860,7 @@ function reloadAllCams(){
    });}
  });
 }
+window.reloadAllCams=reloadAllCams;
 function initCamVideos(){
  document.querySelectorAll('.cam-live-box video[data-livecam],.cam-live-box img[data-livecam],.cam-live-box iframe[data-livecam]').forEach(function(v){
   var url=v.getAttribute('data-livecam');
