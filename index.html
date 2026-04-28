@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a0a">
-<title>騎士氣象台 – 台北公路車天氣</title>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi6aip5aOr5rCj6LGh5Y+wIiwic2hvcnRfbmFtZSI6IumqkeWjq+awo+ixoSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTBhIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIn0=">
+<title>&#x9A0E;&#x58EB;&#x6C23;&#x8C61;&#x53F0; &#x2013; &#x53F0;&#x5317;&#x516C;&#x8DEF;&#x8ECA;&#x5929;&#x6C23;</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi6aiO5aOr5rCj6LGh5Y+wIiwic2hvcnRfbmFtZSI6IumojuWjq+awo+ixoSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTBhIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIn0=">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--fg:#e8e8e8;--fg2:#999;--fg3:#666;--bdr:#2a2a2a;--green:#4CAF50;--yellow:#FFC107;--red:#E53935;--blue:#42A5F5;--purple:#7E57C2}
@@ -127,15 +127,15 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 <body>
 <div class="loading-overlay" id="loadScreen">
   <div class="spinner"></div>
-  <div class="load-text" id="loadText">正在載入即時天氣資料...</div>
-  <div class="load-src" id="loadSrc">來源：Open-Meteo API</div>
+  <div class="load-text" id="loadText">&#x6B63;&#x5728;&#x8F09;&#x5165;&#x5373;&#x6642;&#x5929;&#x6C23;&#x8CC7;&#x6599;...</div>
+  <div class="load-src" id="loadSrc">&#x4F86;&#x6E90;&#xFF1A;Open-Meteo API</div>
 </div>
 <div class="error-banner" id="errBanner"></div>
 <header>
-  <div><h1>騎士氣象台</h1><div class="sub">台北公路車 · 即時三日預測含交通分析</div></div>
+  <div><h1>&#x9A0E;&#x58EB;&#x6C23;&#x8C61;&#x53F0;</h1><div class="sub">&#x53F0;&#x5317;&#x516C;&#x8DEF;&#x8ECA; &#xB7; &#x5373;&#x6642;&#x4E09;&#x65E5;&#x9810;&#x6E2C;&#x542B;&#x4EA4;&#x901A;&#x5206;&#x6790;</div></div>
   <div class="live-badge"><div class="live-dot"></div><span id="srcLabel">LIVE</span></div>
 </header>
-<button id="refreshBtn" class="refresh-btn" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><span class="ri-icon">↺</span>重新整理</button>
+<button id="refreshBtn" class="refresh-btn" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),100)"><span class="ri-icon">&#x21BA;</span>&#x91CD;&#x65B0;&#x6574;&#x7406;</button>
 <div class="tabs" id="tabs"></div>
 <div id="main"></div>
 
@@ -143,225 +143,225 @@ header .sub{font-size:11px;color:var(--fg2);margin-top:2px}
 (function(){
 'use strict';
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 // CONFIG: 9 Routes with coordinates, climb bearing, camera links
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const ROUTES=[
-{id:'feng',name:'風櫃嘴',sub:'楓林橋→萬溪産業道路→風櫃嘴涼亭',dist:10.8,elev:620,
+{id:'feng',name:'\u98A8\u6AC3\u5634',sub:'\u6953\u6797\u6A4B\u2192\u842C\u6EAA\u7523\u696D\u9053\u8DEF\u2192\u98A8\u6AC3\u5634\u6DBC\u4EAD',dist:10.8,elev:620,
  mp:[[121.5827,25.1190],[121.5840,25.1215],[121.5868,25.1245],[121.5890,25.1275],[121.5905,25.1305],[121.5922,25.1328],[121.5955,25.1340],[121.5985,25.1355],[121.6010,25.1365],[121.6029,25.1371]],
  lat:25.127,lon:121.583,bear:350,
  segs:[
-  {n:'楓林橋起登段',m:'0–2.5 km · 坡 5% · N',bear:350,elFrac:0,
-   cam:{name:'楓林橋路口',url:'https://livecam.tw/cam/BOT236/'},
-   tr:'至善路三段故宮主幹道，09:00 後遊覽車大量湧入；建議 08:00 前通過，下山車速快靠右行駛。'},
-  {n:'萬溪産業道路中段',m:'2.5–5.8 km · 坡 9% · NNE',bear:20,elFrac:.33,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'車流極少，偶有農用車；路幅約 4m，彎道視線短，遇對向機車需靠右減速讓行。'},
-  {n:'萬溪上段陡坡',m:'5.8–8.5 km · 坡 11% · N',bear:350,elFrac:.66,
-   cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
-   tr:'路幅最窄處僅單線通行；下坡機車速度快，衝頂前確認無來車，選寬處讓行。'},
-  {n:'稜線至風櫃嘴涼亭',m:'8.5–10.8 km · 坡 6% · NNE',bear:20,elFrac:1,
-   cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
-   tr:'假日機車族聚集風櫃嘴涼亭，停車混亂；下坡前先觀察人車動態，避免高速衝入停車區。'},
+  {n:'\u6953\u6797\u6A4B\u8D77\u767B\u6BB5',m:'0\u20132.5 km \u00B7 \u5761 5% \u00B7 N',bear:350,elFrac:0,
+   cam:{name:'\u6953\u6797\u6A4B\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT236/'},
+   tr:'\u81F3\u5584\u8DEF\u4E09\u6BB5\u6545\u5BAE\u4E3B\u5E79\u9053\uFF0C09:00 \u5F8C\u904A\u89BD\u8ECA\u5927\u91CF\u6E67\u5165\uFF1B\u5EFA\u8B70 08:00 \u524D\u901A\u904E\uFF0C\u4E0B\u5C71\u8ECA\u901F\u5FEB\u9760\u53F3\u884C\u99DB\u3002'},
+  {n:'\u842C\u6EAA\u7523\u696D\u9053\u8DEF\u4E2D\u6BB5',m:'2.5\u20135.8 km \u00B7 \u5761 9% \u00B7 NNE',bear:20,elFrac:.33,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u8ECA\u6D41\u6975\u5C11\uFF0C\u5076\u6709\u8FB2\u7528\u8ECA\uFF1B\u8DEF\u5E45\u7D04 4m\uFF0C\u5F4E\u9053\u8996\u7DDA\u77ED\uFF0C\u9047\u5C0D\u5411\u6A5F\u8ECA\u9700\u9760\u53F3\u6E1B\u901F\u8B93\u884C\u3002'},
+  {n:'\u842C\u6EAA\u4E0A\u6BB5\u9661\u5761',m:'5.8\u20138.5 km \u00B7 \u5761 11% \u00B7 N',bear:350,elFrac:.66,
+   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
+   tr:'\u8DEF\u5E45\u6700\u7A84\u8655\u50C5\u55AE\u7DDA\u901A\u884C\uFF1B\u4E0B\u5761\u6A5F\u8ECA\u901F\u5EA6\u5FEB\uFF0C\u885D\u9802\u524D\u78BA\u8A8D\u7121\u4F86\u8ECA\uFF0C\u9078\u5BEC\u8655\u8B93\u884C\u3002'},
+  {n:'\u7A1C\u7DDA\u81F3\u98A8\u6AC3\u5634\u6DBC\u4EAD',m:'8.5\u201310.8 km \u00B7 \u5761 6% \u00B7 NNE',bear:20,elFrac:1,
+   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
+   tr:'\u5047\u65E5\u6A5F\u8ECA\u65CF\u805A\u96C6\u98A8\u6AC3\u5634\u6DBC\u4EAD\uFF0C\u505C\u8ECA\u6DF7\u4E82\uFF1B\u4E0B\u5761\u524D\u5148\u89C0\u5BDF\u4EBA\u8ECA\u52D5\u614B\uFF0C\u907F\u514D\u9AD8\u901F\u885D\u5165\u505C\u8ECA\u5340\u3002'},
  ]},
-{id:'leng',name:'冷水坑',sub:'至善路口→平等里→冷水坑',dist:11.4,elev:658,
+{id:'leng',name:'\u51B7\u6C34\u5751',sub:'\u81F3\u5584\u8DEF\u53E3\u2192\u5E73\u7B49\u91CC\u2192\u51B7\u6C34\u5751',dist:11.4,elev:658,
  mp:[[121.5470,25.1015],[121.5495,25.1055],[121.5525,25.1105],[121.5560,25.1158],[121.5585,25.1215],[121.5612,25.1285],[121.5640,25.1365],[121.5670,25.1480],[121.5690,25.1580],[121.5695,25.1665]],
  lat:25.125,lon:121.557,bear:10,
  segs:[
-  {n:'至善路三段口',m:'0–3 km · 坡 3% · N',bear:0,elFrac:0,
-   cam:{name:'故宮路-至善路口',url:'https://livecam.tw/cam/BOT236/'},
-   tr:'故宮幹道 09:00 後遊覽車頻繁；靠右側，進出故宮路口放慢注意盲彎。'},
-  {n:'平等里茶園',m:'3–6.2 km · 坡 6% · N',bear:5,elFrac:.33,cam:null,
-   tr:'農用車偶爾出現；彎道多，預判對向來車，農機具體積大注意會車空間。'},
-  {n:'內雙溪→冷擎',m:'6.2–9.4 km · 坡 8% · NNW',bear:340,elFrac:.66,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'車輛極少；橋面鐵格柵雨後特別滑，過橋降速慢行。'},
-  {n:'冷水坑遊客中心',m:'9.4–11.4 km · 坡 5% · NW',bear:315,elFrac:1,
-   cam:{name:'冷水坑停車場-陽明山',url:'https://livecam.tw/cam/lsktcc/'},
-   tr:'假日遊覽車集中，停車場出入頻繁；下坡前觀察出口車輛，勿高速通過入口區。'},
+  {n:'\u81F3\u5584\u8DEF\u4E09\u6BB5\u53E3',m:'0\u20133 km \u00B7 \u5761 3% \u00B7 N',bear:0,elFrac:0,
+   cam:{name:'\u6545\u5BAE\u8DEF-\u81F3\u5584\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT236/'},
+   tr:'\u6545\u5BAE\u5E79\u9053 09:00 \u5F8C\u904A\u89BD\u8ECA\u983B\u7E41\uFF1B\u9760\u53F3\u5074\uFF0C\u9032\u51FA\u6545\u5BAE\u8DEF\u53E3\u653E\u6162\u6CE8\u610F\u76F2\u5F4E\u3002'},
+  {n:'\u5E73\u7B49\u91CC\u8336\u5712',m:'3\u20136.2 km \u00B7 \u5761 6% \u00B7 N',bear:5,elFrac:.33,cam:null,
+   tr:'\u8FB2\u7528\u8ECA\u5076\u723E\u51FA\u73FE\uFF1B\u5F4E\u9053\u591A\uFF0C\u9810\u5224\u5C0D\u5411\u4F86\u8ECA\uFF0C\u8FB2\u6A5F\u5177\u9AD4\u7A4D\u5927\u6CE8\u610F\u6703\u8ECA\u7A7A\u9593\u3002'},
+  {n:'\u5167\u96D9\u6EAA\u2192\u51B7\u64CE',m:'6.2\u20139.4 km \u00B7 \u5761 8% \u00B7 NNW',bear:340,elFrac:.66,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u8ECA\u8F1B\u6975\u5C11\uFF1B\u6A4B\u9762\u9435\u683C\u67F5\u96E8\u5F8C\u7279\u5225\u6ED1\uFF0C\u904E\u6A4B\u964D\u901F\u6162\u884C\u3002'},
+  {n:'\u51B7\u6C34\u5751\u904A\u5BA2\u4E2D\u5FC3',m:'9.4\u201311.4 km \u00B7 \u5761 5% \u00B7 NW',bear:315,elFrac:1,
+   cam:{name:'\u51B7\u6C34\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/lsktcc/'},
+   tr:'\u5047\u65E5\u904A\u89BD\u8ECA\u96C6\u4E2D\uFF0C\u505C\u8ECA\u5834\u51FA\u5165\u983B\u7E41\uFF1B\u4E0B\u5761\u524D\u89C0\u5BDF\u51FA\u53E3\u8ECA\u8F1B\uFF0C\u52FF\u9AD8\u901F\u901A\u904E\u5165\u53E3\u5340\u3002'},
  ]},
-{id:'yangde',name:'仰德小油',sub:'劍潭→仰德大道→小油坑',dist:14.8,elev:805,
+{id:'yangde',name:'\u4EF0\u5FB7\u5C0F\u6CB9',sub:'\u528D\u6F6D\u2192\u4EF0\u5FB7\u5927\u9053\u2192\u5C0F\u6CB9\u5751',dist:14.8,elev:805,
  mp:[[121.5235,25.0843],[121.5260,25.0930],[121.5290,25.1015],[121.5325,25.1090],[121.5370,25.1180],[121.5410,25.1280],[121.5442,25.1370],[121.5460,25.1475],[121.5478,25.1580],[121.5490,25.1680],[121.5478,25.1750],[121.5460,25.1790]],
  lat:25.130,lon:121.535,bear:5,
  segs:[
-  {n:'文化大學起登',m:'0–3.5 km · 坡 6% · N',bear:0,elFrac:0,
-   cam:{name:'仰德大道二段2巷口',url:'https://livecam.tw/cam/BOT282/'},
-   tr:'仰德大道通勤幹道 07-08 點尖峰，路邊停車多注意門殺；公車進出頻繁保持距離。'},
-  {n:'仰德大道三段',m:'3.5–7.8 km · 坡 7% · N',bear:5,elFrac:.33,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'09:00 後車流銳減；下坡方向車速偏快，靠右爬升，直線路段視野佳可預判對向車況。'},
-  {n:'陽明山公車總站',m:'7.8–11 km · 坡 5% · NNE',bear:15,elFrac:.66,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'公車路線密集，注意停靠站盲區和乘客橫越；公車迴轉體積大，待其完成再繞行。'},
-  {n:'陽金→小油坑',m:'11–14.8 km · 坡 9% · NE',bear:40,elFrac:1,
-   cam:{name:'小油坑停車場-陽明山',url:'https://livecam.tw/cam/xyktcc/'},
-   tr:'假日觀光遊覽車多但上坡速慢；注意遊覽車寬幅轉彎盲角，下坡衝速前確認稜線視野。'},
+  {n:'\u6587\u5316\u5927\u5B78\u8D77\u767B',m:'0\u20133.5 km \u00B7 \u5761 6% \u00B7 N',bear:0,elFrac:0,
+   cam:{name:'\u4EF0\u5FB7\u5927\u9053\u4E8C\u6BB52\u5DF7\u53E3',url:'https://livecam.tw/cam/BOT282/'},
+   tr:'\u4EF0\u5FB7\u5927\u9053\u901A\u52E4\u5E79\u9053 07-08 \u9EDE\u5C16\u5CF0\uFF0C\u8DEF\u908A\u505C\u8ECA\u591A\u6CE8\u610F\u9580\u6BBA\uFF1B\u516C\u8ECA\u9032\u51FA\u983B\u7E41\u4FDD\u6301\u8DDD\u96E2\u3002'},
+  {n:'\u4EF0\u5FB7\u5927\u9053\u4E09\u6BB5',m:'3.5\u20137.8 km \u00B7 \u5761 7% \u00B7 N',bear:5,elFrac:.33,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'09:00 \u5F8C\u8ECA\u6D41\u92B3\u6E1B\uFF1B\u4E0B\u5761\u65B9\u5411\u8ECA\u901F\u504F\u5FEB\uFF0C\u9760\u53F3\u722C\u5347\uFF0C\u76F4\u7DDA\u8DEF\u6BB5\u8996\u91CE\u4F73\u53EF\u9810\u5224\u5C0D\u5411\u8ECA\u6CC1\u3002'},
+  {n:'\u967D\u660E\u5C71\u516C\u8ECA\u7E3D\u7AD9',m:'7.8\u201311 km \u00B7 \u5761 5% \u00B7 NNE',bear:15,elFrac:.66,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u516C\u8ECA\u8DEF\u7DDA\u5BC6\u96C6\uFF0C\u6CE8\u610F\u505C\u9760\u7AD9\u76F2\u5340\u548C\u4E58\u5BA2\u6A6B\u8D8A\uFF1B\u516C\u8ECA\u8FF4\u8F49\u9AD4\u7A4D\u5927\uFF0C\u5F85\u5176\u5B8C\u6210\u518D\u7E5E\u884C\u3002'},
+  {n:'\u967D\u91D1\u2192\u5C0F\u6CB9\u5751',m:'11\u201314.8 km \u00B7 \u5761 9% \u00B7 NE',bear:40,elFrac:1,
+   cam:{name:'\u5C0F\u6CB9\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/xyktcc/'},
+   tr:'\u5047\u65E5\u89C0\u5149\u904A\u89BD\u8ECA\u591A\u4F46\u4E0A\u5761\u901F\u6162\uFF1B\u6CE8\u610F\u904A\u89BD\u8ECA\u5BEC\u5E45\u8F49\u5F4E\u76F2\u89D2\uFF0C\u4E0B\u5761\u885D\u901F\u524D\u78BA\u8A8D\u7A1C\u7DDA\u8996\u91CE\u3002'},
  ]},
-{id:'xingyi',name:'行義小油',sub:'行義路→紗帽路→小油坑',dist:13.1,elev:782,
+{id:'xingyi',name:'\u884C\u7FA9\u5C0F\u6CB9',sub:'\u884C\u7FA9\u8DEF\u2192\u7D17\u5E3D\u8DEF\u2192\u5C0F\u6CB9\u5751',dist:13.1,elev:782,
  mp:[[121.5175,25.1260],[121.5220,25.1345],[121.5265,25.1420],[121.5310,25.1488],[121.5355,25.1540],[121.5398,25.1585],[121.5435,25.1620],[121.5475,25.1665],[121.5510,25.1698],[121.5530,25.1735],[121.5520,25.1770],[121.5490,25.1790],[121.5465,25.1785]],
  lat:25.142,lon:121.525,bear:345,
  segs:[
-  {n:'行義路溫泉區',m:'0–2.5 km · 坡 4% · N',bear:350,elFrac:0,
-   cam:{name:'石牌路-立農街2段',url:'https://livecam.tw/cam/BOT406/'},
-   tr:'溫泉區假日下午最忙，清晨無車；不規則停車多注意突然開門。'},
-  {n:'紗帽路前山段',m:'2.5–6.8 km · 坡 7% · N',bear:0,elFrac:.33,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'車流大減，主要居民用車；彎多靠右，注意機車逆向使用路肩。'},
-  {n:'紗帽接陽投',m:'6.8–10.2 km · 坡 8% · NNW',bear:340,elFrac:.66,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'陽投公路路面較寬，自用車偶有超速；注意側風路段車輛壓線，保持右側行駛。'},
-  {n:'小油坑停車場',m:'10.2–13.1 km · 坡 9% · NE',bear:40,elFrac:1,
-   cam:{name:'小油坑停車場-陽明山',url:'https://livecam.tw/cam/xyktcc/'},
-   tr:'假日觀光車進出繁忙，旅遊巴士大轉彎占全路幅；停車場入口降速讓行。'},
+  {n:'\u884C\u7FA9\u8DEF\u6EAB\u6CC9\u5340',m:'0\u20132.5 km \u00B7 \u5761 4% \u00B7 N',bear:350,elFrac:0,
+   cam:{name:'\u77F3\u724C\u8DEF-\u7ACB\u8FB2\u88572\u6BB5',url:'https://livecam.tw/cam/BOT406/'},
+   tr:'\u6EAB\u6CC9\u5340\u5047\u65E5\u4E0B\u5348\u6700\u5FD9\uFF0C\u6E05\u6668\u7121\u8ECA\uFF1B\u4E0D\u898F\u5247\u505C\u8ECA\u591A\u6CE8\u610F\u7A81\u7136\u958B\u9580\u3002'},
+  {n:'\u7D17\u5E3D\u8DEF\u524D\u5C71\u6BB5',m:'2.5\u20136.8 km \u00B7 \u5761 7% \u00B7 N',bear:0,elFrac:.33,cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u8ECA\u6D41\u5927\u6E1B\uFF0C\u4E3B\u8981\u5C45\u6C11\u7528\u8ECA\uFF1B\u5F4E\u591A\u9760\u53F3\uFF0C\u6CE8\u610F\u6A5F\u8ECA\u9006\u5411\u4F7F\u7528\u8DEF\u80A9\u3002'},
+  {n:'\u7D17\u5E3D\u63A5\u967D\u6295',m:'6.8\u201310.2 km \u00B7 \u5761 8% \u00B7 NNW',bear:340,elFrac:.66,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u967D\u6295\u516C\u8DEF\u8DEF\u9762\u8F03\u5BEC\uFF0C\u81EA\u7528\u8ECA\u5076\u6709\u8D85\u901F\uFF1B\u6CE8\u610F\u5074\u98A8\u8DEF\u6BB5\u8ECA\u8F1B\u58D3\u7DDA\uFF0C\u4FDD\u6301\u53F3\u5074\u884C\u99DB\u3002'},
+  {n:'\u5C0F\u6CB9\u5751\u505C\u8ECA\u5834',m:'10.2\u201313.1 km \u00B7 \u5761 9% \u00B7 NE',bear:40,elFrac:1,
+   cam:{name:'\u5C0F\u6CB9\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/xyktcc/'},
+   tr:'\u5047\u65E5\u89C0\u5149\u8ECA\u9032\u51FA\u7E41\u5FD9\uFF0C\u65C5\u904A\u5DF4\u58EB\u5927\u8F49\u5F4E\u5360\u5168\u8DEF\u5E45\uFF1B\u505C\u8ECA\u5834\u5165\u53E3\u964D\u901F\u8B93\u884C\u3002'},
  ]},
-{id:'balaka',name:'巴拉卡',sub:'三芝 101甲→大屯鞍部',dist:17.3,elev:784,
+{id:'balaka',name:'\u5DF4\u62C9\u5361',sub:'\u4E09\u829D 101\u7532\u2192\u5927\u5C6F\u978D\u90E8',dist:17.3,elev:784,
  mp:[[121.5005,25.2582],[121.5065,25.2500],[121.5120,25.2410],[121.5175,25.2315],[121.5225,25.2220],[121.5270,25.2130],[121.5305,25.2050],[121.5330,25.1975],[121.5315,25.1930],[121.5290,25.1880],[121.5270,25.1850]],
  lat:25.218,lon:121.494,bear:135,
  segs:[
-  {n:'三芝起登',m:'0–4.2 km · 坡 4% · SE',bear:135,elFrac:0,
-   cam:{name:'三芝淡金公路(台2)',url:'https://livecam.tw/cam/NWT0213/'},
-   tr:'101甲商業卡車偶有，保持安全距離；市區路口多注意行人和機車搶道。'},
-  {n:'中段林道',m:'4.2–9.5 km · 坡 6% · SE',bear:130,elFrac:.33,cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
-   tr:'林道幾乎無車，偶有農用車；注意路面落土和倒竹。'},
-  {n:'二子坪入口段',m:'9.5–13.8 km · 坡 7% · SE',bear:140,elFrac:.66,
-   cam:{name:'竹子湖派出所前',url:'https://livecam.tw/cam/BOT281/'},
-   tr:'公車停靠時注意乘客動向；霧天公車能見度低，遇公車先等待完全通過再追。'},
-  {n:'大屯山鞍部',m:'13.8–17.3 km · 坡 8% · ESE',bear:110,elFrac:1,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'公車迴轉站假日遊客密集；大霧時與公車保持充分距離，下坡謹慎。'},
+  {n:'\u4E09\u829D\u8D77\u767B',m:'0\u20134.2 km \u00B7 \u5761 4% \u00B7 SE',bear:135,elFrac:0,
+   cam:{name:'\u4E09\u829D\u6DE1\u91D1\u516C\u8DEF(\u53F02)',url:'https://livecam.tw/cam/NWT0213/'},
+   tr:'101\u7532\u5546\u696D\u5361\u8ECA\u5076\u6709\uFF0C\u4FDD\u6301\u5B89\u5168\u8DDD\u96E2\uFF1B\u5E02\u5340\u8DEF\u53E3\u591A\u6CE8\u610F\u884C\u4EBA\u548C\u6A5F\u8ECA\u6436\u9053\u3002'},
+  {n:'\u4E2D\u6BB5\u6797\u9053',m:'4.2\u20139.5 km \u00B7 \u5761 6% \u00B7 SE',bear:130,elFrac:.33,cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
+   tr:'\u6797\u9053\u5E7E\u4E4E\u7121\u8ECA\uFF0C\u5076\u6709\u8FB2\u7528\u8ECA\uFF1B\u6CE8\u610F\u8DEF\u9762\u843D\u571F\u548C\u5012\u7AF9\u3002'},
+  {n:'\u4E8C\u5B50\u576A\u5165\u53E3\u6BB5',m:'9.5\u201313.8 km \u00B7 \u5761 7% \u00B7 SE',bear:140,elFrac:.66,
+   cam:{name:'\u7AF9\u5B50\u6E56\u6D3E\u51FA\u6240\u524D',url:'https://livecam.tw/cam/BOT281/'},
+   tr:'\u516C\u8ECA\u505C\u9760\u6642\u6CE8\u610F\u4E58\u5BA2\u52D5\u5411\uFF1B\u9727\u5929\u516C\u8ECA\u80FD\u898B\u5EA6\u4F4E\uFF0C\u9047\u516C\u8ECA\u5148\u7B49\u5F85\u5B8C\u5168\u901A\u904E\u518D\u8FFD\u3002'},
+  {n:'\u5927\u5C6F\u5C71\u978D\u90E8',m:'13.8\u201317.3 km \u00B7 \u5761 8% \u00B7 ESE',bear:110,elFrac:1,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u516C\u8ECA\u8FF4\u8F49\u7AD9\u5047\u65E5\u904A\u5BA2\u5BC6\u96C6\uFF1B\u5927\u9727\u6642\u8207\u516C\u8ECA\u4FDD\u6301\u5145\u5206\u8DDD\u96E2\uFF0C\u4E0B\u5761\u8B39\u614E\u3002'},
  ]},
-{id:'yangjin',name:'陽金',sub:'金山→馬槽→小油坑鞍部',dist:15.0,elev:720,
+{id:'yangjin',name:'\u967D\u91D1',sub:'\u91D1\u5C71\u2192\u99AC\u69FD\u2192\u5C0F\u6CB9\u5751\u978D\u90E8',dist:15.0,elev:720,
  mp:[[121.638,25.219],[121.621,25.212],[121.6080,25.202],[121.5940,25.195],[121.5800,25.192],[121.5670,25.190],[121.5550,25.188],[121.5465,25.1785]],
  lat:25.200,lon:121.524,bear:155,
  segs:[
-  {n:'金山老街起步',m:'0–3.8 km · 坡 3% · SSE',bear:160,elFrac:0,
-   cam:{name:'金山環金路(台2)中山路',url:'https://livecam.tw/cam/NWT0236/'},
-   tr:'夏日海水浴場遊客車多；路口多注意行人，機車隨意切換車道。'},
-  {n:'磺港→馬槽',m:'3.8–8.5 km · 坡 6% · SE',bear:140,elFrac:.33,
-   cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'陽金公路大型遊覽車頻繁；上坡被超車風險高靠右，注意遊覽車下坡衝速的迎面風壓。'},
-  {n:'馬槽至竹仔山',m:'8.5–12 km · 坡 8% · SE',bear:130,elFrac:.66,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'觀光車下山車速快，彎道對向車多；霧中注意車燈方向，聽到引擎聲先靠邊停候。'},
-  {n:'竹仔山至鞍部',m:'12–15 km · 坡 7% · SSE',bear:150,elFrac:1,
-   cam:{name:'小油坑停車場-陽明山',url:'https://livecam.tw/cam/xyktcc/'},
-   tr:'鞍部停車複雜，公車遊覽車同時進出；下坡前於高點觀察確認安全後再通過。'},
+  {n:'\u91D1\u5C71\u8001\u8857\u8D77\u6B65',m:'0\u20133.8 km \u00B7 \u5761 3% \u00B7 SSE',bear:160,elFrac:0,
+   cam:{name:'\u91D1\u5C71\u74B0\u91D1\u8DEF(\u53F02)\u4E2D\u5C71\u8DEF',url:'https://livecam.tw/cam/NWT0236/'},
+   tr:'\u590F\u65E5\u6D77\u6C34\u6D74\u5834\u904A\u5BA2\u8ECA\u591A\uFF1B\u8DEF\u53E3\u591A\u6CE8\u610F\u884C\u4EBA\uFF0C\u6A5F\u8ECA\u96A8\u610F\u5207\u63DB\u8ECA\u9053\u3002'},
+  {n:'\u78FA\u6E2F\u2192\u99AC\u69FD',m:'3.8\u20138.5 km \u00B7 \u5761 6% \u00B7 SE',bear:140,elFrac:.33,
+   cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u967D\u91D1\u516C\u8DEF\u5927\u578B\u904A\u89BD\u8ECA\u983B\u7E41\uFF1B\u4E0A\u5761\u88AB\u8D85\u8ECA\u98A8\u96AA\u9AD8\u9760\u53F3\uFF0C\u6CE8\u610F\u904A\u89BD\u8ECA\u4E0B\u5761\u885D\u901F\u7684\u8FCE\u9762\u98A8\u58D3\u3002'},
+  {n:'\u99AC\u69FD\u81F3\u7AF9\u4ED4\u5C71',m:'8.5\u201312 km \u00B7 \u5761 8% \u00B7 SE',bear:130,elFrac:.66,cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u89C0\u5149\u8ECA\u4E0B\u5C71\u8ECA\u901F\u5FEB\uFF0C\u5F4E\u9053\u5C0D\u5411\u8ECA\u591A\uFF1B\u9727\u4E2D\u6CE8\u610F\u8ECA\u71C8\u65B9\u5411\uFF0C\u807D\u5230\u5F15\u64CE\u8072\u5148\u9760\u908A\u505C\u5019\u3002'},
+  {n:'\u7AF9\u4ED4\u5C71\u81F3\u978D\u90E8',m:'12\u201315 km \u00B7 \u5761 7% \u00B7 SSE',bear:150,elFrac:1,
+   cam:{name:'\u5C0F\u6CB9\u5751\u505C\u8ECA\u5834-\u967D\u660E\u5C71',url:'https://livecam.tw/cam/xyktcc/'},
+   tr:'\u978D\u90E8\u505C\u8ECA\u8907\u96DC\uFF0C\u516C\u8ECA\u904A\u89BD\u8ECA\u540C\u6642\u9032\u51FA\uFF1B\u4E0B\u5761\u524D\u65BC\u9AD8\u9EDE\u89C0\u5BDF\u78BA\u8A8D\u5B89\u5168\u5F8C\u518D\u901A\u904E\u3002'},
  ]},
-{id:'zhzheng',name:'中正山',sub:'行義路→紗帽路→中正山',dist:8.2,elev:546,
+{id:'zhzheng',name:'\u4E2D\u6B63\u5C71',sub:'\u884C\u7FA9\u8DEF\u2192\u7D17\u5E3D\u8DEF\u2192\u4E2D\u6B63\u5C71',dist:8.2,elev:546,
  mp:[[121.5175,25.1260],[121.5200,25.1310],[121.5228,25.1365],[121.5255,25.1420],[121.5275,25.1470],[121.5290,25.1510],[121.5305,25.1538],[121.5298,25.1555],[121.5290,25.1560],[121.5295,25.1555]],
  lat:25.118,lon:121.498,bear:330,
  segs:[
-  {n:'行義路溫泉口',m:'0–1.8 km · 坡 5% · N',bear:350,elFrac:0,
-   cam:{name:'石牌路-立農街2段',url:'https://livecam.tw/cam/BOT406/'},
-   tr:'清晨通暢；不規則停車密集注意車門突然打開。'},
-  {n:'紗帽路支線',m:'1.8–4.2 km · 坡 7% · NW',bear:320,elFrac:.33,cam:{name:'仰德大道二段2巷口',url:'https://livecam.tw/cam/BOT282/'},
-   tr:'鄰里小道幾乎無車；偶有機車，彎道中線保持。'},
-  {n:'中正山産道口',m:'4.2–6.5 km · 坡 9% · NW',bear:315,elFrac:.66,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'産道入口後零車流，偶有登山客停車路肩；路幅極窄下坡前確認無來車。'},
-  {n:'中正山瞭望台',m:'6.5–8.2 km · 坡 10% · NNW',bear:340,elFrac:1,cam:{name:'湖山路-陽金公路',url:'https://livecam.tw/cam/BOT413/'},
-   tr:'健行步道與公路交叉；注意徒步者走入路面，鳴鈴預告後再通過。'},
+  {n:'\u884C\u7FA9\u8DEF\u6EAB\u6CC9\u53E3',m:'0\u20131.8 km \u00B7 \u5761 5% \u00B7 N',bear:350,elFrac:0,
+   cam:{name:'\u77F3\u724C\u8DEF-\u7ACB\u8FB2\u88572\u6BB5',url:'https://livecam.tw/cam/BOT406/'},
+   tr:'\u6E05\u6668\u901A\u66A2\uFF1B\u4E0D\u898F\u5247\u505C\u8ECA\u5BC6\u96C6\u6CE8\u610F\u8ECA\u9580\u7A81\u7136\u6253\u958B\u3002'},
+  {n:'\u7D17\u5E3D\u8DEF\u652F\u7DDA',m:'1.8\u20134.2 km \u00B7 \u5761 7% \u00B7 NW',bear:320,elFrac:.33,cam:{name:'\u4EF0\u5FB7\u5927\u9053\u4E8C\u6BB52\u5DF7\u53E3',url:'https://livecam.tw/cam/BOT282/'},
+   tr:'\u9130\u91CC\u5C0F\u9053\u5E7E\u4E4E\u7121\u8ECA\uFF1B\u5076\u6709\u6A5F\u8ECA\uFF0C\u5F4E\u9053\u4E2D\u7DDA\u4FDD\u6301\u3002'},
+  {n:'\u4E2D\u6B63\u5C71\u7523\u9053\u53E3',m:'4.2\u20136.5 km \u00B7 \u5761 9% \u00B7 NW',bear:315,elFrac:.66,cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u7523\u9053\u5165\u53E3\u5F8C\u96F6\u8ECA\u6D41\uFF0C\u5076\u6709\u767B\u5C71\u5BA2\u505C\u8ECA\u8DEF\u80A9\uFF1B\u8DEF\u5E45\u6975\u7A84\u4E0B\u5761\u524D\u78BA\u8A8D\u7121\u4F86\u8ECA\u3002'},
+  {n:'\u4E2D\u6B63\u5C71\u77AD\u671B\u53F0',m:'6.5\u20138.2 km \u00B7 \u5761 10% \u00B7 NNW',bear:340,elFrac:1,cam:{name:'\u6E56\u5C71\u8DEF-\u967D\u91D1\u516C\u8DEF',url:'https://livecam.tw/cam/BOT413/'},
+   tr:'\u5065\u884C\u6B65\u9053\u8207\u516C\u8DEF\u4EA4\u53C9\uFF1B\u6CE8\u610F\u5F92\u6B65\u8005\u8D70\u5165\u8DEF\u9762\uFF0C\u9CF4\u9234\u9810\u544A\u5F8C\u518D\u901A\u904E\u3002'},
  ]},
-{id:'xiwan',name:'汐萬五指',sub:'汐止→汐萬路→五指山',dist:10.5,elev:590,
+{id:'xiwan',name:'\u6C50\u842C\u4E94\u6307',sub:'\u6C50\u6B62\u2192\u6C50\u842C\u8DEF\u2192\u4E94\u6307\u5C71',dist:10.5,elev:590,
  mp:[[121.6620,25.0655],[121.6635,25.0730],[121.6650,25.0815],[121.6660,25.0900],[121.6665,25.0985],[121.6665,25.1065],[121.6658,25.1150],[121.6640,25.1225],[121.6610,25.1305],[121.6585,25.1385],[121.6572,25.1440]],
  lat:25.098,lon:121.657,bear:0,
  segs:[
-  {n:'汐萬路起登',m:'0–2.5 km · 坡 4% · N',bear:355,elFrac:0,
-   cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
-   tr:'通勤車流 07-08 點集中，之後快速減少；砂石車出入量大保持車距。'},
-  {n:'汐萬中段林道',m:'2.5–6 km · 坡 7% · N',bear:0,elFrac:.33,cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
-   tr:'林道車流極少；彎道盲點多注意下坡機車高速衝出，爬升靠右行駛。'},
-  {n:'五指山公墓入口',m:'6–8.2 km · 坡 8% · N',bear:5,elFrac:.66,
-   cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
-   tr:'清明掃墓季節人車暴增，平日幾乎無車；清明前後避開此路線。'},
-  {n:'五指山稜線',m:'8.2–10.5 km · 坡 6% · NNE',bear:20,elFrac:1,cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
-   tr:'無一般車輛，健行者多；下坡前鳴鈴警示步道交叉口，注意碎石制動。'},
+  {n:'\u6C50\u842C\u8DEF\u8D77\u767B',m:'0\u20132.5 km \u00B7 \u5761 4% \u00B7 N',bear:355,elFrac:0,
+   cam:{name:'\u5927\u540C\u8DEF2\u6BB5-\u6C50\u842C\u8DEF1\u6BB5',url:'https://livecam.tw/cam/NWT0051/'},
+   tr:'\u901A\u52E4\u8ECA\u6D41 07-08 \u9EDE\u96C6\u4E2D\uFF0C\u4E4B\u5F8C\u5FEB\u901F\u6E1B\u5C11\uFF1B\u7802\u77F3\u8ECA\u51FA\u5165\u91CF\u5927\u4FDD\u6301\u8ECA\u8DDD\u3002'},
+  {n:'\u6C50\u842C\u4E2D\u6BB5\u6797\u9053',m:'2.5\u20136 km \u00B7 \u5761 7% \u00B7 N',bear:0,elFrac:.33,cam:{name:'\u5927\u540C\u8DEF2\u6BB5-\u6C50\u842C\u8DEF1\u6BB5',url:'https://livecam.tw/cam/NWT0051/'},
+   tr:'\u6797\u9053\u8ECA\u6D41\u6975\u5C11\uFF1B\u5F4E\u9053\u76F2\u9EDE\u591A\u6CE8\u610F\u4E0B\u5761\u6A5F\u8ECA\u9AD8\u901F\u885D\u51FA\uFF0C\u722C\u5347\u9760\u53F3\u884C\u99DB\u3002'},
+  {n:'\u4E94\u6307\u5C71\u516C\u5893\u5165\u53E3',m:'6\u20138.2 km \u00B7 \u5761 8% \u00B7 N',bear:5,elFrac:.66,
+   cam:{name:'\u5927\u540C\u8DEF2\u6BB5-\u6C50\u842C\u8DEF1\u6BB5',url:'https://livecam.tw/cam/NWT0051/'},
+   tr:'\u6E05\u660E\u6383\u5893\u5B63\u7BC0\u4EBA\u8ECA\u66B4\u589E\uFF0C\u5E73\u65E5\u5E7E\u4E4E\u7121\u8ECA\uFF1B\u6E05\u660E\u524D\u5F8C\u907F\u958B\u6B64\u8DEF\u7DDA\u3002'},
+  {n:'\u4E94\u6307\u5C71\u7A1C\u7DDA',m:'8.2\u201310.5 km \u00B7 \u5761 6% \u00B7 NNE',bear:20,elFrac:1,cam:{name:'\u5927\u540C\u8DEF2\u6BB5-\u6C50\u842C\u8DEF1\u6BB5',url:'https://livecam.tw/cam/NWT0051/'},
+   tr:'\u7121\u4E00\u822C\u8ECA\u8F1B\uFF0C\u5065\u884C\u8005\u591A\uFF1B\u4E0B\u5761\u524D\u9CF4\u9234\u8B66\u793A\u6B65\u9053\u4EA4\u53C9\u53E3\uFF0C\u6CE8\u610F\u788E\u77F3\u5236\u52D5\u3002'},
  ]},
-{id:'dahu',name:'大湖五指',sub:'內湖大湖→碧山→五指山',dist:7.8,elev:622,
+{id:'dahu',name:'\u5927\u6E56\u4E94\u6307',sub:'\u5167\u6E56\u5927\u6E56\u2192\u78A7\u5C71\u2192\u4E94\u6307\u5C71',dist:7.8,elev:622,
  mp:[[121.6020,25.0840],[121.6065,25.0890],[121.6115,25.0945],[121.6170,25.1005],[121.6225,25.1065],[121.6285,25.1120],[121.6345,25.1180],[121.6405,25.1240],[121.6465,25.1300],[121.6515,25.1360],[121.6555,25.1410],[121.6572,25.1440]],
  lat:25.096,lon:121.638,bear:30,
  segs:[
-  {n:'大湖山莊街起步',m:'0–1.8 km · 坡 5% · NE',bear:30,elFrac:0,
-   cam:{name:'東湖隧道北向0K+295M',url:'https://livecam.tw/cam/BOT102/'},
-   tr:'住宅區晨間通勤車流集中，路邊停車多；注意突然開門，靠左離停車帶 1m 以上。'},
-  {n:'碧山路口轉入',m:'1.8–3.5 km · 坡 8% · NE',bear:35,elFrac:.33,cam:{name:'東湖隧道北向1K+500M',url:'https://livecam.tw/cam/BOT107/'},
-   tr:'碧山路有機車和自用車；轉彎前確認後方車輛，避免轉彎中被後車超越。'},
-  {n:'陡坡髮夾彎區',m:'3.5–5.8 km · 坡 12% · NNE',bear:20,elFrac:.66,cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
-   tr:'上坡車流少但下坡快速機車多；彎道視野受限，聽引擎聲先靠右讓，注意來車衝出彎角。'},
-  {n:'五指山公墓段',m:'5.8–7.8 km · 坡 7% · NE',bear:30,elFrac:1,
-   cam:{name:'大同路2段-汐萬路1段',url:'https://livecam.tw/cam/NWT0051/'},
-   tr:'清明節人車大增，其他幾乎無車；墓區工程車偶出現，注意沙塵影響抓地力。'},
+  {n:'\u5927\u6E56\u5C71\u838A\u8857\u8D77\u6B65',m:'0\u20131.8 km \u00B7 \u5761 5% \u00B7 NE',bear:30,elFrac:0,
+   cam:{name:'\u6771\u6E56\u96A7\u9053\u5317\u54110K+295M',url:'https://livecam.tw/cam/BOT102/'},
+   tr:'\u4F4F\u5B85\u5340\u6668\u9593\u901A\u52E4\u8ECA\u6D41\u96C6\u4E2D\uFF0C\u8DEF\u908A\u505C\u8ECA\u591A\uFF1B\u6CE8\u610F\u7A81\u7136\u958B\u9580\uFF0C\u9760\u5DE6\u96E2\u505C\u8ECA\u5E36 1m \u4EE5\u4E0A\u3002'},
+  {n:'\u78A7\u5C71\u8DEF\u53E3\u8F49\u5165',m:'1.8\u20133.5 km \u00B7 \u5761 8% \u00B7 NE',bear:35,elFrac:.33,cam:{name:'\u6771\u6E56\u96A7\u9053\u5317\u54111K+500M',url:'https://livecam.tw/cam/BOT107/'},
+   tr:'\u78A7\u5C71\u8DEF\u6709\u6A5F\u8ECA\u548C\u81EA\u7528\u8ECA\uFF1B\u8F49\u5F4E\u524D\u78BA\u8A8D\u5F8C\u65B9\u8ECA\u8F1B\uFF0C\u907F\u514D\u8F49\u5F4E\u4E2D\u88AB\u5F8C\u8ECA\u8D85\u8D8A\u3002'},
+  {n:'\u9661\u5761\u9AEE\u593E\u5F4E\u5340',m:'3.5\u20135.8 km \u00B7 \u5761 12% \u00B7 NNE',bear:20,elFrac:.66,cam:{name:'\u5927\u540C\u8DEF2\u6BB5-\u6C50\u842C\u8DEF1\u6BB5',url:'https://livecam.tw/cam/NWT0051/'},
+   tr:'\u4E0A\u5761\u8ECA\u6D41\u5C11\u4F46\u4E0B\u5761\u5FEB\u901F\u6A5F\u8ECA\u591A\uFF1B\u5F4E\u9053\u8996\u91CE\u53D7\u9650\uFF0C\u807D\u5F15\u64CE\u8072\u5148\u9760\u53F3\u8B93\uFF0C\u6CE8\u610F\u4F86\u8ECA\u885D\u51FA\u5F4E\u89D2\u3002'},
+  {n:'\u4E94\u6307\u5C71\u516C\u5893\u6BB5',m:'5.8\u20137.8 km \u00B7 \u5761 7% \u00B7 NE',bear:30,elFrac:1,
+   cam:{name:'\u5927\u540C\u8DEF2\u6BB5-\u6C50\u842C\u8DEF1\u6BB5',url:'https://livecam.tw/cam/NWT0051/'},
+   tr:'\u6E05\u660E\u7BC0\u4EBA\u8ECA\u5927\u589E\uFF0C\u5176\u4ED6\u5E7E\u4E4E\u7121\u8ECA\uFF1B\u5893\u5340\u5DE5\u7A0B\u8ECA\u5076\u51FA\u73FE\uFF0C\u6CE8\u610F\u6C99\u5875\u5F71\u97FF\u6293\u5730\u529B\u3002'},
  ]},
 ,
-  {id:'danjin',name:'淡金來回',sub:'承德路七段麥當勞→淡水→三芝→石門→金山（折返）',dist:86.0,elev:820,
+  {id:'danjin',name:'\u6DE1\u91D1\u4F86\u56DE',sub:'\u627F\u5FB7\u8DEF\u4E03\u6BB5\u9EA5\u7576\u52DE\u2192\u6DE1\u6C34\u2192\u4E09\u829D\u2192\u77F3\u9580\u2192\u91D1\u5C71\uFF08\u6298\u8FD4\uFF09',dist:86.0,elev:820,
  mp:[[121.5143,25.103],[121.508,25.118],[121.502,25.134],[121.496,25.149],[121.491,25.165],[121.4695,25.1745],[121.4620,25.2200],[121.4535,25.2535],[121.4385,25.2730],[121.4150,25.2870],[121.3970,25.2945],[121.3880,25.2940],[121.3850,25.2870],[121.4060,25.2800],[121.4260,25.2750],[121.4470,25.2820],[121.4680,25.2820],[121.4870,25.2760],[121.5070,25.2720],[121.5285,25.2680],[121.5490,25.2620],[121.5690,25.2520],[121.5920,25.2360],[121.6130,25.2310],[121.6280,25.2210],[121.638,25.219]],
  lat:25.225,lon:121.476,bear:0,
  segs:[
-  {n:'承德路七段麥當勞',m:'0–8 km · 坡 1% · N',bear:0,elFrac:0,
-   cam:{name:'承德路6段-福國路口',url:'https://livecam.tw/cam/BOT366/'},
-   tr:'淡水河濱路段平日通勤車流，假日單車客密集；注意紅燈路口左轉車，保持直線行駛靠右。'},
-  {n:'紅樹林捷運站',m:'8–24 km · 坡 1% · NNW',bear:340,elFrac:.12,
-   cam:{name:'淡水淡金路中正東路口',url:'https://livecam.tw/cam/NWT0175/'},
-   tr:'淡金公路平坦海濱路段；假日機車多，注意路口行人橫越，風強時側風明顯。'},
-  {n:'三芝金芝門市',m:'24–42 km · 坡 3% · N',bear:5,elFrac:.30,
-   cam:{name:'三芸淡金公路(台2)',url:'https://livecam.tw/cam/NWT0213/'},
-   tr:'三芝市區路口多；卡車出入加油站注意，假日遊客車在此休息補給，路側停車雜亂。'},
-  {n:'石門郵局',m:'42–54 km · 坡 2% · NNE',bear:20,elFrac:.48,
-   cam:{name:'石門淡金公路石門洞(E)',url:'https://livecam.tw/cam/CCTV-11-0020-028-002/'},
-   tr:'北海岸路段側風強烈；101縣道與台2線路口注意轉向車，下坡車速快保持右側行駛。'},
-  {n:'金山環金門市',m:'54–65 km · 坡 2% · SE',bear:140,elFrac:.65,
-   cam:{name:'金山區台2、台2甲',url:'https://livecam.tw/cam/NWT0237/'},
-   tr:'金山市區補給後折返；溫泉旅館出入車較多，假日海水浴場遊客多，補給後原路折返。'},
-  {n:'石門郵局（折返）',m:'65–76 km · 坡 2% · SSW',bear:200,elFrac:.78,
+  {n:'\u627F\u5FB7\u8DEF\u4E03\u6BB5\u9EA5\u7576\u52DE',m:'0\u20138 km \u00B7 \u5761 1% \u00B7 N',bear:0,elFrac:0,
+   cam:{name:'\u627F\u5FB7\u8DEF6\u6BB5-\u798F\u570B\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT366/'},
+   tr:'\u6DE1\u6C34\u6CB3\u6FF1\u8DEF\u6BB5\u5E73\u65E5\u901A\u52E4\u8ECA\u6D41\uFF0C\u5047\u65E5\u55AE\u8ECA\u5BA2\u5BC6\u96C6\uFF1B\u6CE8\u610F\u7D05\u71C8\u8DEF\u53E3\u5DE6\u8F49\u8ECA\uFF0C\u4FDD\u6301\u76F4\u7DDA\u884C\u99DB\u9760\u53F3\u3002'},
+  {n:'\u7D05\u6A39\u6797\u6377\u904B\u7AD9',m:'8\u201324 km \u00B7 \u5761 1% \u00B7 NNW',bear:340,elFrac:.12,
+   cam:{name:'\u6DE1\u6C34\u6DE1\u91D1\u8DEF\u4E2D\u6B63\u6771\u8DEF\u53E3',url:'https://livecam.tw/cam/NWT0175/'},
+   tr:'\u6DE1\u91D1\u516C\u8DEF\u5E73\u5766\u6D77\u6FF1\u8DEF\u6BB5\uFF1B\u5047\u65E5\u6A5F\u8ECA\u591A\uFF0C\u6CE8\u610F\u8DEF\u53E3\u884C\u4EBA\u6A6B\u8D8A\uFF0C\u98A8\u5F37\u6642\u5074\u98A8\u660E\u986F\u3002'},
+  {n:'\u4E09\u829D\u91D1\u829D\u9580\u5E02',m:'24\u201342 km \u00B7 \u5761 3% \u00B7 N',bear:5,elFrac:.30,
+   cam:{name:'\u4E09\u82B8\u6DE1\u91D1\u516C\u8DEF(\u53F02)',url:'https://livecam.tw/cam/NWT0213/'},
+   tr:'\u4E09\u829D\u5E02\u5340\u8DEF\u53E3\u591A\uFF1B\u5361\u8ECA\u51FA\u5165\u52A0\u6CB9\u7AD9\u6CE8\u610F\uFF0C\u5047\u65E5\u904A\u5BA2\u8ECA\u5728\u6B64\u4F11\u606F\u88DC\u7D66\uFF0C\u8DEF\u5074\u505C\u8ECA\u96DC\u4E82\u3002'},
+  {n:'\u77F3\u9580\u90F5\u5C40',m:'42\u201354 km \u00B7 \u5761 2% \u00B7 NNE',bear:20,elFrac:.48,
+   cam:{name:'\u77F3\u9580\u6DE1\u91D1\u516C\u8DEF\u77F3\u9580\u6D1E(E)',url:'https://livecam.tw/cam/CCTV-11-0020-028-002/'},
+   tr:'\u5317\u6D77\u5CB8\u8DEF\u6BB5\u5074\u98A8\u5F37\u70C8\uFF1B101\u7E23\u9053\u8207\u53F02\u7DDA\u8DEF\u53E3\u6CE8\u610F\u8F49\u5411\u8ECA\uFF0C\u4E0B\u5761\u8ECA\u901F\u5FEB\u4FDD\u6301\u53F3\u5074\u884C\u99DB\u3002'},
+  {n:'\u91D1\u5C71\u74B0\u91D1\u9580\u5E02',m:'54\u201365 km \u00B7 \u5761 2% \u00B7 SE',bear:140,elFrac:.65,
+   cam:{name:'\u91D1\u5C71\u5340\u53F02\u3001\u53F02\u7532',url:'https://livecam.tw/cam/NWT0237/'},
+   tr:'\u91D1\u5C71\u5E02\u5340\u88DC\u7D66\u5F8C\u6298\u8FD4\uFF1B\u6EAB\u6CC9\u65C5\u9928\u51FA\u5165\u8ECA\u8F03\u591A\uFF0C\u5047\u65E5\u6D77\u6C34\u6D74\u5834\u904A\u5BA2\u591A\uFF0C\u88DC\u7D66\u5F8C\u539F\u8DEF\u6298\u8FD4\u3002'},
+  {n:'\u77F3\u9580\u90F5\u5C40\uFF08\u6298\u8FD4\uFF09',m:'65\u201376 km \u00B7 \u5761 2% \u00B7 SSW',bear:200,elFrac:.78,
    cam:null,
-   tr:'折返路段視野好但逆風；保持穩定踏頻，注意疲勞累積後的注意力下降。'},
-  {n:'三芝金芝門市（折返）',m:'76–81 km · 坡 1% · S',bear:175,elFrac:.88,
+   tr:'\u6298\u8FD4\u8DEF\u6BB5\u8996\u91CE\u597D\u4F46\u9006\u98A8\uFF1B\u4FDD\u6301\u7A69\u5B9A\u8E0F\u983B\uFF0C\u6CE8\u610F\u75B2\u52DE\u7D2F\u7A4D\u5F8C\u7684\u6CE8\u610F\u529B\u4E0B\u964D\u3002'},
+  {n:'\u4E09\u829D\u91D1\u829D\u9580\u5E02\uFF08\u6298\u8FD4\uFF09',m:'76\u201381 km \u00B7 \u5761 1% \u00B7 S',bear:175,elFrac:.88,
    cam:null,
-   tr:'三芝至淡水路段平坦；下午常有南向側風，補充水分為長距離後段重要事項。'},
-  {n:'紅樹林捷運站（折返）',m:'81–84 km · 坡 1% · SSE',bear:170,elFrac:.95,
+   tr:'\u4E09\u829D\u81F3\u6DE1\u6C34\u8DEF\u6BB5\u5E73\u5766\uFF1B\u4E0B\u5348\u5E38\u6709\u5357\u5411\u5074\u98A8\uFF0C\u88DC\u5145\u6C34\u5206\u70BA\u9577\u8DDD\u96E2\u5F8C\u6BB5\u91CD\u8981\u4E8B\u9805\u3002'},
+  {n:'\u7D05\u6A39\u6797\u6377\u904B\u7AD9\uFF08\u6298\u8FD4\uFF09',m:'81\u201384 km \u00B7 \u5761 1% \u00B7 SSE',bear:170,elFrac:.95,
    cam:null,
-   tr:'返程進入淡水市區路段；17:00後通勤車增加，靠右行駛，機車道注意並行。'},
-  {n:'承德路七段麥當勞（返抵）',m:'84–86 km · 坡 1% · S',bear:180,elFrac:1,
-   cam:{name:'承德路6段-福國路口',url:'https://livecam.tw/cam/BOT366/'},
-   tr:'返抵起點；慢速冷卻，注意路口左轉車，完成後補充飲食。'},
+   tr:'\u8FD4\u7A0B\u9032\u5165\u6DE1\u6C34\u5E02\u5340\u8DEF\u6BB5\uFF1B17:00\u5F8C\u901A\u52E4\u8ECA\u589E\u52A0\uFF0C\u9760\u53F3\u884C\u99DB\uFF0C\u6A5F\u8ECA\u9053\u6CE8\u610F\u4E26\u884C\u3002'},
+  {n:'\u627F\u5FB7\u8DEF\u4E03\u6BB5\u9EA5\u7576\u52DE\uFF08\u8FD4\u62B5\uFF09',m:'84\u201386 km \u00B7 \u5761 1% \u00B7 S',bear:180,elFrac:1,
+   cam:{name:'\u627F\u5FB7\u8DEF6\u6BB5-\u798F\u570B\u8DEF\u53E3',url:'https://livecam.tw/cam/BOT366/'},
+   tr:'\u8FD4\u62B5\u8D77\u9EDE\uFF1B\u6162\u901F\u51B7\u537B\uFF0C\u6CE8\u610F\u8DEF\u53E3\u5DE6\u8F49\u8ECA\uFF0C\u5B8C\u6210\u5F8C\u88DC\u5145\u98F2\u98DF\u3002'},
  ]},
-{id:'tatajia',name:'塔塔加',sub:'水里商工→愛玉橋→望高茶園→塔塔加遊客中心',dist:62.0,elev:2014,
+{id:'tatajia',name:'\u5854\u5854\u52A0',sub:'\u6C34\u91CC\u5546\u5DE5\u2192\u611B\u7389\u6A4B\u2192\u671B\u9AD8\u8336\u5712\u2192\u5854\u5854\u52A0\u904A\u5BA2\u4E2D\u5FC3',dist:62.0,elev:2014,
  mp:[[120.8530,23.8620],[120.8610,23.8350],[120.8680,23.8100],[120.8740,23.7820],[120.8800,23.7540],[120.8840,23.7240],[120.8870,23.6940],[120.8890,23.6640],[120.8910,23.6340],[120.8920,23.6040],[120.8930,23.5760],[120.8940,23.5480],[120.8950,23.5200]],
  lat:23.700,lon:120.885,bear:180,
  segs:[
-  {n:'水里商工起登',m:'0–9 km · 坡 3% · S',bear:180,elFrac:0,cam:null,tr:'台21線進入山區前的最後補給點；工程車與砂石車偶有，保持右側行駛。'},
-  {n:'豐丘橋',m:'9–18 km · 坡 4% · S',bear:175,elFrac:.14,cam:null,tr:'風光明媚的峽谷路段；路幅尚可，假日自用車增多，下坡車速快注意。'},
-  {n:'望鄉部落',m:'18–28 km · 坡 5% · SSW',bear:190,elFrac:.28,cam:null,tr:'原住民部落路段，路面平整；部落犬隻偶出現，緩行通過。'},
-  {n:'愛玉橋',m:'28–38 km · 坡 7% · S',bear:180,elFrac:.44,cam:null,tr:'溪谷橋梁路段；路面潮濕機率高，橋面注意側風，下方溪谷視野壯觀。'},
-  {n:'望高茶園',m:'38–48 km · 坡 8% · SSE',bear:170,elFrac:.60,cam:null,tr:'高海拔茶園路段，彎道多；視野開闊但霧氣重，能見度低時減速。'},
-  {n:'觀山停車場',m:'48–56 km · 坡 9% · SE',bear:160,elFrac:.76,cam:null,tr:'接近稜線路段，坡度陡增；假日遊客車多，停車場出入注意。'},
-  {n:'塔塔加遊客中心',m:'56–62 km · 坡 6% · ESE',bear:110,elFrac:1,cam:null,tr:'終點前最後爬升；高海拔低溫注意保暖，遊客中心停車複雜注意行人。'}
+  {n:'\u6C34\u91CC\u5546\u5DE5\u8D77\u767B',m:'0\u20139 km \u00B7 \u5761 3% \u00B7 S',bear:180,elFrac:0,cam:null,tr:'\u53F021\u7DDA\u9032\u5165\u5C71\u5340\u524D\u7684\u6700\u5F8C\u88DC\u7D66\u9EDE\uFF1B\u5DE5\u7A0B\u8ECA\u8207\u7802\u77F3\u8ECA\u5076\u6709\uFF0C\u4FDD\u6301\u53F3\u5074\u884C\u99DB\u3002'},
+  {n:'\u8C50\u4E18\u6A4B',m:'9\u201318 km \u00B7 \u5761 4% \u00B7 S',bear:175,elFrac:.14,cam:null,tr:'\u98A8\u5149\u660E\u5A9A\u7684\u5CFD\u8C37\u8DEF\u6BB5\uFF1B\u8DEF\u5E45\u5C1A\u53EF\uFF0C\u5047\u65E5\u81EA\u7528\u8ECA\u589E\u591A\uFF0C\u4E0B\u5761\u8ECA\u901F\u5FEB\u6CE8\u610F\u3002'},
+  {n:'\u671B\u9109\u90E8\u843D',m:'18\u201328 km \u00B7 \u5761 5% \u00B7 SSW',bear:190,elFrac:.28,cam:null,tr:'\u539F\u4F4F\u6C11\u90E8\u843D\u8DEF\u6BB5\uFF0C\u8DEF\u9762\u5E73\u6574\uFF1B\u90E8\u843D\u72AC\u96BB\u5076\u51FA\u73FE\uFF0C\u7DE9\u884C\u901A\u904E\u3002'},
+  {n:'\u611B\u7389\u6A4B',m:'28\u201338 km \u00B7 \u5761 7% \u00B7 S',bear:180,elFrac:.44,cam:null,tr:'\u6EAA\u8C37\u6A4B\u6881\u8DEF\u6BB5\uFF1B\u8DEF\u9762\u6F6E\u6FD5\u6A5F\u7387\u9AD8\uFF0C\u6A4B\u9762\u6CE8\u610F\u5074\u98A8\uFF0C\u4E0B\u65B9\u6EAA\u8C37\u8996\u91CE\u58EF\u89C0\u3002'},
+  {n:'\u671B\u9AD8\u8336\u5712',m:'38\u201348 km \u00B7 \u5761 8% \u00B7 SSE',bear:170,elFrac:.60,cam:null,tr:'\u9AD8\u6D77\u62D4\u8336\u5712\u8DEF\u6BB5\uFF0C\u5F4E\u9053\u591A\uFF1B\u8996\u91CE\u958B\u95CA\u4F46\u9727\u6C23\u91CD\uFF0C\u80FD\u898B\u5EA6\u4F4E\u6642\u6E1B\u901F\u3002'},
+  {n:'\u89C0\u5C71\u505C\u8ECA\u5834',m:'48\u201356 km \u00B7 \u5761 9% \u00B7 SE',bear:160,elFrac:.76,cam:null,tr:'\u63A5\u8FD1\u7A1C\u7DDA\u8DEF\u6BB5\uFF0C\u5761\u5EA6\u9661\u589E\uFF1B\u5047\u65E5\u904A\u5BA2\u8ECA\u591A\uFF0C\u505C\u8ECA\u5834\u51FA\u5165\u6CE8\u610F\u3002'},
+  {n:'\u5854\u5854\u52A0\u904A\u5BA2\u4E2D\u5FC3',m:'56\u201362 km \u00B7 \u5761 6% \u00B7 ESE',bear:110,elFrac:1,cam:null,tr:'\u7D42\u9EDE\u524D\u6700\u5F8C\u722C\u5347\uFF1B\u9AD8\u6D77\u62D4\u4F4E\u6EAB\u6CE8\u610F\u4FDD\u6696\uFF0C\u904A\u5BA2\u4E2D\u5FC3\u505C\u8ECA\u8907\u96DC\u6CE8\u610F\u884C\u4EBA\u3002'}
  ]},
-{id:'siyuan',name:'思源啞口',sub:'泰雅大橋→南山部落→思源埡口',dist:42.0,elev:1580,
+{id:'siyuan',name:'\u601D\u6E90\u555E\u53E3',sub:'\u6CF0\u96C5\u5927\u6A4B\u2192\u5357\u5C71\u90E8\u843D\u2192\u601D\u6E90\u57E1\u53E3',dist:42.0,elev:1580,
  mp:[[121.5475,24.5980],[121.5300,24.5750],[121.5120,24.5530],[121.4940,24.5290],[121.4760,24.5080],[121.4600,24.4880],[121.4440,24.4690],[121.4300,24.4490],[121.4190,24.4300]],
  lat:24.515,lon:121.483,bear:210,
  segs:[
-  {n:'泰雅大橋起步',m:'0–8 km · 坡 3% · SW',bear:220,elFrac:0,cam:null,tr:'台7甲線入口，宜蘭方向車流較少；注意颱風後路面落石，進山前確認天氣。'},
-  {n:'思源橋',m:'8–16 km · 坡 5% · WSW',bear:240,elFrac:.19,cam:null,tr:'橋梁區段水氣重；橋面鋼格柵雨後特別滑，橋上側風明顯減速通過。'},
-  {n:'繼光橋',m:'16–25 km · 坡 6% · WSW',bear:250,elFrac:.38,cam:null,tr:'峽谷深切路段；路幅較窄，對向來車難預測，彎道保持右側。'},
-  {n:'南山部落',m:'25–34 km · 坡 5% · W',bear:270,elFrac:.57,cam:null,tr:'南山部落補給點；有便利商店可補給，冬季高麗菜田農用車多注意。'},
-  {n:'思源埡口',m:'34–42 km · 坡 8% · SW',bear:220,elFrac:1,cam:null,tr:'最後攻頂路段；埡口風力強勁，寒流時溫差大，備好保暖衣物。'}
+  {n:'\u6CF0\u96C5\u5927\u6A4B\u8D77\u6B65',m:'0\u20138 km \u00B7 \u5761 3% \u00B7 SW',bear:220,elFrac:0,cam:null,tr:'\u53F07\u7532\u7DDA\u5165\u53E3\uFF0C\u5B9C\u862D\u65B9\u5411\u8ECA\u6D41\u8F03\u5C11\uFF1B\u6CE8\u610F\u98B1\u98A8\u5F8C\u8DEF\u9762\u843D\u77F3\uFF0C\u9032\u5C71\u524D\u78BA\u8A8D\u5929\u6C23\u3002'},
+  {n:'\u601D\u6E90\u6A4B',m:'8\u201316 km \u00B7 \u5761 5% \u00B7 WSW',bear:240,elFrac:.19,cam:null,tr:'\u6A4B\u6881\u5340\u6BB5\u6C34\u6C23\u91CD\uFF1B\u6A4B\u9762\u92FC\u683C\u67F5\u96E8\u5F8C\u7279\u5225\u6ED1\uFF0C\u6A4B\u4E0A\u5074\u98A8\u660E\u986F\u6E1B\u901F\u901A\u904E\u3002'},
+  {n:'\u7E7C\u5149\u6A4B',m:'16\u201325 km \u00B7 \u5761 6% \u00B7 WSW',bear:250,elFrac:.38,cam:null,tr:'\u5CFD\u8C37\u6DF1\u5207\u8DEF\u6BB5\uFF1B\u8DEF\u5E45\u8F03\u7A84\uFF0C\u5C0D\u5411\u4F86\u8ECA\u96E3\u9810\u6E2C\uFF0C\u5F4E\u9053\u4FDD\u6301\u53F3\u5074\u3002'},
+  {n:'\u5357\u5C71\u90E8\u843D',m:'25\u201334 km \u00B7 \u5761 5% \u00B7 W',bear:270,elFrac:.57,cam:null,tr:'\u5357\u5C71\u90E8\u843D\u88DC\u7D66\u9EDE\uFF1B\u6709\u4FBF\u5229\u5546\u5E97\u53EF\u88DC\u7D66\uFF0C\u51AC\u5B63\u9AD8\u9E97\u83DC\u7530\u8FB2\u7528\u8ECA\u591A\u6CE8\u610F\u3002'},
+  {n:'\u601D\u6E90\u57E1\u53E3',m:'34\u201342 km \u00B7 \u5761 8% \u00B7 SW',bear:220,elFrac:1,cam:null,tr:'\u6700\u5F8C\u653B\u9802\u8DEF\u6BB5\uFF1B\u57E1\u53E3\u98A8\u529B\u5F37\u52C1\uFF0C\u5BD2\u6D41\u6642\u6EAB\u5DEE\u5927\uFF0C\u5099\u597D\u4FDD\u6696\u8863\u7269\u3002'}
  ]},
-{id:'wuling',name:'西進武嶺',sub:'地理中心碑→霧社→最高小七→武嶺牌樓',dist:36.0,elev:2103,
+{id:'wuling',name:'\u897F\u9032\u6B66\u5DBA',sub:'\u5730\u7406\u4E2D\u5FC3\u7891\u2192\u9727\u793E\u2192\u6700\u9AD8\u5C0F\u4E03\u2192\u6B66\u5DBA\u724C\u6A13',dist:36.0,elev:2103,
  mp:[[121.0890,23.9720],[121.1050,23.9840],[121.1210,23.9960],[121.1380,24.0080],[121.1540,24.0200],[121.1700,24.0360],[121.1860,24.0530],[121.2020,24.0720],[121.2200,24.0920],[121.2380,24.1100],[121.2560,24.1300]],
  lat:24.042,lon:121.175,bear:35,
  segs:[
-  {n:'地理中心碑起登',m:'0–5 km · 坡 3% · NE',bear:30,elFrac:0,cam:null,tr:'台14甲線起點，埔里市區路口多；進山前在埔里補給飲食，城區注意機車和行人。'},
-  {n:'人止關',m:'5–12 km · 坡 5% · NE',bear:40,elFrac:.19,cam:null,tr:'歷史隘口路段，峽谷地形；落石風險較高，霧雨天視線差需減速，隧道注意燈光。'},
-  {n:'霧社',m:'12–18 km · 坡 4% · NNE',bear:20,elFrac:.33,cam:null,tr:'霧社補給最後機會；商家集中，補充水分與食物，冬季晨間霧氣濃注意視線。'},
-  {n:'最高小七',m:'18–24 km · 坡 8% · NE',bear:40,elFrac:.50,cam:null,tr:'全台最高7-Eleven補給站；假日遊客極多，注意停車場進出車輛，路肩停車混亂。'},
-  {n:'翠峰',m:'24–28 km · 坡 9% · NE',bear:35,elFrac:.67,cam:null,tr:'陡坡連續髮夾彎；遊覽車下坡速度快，彎道內側注意來車，強風路段。'},
-  {n:'鳶峰',m:'28–31 km · 坡 9% · NNE',bear:25,elFrac:.78,cam:null,tr:'鳶峰觀景台人氣高；停車場人車雜亂，快速通過不在此久停，稜線強風側吹。'},
-  {n:'昆陽',m:'31–34 km · 坡 7% · NE',bear:40,elFrac:.89,cam:null,tr:'昆陽停車場海拔3275m；高山症注意，補給水後緩踩，寒流時路面可能結冰。'},
-  {n:'武嶺牌樓',m:'34–36 km · 坡 5% · NE',bear:45,elFrac:1,cam:null,tr:'終點武嶺3275m；氣溫低風大，拍照後立即穿上保暖外套，下坡前確認煞車狀態。'}
+  {n:'\u5730\u7406\u4E2D\u5FC3\u7891\u8D77\u767B',m:'0\u20135 km \u00B7 \u5761 3% \u00B7 NE',bear:30,elFrac:0,cam:null,tr:'\u53F014\u7532\u7DDA\u8D77\u9EDE\uFF0C\u57D4\u91CC\u5E02\u5340\u8DEF\u53E3\u591A\uFF1B\u9032\u5C71\u524D\u5728\u57D4\u91CC\u88DC\u7D66\u98F2\u98DF\uFF0C\u57CE\u5340\u6CE8\u610F\u6A5F\u8ECA\u548C\u884C\u4EBA\u3002'},
+  {n:'\u4EBA\u6B62\u95DC',m:'5\u201312 km \u00B7 \u5761 5% \u00B7 NE',bear:40,elFrac:.19,cam:null,tr:'\u6B77\u53F2\u9698\u53E3\u8DEF\u6BB5\uFF0C\u5CFD\u8C37\u5730\u5F62\uFF1B\u843D\u77F3\u98A8\u96AA\u8F03\u9AD8\uFF0C\u9727\u96E8\u5929\u8996\u7DDA\u5DEE\u9700\u6E1B\u901F\uFF0C\u96A7\u9053\u6CE8\u610F\u71C8\u5149\u3002'},
+  {n:'\u9727\u793E',m:'12\u201318 km \u00B7 \u5761 4% \u00B7 NNE',bear:20,elFrac:.33,cam:null,tr:'\u9727\u793E\u88DC\u7D66\u6700\u5F8C\u6A5F\u6703\uFF1B\u5546\u5BB6\u96C6\u4E2D\uFF0C\u88DC\u5145\u6C34\u5206\u8207\u98DF\u7269\uFF0C\u51AC\u5B63\u6668\u9593\u9727\u6C23\u6FC3\u6CE8\u610F\u8996\u7DDA\u3002'},
+  {n:'\u6700\u9AD8\u5C0F\u4E03',m:'18\u201324 km \u00B7 \u5761 8% \u00B7 NE',bear:40,elFrac:.50,cam:null,tr:'\u5168\u53F0\u6700\u9AD87-Eleven\u88DC\u7D66\u7AD9\uFF1B\u5047\u65E5\u904A\u5BA2\u6975\u591A\uFF0C\u6CE8\u610F\u505C\u8ECA\u5834\u9032\u51FA\u8ECA\u8F1B\uFF0C\u8DEF\u80A9\u505C\u8ECA\u6DF7\u4E82\u3002'},
+  {n:'\u7FE0\u5CF0',m:'24\u201328 km \u00B7 \u5761 9% \u00B7 NE',bear:35,elFrac:.67,cam:null,tr:'\u9661\u5761\u9023\u7E8C\u9AEE\u593E\u5F4E\uFF1B\u904A\u89BD\u8ECA\u4E0B\u5761\u901F\u5EA6\u5FEB\uFF0C\u5F4E\u9053\u5167\u5074\u6CE8\u610F\u4F86\u8ECA\uFF0C\u5F37\u98A8\u8DEF\u6BB5\u3002'},
+  {n:'\u9CF6\u5CF0',m:'28\u201331 km \u00B7 \u5761 9% \u00B7 NNE',bear:25,elFrac:.78,cam:null,tr:'\u9CF6\u5CF0\u89C0\u666F\u53F0\u4EBA\u6C23\u9AD8\uFF1B\u505C\u8ECA\u5834\u4EBA\u8ECA\u96DC\u4E82\uFF0C\u5FEB\u901F\u901A\u904E\u4E0D\u5728\u6B64\u4E45\u505C\uFF0C\u7A1C\u7DDA\u5F37\u98A8\u5074\u5439\u3002'},
+  {n:'\u6606\u967D',m:'31\u201334 km \u00B7 \u5761 7% \u00B7 NE',bear:40,elFrac:.89,cam:null,tr:'\u6606\u967D\u505C\u8ECA\u5834\u6D77\u62D43275m\uFF1B\u9AD8\u5C71\u75C7\u6CE8\u610F\uFF0C\u88DC\u7D66\u6C34\u5F8C\u7DE9\u8E29\uFF0C\u5BD2\u6D41\u6642\u8DEF\u9762\u53EF\u80FD\u7D50\u51B0\u3002'},
+  {n:'\u6B66\u5DBA\u724C\u6A13',m:'34\u201336 km \u00B7 \u5761 5% \u00B7 NE',bear:45,elFrac:1,cam:null,tr:'\u7D42\u9EDE\u6B66\u5DBA3275m\uFF1B\u6C23\u6EAB\u4F4E\u98A8\u5927\uFF0C\u62CD\u7167\u5F8C\u7ACB\u5373\u7A7F\u4E0A\u4FDD\u6696\u5916\u5957\uFF0C\u4E0B\u5761\u524D\u78BA\u8A8D\u715E\u8ECA\u72C0\u614B\u3002'}
  ]}
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 // API LAYER: Triple fallback weather fetching
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 let weatherSrc='', weatherData=null, radarData=null, radarSrc='';
 const now=new Date();
 
@@ -372,7 +372,7 @@ async function fetchWeather(){
   const latStr=lats.join(',');
   const lonStr=lons.join(',');
   try{
-    setText('正在連線 Open-Meteo API...','來源：api.open-meteo.com（主要來源）');
+    setText('\u6B63\u5728\u9023\u7DDA Open-Meteo API...','\u4F86\u6E90\uFF1Aapi.open-meteo.com\uFF08\u4E3B\u8981\u4F86\u6E90\uFF09');
     const u='https://api.open-meteo.com/v1/forecast?latitude='+latStr+'&longitude='+lonStr+'&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
     const r=await fetch(u,{cache:'no-store'});
     if(!r.ok)throw new Error('HTTP '+r.status);
@@ -383,7 +383,7 @@ async function fetchWeather(){
   }catch(e1){
     console.warn('Primary (Open-Meteo) failed:',e1.message);
     try{
-      setText('切換 Open-Meteo 單點模式...','來源：Open-Meteo（單點重試）');
+      setText('\u5207\u63DB Open-Meteo \u55AE\u9EDE\u6A21\u5F0F...','\u4F86\u6E90\uFF1AOpen-Meteo\uFF08\u55AE\u9EDE\u91CD\u8A66\uFF09');
       const results=[];
       for(const r of routeArr){
         const u2='https://api.open-meteo.com/v1/forecast?latitude='+r.lat+'&longitude='+r.lon+'&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,weather_code&timezone=Asia%2FTaipei&forecast_days=3';
@@ -391,11 +391,11 @@ async function fetchWeather(){
         if(!rr.ok)throw new Error('HTTP '+rr.status);
         results.push(await rr.json());
       }
-      weatherSrc='Open-Meteo (單點)';return results;
+      weatherSrc='Open-Meteo (\u55AE\u9EDE)';return results;
     }catch(e2){
       console.warn('Backup 1 (Open-Meteo single) failed:',e2.message);
       try{
-        setText('切換 MET Norway...','來源：api.met.no（備用）');
+        setText('\u5207\u63DB MET Norway...','\u4F86\u6E90\uFF1Aapi.met.no\uFF08\u5099\u7528\uFF09');
         const results=[];
         for(const r of routeArr){
           const u3='https://api.met.no/weatherapi/locationforecast/2.0/compact?lat='+r.lat+'&lon='+r.lon;
@@ -407,7 +407,7 @@ async function fetchWeather(){
       }catch(e3){
         console.warn('Backup 2 (MET Norway) failed:',e3.message);
         try{
-          setText('切換 wttr.in...','來源：wttr.in（備用）');
+          setText('\u5207\u63DB wttr.in...','\u4F86\u6E90\uFF1Awttr.in\uFF08\u5099\u7528\uFF09');
           const results=[];
           for(const r of routeArr){
             const u4='https://wttr.in/'+r.lat+','+r.lon+'?format=j1';
@@ -498,9 +498,9 @@ async function fetchRadar(){
     radarHost=radarData.host||'https://tilecache.rainviewer.com';radarSrc='RainViewer';
   }catch(e3){console.warn('All radar sources failed:',e3.message);radarFrames=[];radarHost='';radarSrc='';}
 }
-// ═══════════════════════════════════════════════════════════════════════════════
-// DATA PROCESSING: Convert raw API → route scores & segment data
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// DATA PROCESSING: Convert raw API \u2192 route scores & segment data
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 function windAlign(windDirDeg,climbBear){
   const windTo=(windDirDeg+180)%360;
   const diff=((windTo-climbBear+540)%360)-180;
@@ -517,20 +517,20 @@ function processWeather(raw){
     // Build 3 day scenarios
     const days=[0,1,2].map(di=>{
       const startIdx=di===0?nowIdx:findHourIdx(h.time,di,6);
-      const sliceLen=9;// 9 points = 4h at 30min intervals → use every-other hourly
+      const sliceLen=9;// 9 points = 4h at 30min intervals \u2192 use every-other hourly
       const idxs=[];for(let i=0;i<sliceLen;i++){const idx=startIdx+Math.round(i*0.5);if(idx<h.time.length)idxs.push(idx);else idxs.push(h.time.length-1);}
       const segsData=route.segs.map((seg,si)=>{
-        // 根據路段預計抵達時間選取正確的氣象小時索引（假設平均爬升速度 12km/h）
+        // \u6839\u64DA\u8DEF\u6BB5\u9810\u8A08\u62B5\u9054\u6642\u9593\u9078\u53D6\u6B63\u78BA\u7684\u6C23\u8C61\u5C0F\u6642\u7D22\u5F15\uFF08\u5047\u8A2D\u5E73\u5747\u722C\u5347\u901F\u5EA6 12km/h\uFF09
         const estimatedRideHrs=Math.round((route.dist||10)*(seg.elFrac||0)/12);
         const segIdx=Math.min(startIdx+estimatedRideHrs,h.time.length-1);
-        // 根據海拔差修正溫度（標準大氣遞減率 -6.5°C/1000m）
+        // \u6839\u64DA\u6D77\u62D4\u5DEE\u4FEE\u6B63\u6EAB\u5EA6\uFF08\u6A19\u6E96\u5927\u6C23\u905E\u6E1B\u7387 -6.5\u00B0C/1000m\uFF09
         const elevDelta=(route.elev||0)*(seg.elFrac||0);
         const tempAdj=-(elevDelta/1000)*6.5;
         const t=Math.round((h.temperature_2m[segIdx]||22)+tempAdj);
         const f=Math.round((h.apparent_temperature[segIdx]||(h.temperature_2m[segIdx]||22)-2)+tempAdj);
         const rain=Math.round(h.precipitation_probability[segIdx]||0);
-        // 風速/風向用出發時刻 startIdx，不加騎行偏移（顯示即時風況）
-        const ws=Math.round((h.wind_speed_10m[startIdx]||5)/3.6*10)/10;// km/h→m/s
+        // \u98A8\u901F/\u98A8\u5411\u7528\u51FA\u767C\u6642\u523B startIdx\uFF0C\u4E0D\u52A0\u9A0E\u884C\u504F\u79FB\uFF08\u986F\u793A\u5373\u6642\u98A8\u6CC1\uFF09
+        const ws=Math.round((h.wind_speed_10m[startIdx]||5)/3.6*10)/10;// km/h\u2192m/s
         const wd=h.wind_direction_10m[startIdx]||180;
         const a=Math.round(windAlign(wd,seg.bear)*100)/100;
         const road=rain>=45?'wet':rain>=20?'damp':'dry';
@@ -543,7 +543,7 @@ function processWeather(raw){
           tl.windMs.push(Math.round((h.wind_speed_10m[idx]||5)/3.6*10)/10);
           tl.windAlign.push(Math.round(windAlign(h.wind_direction_10m[idx]||180,seg.bear)*100)/100);
         });
-        const rdTxt=road==='wet'?'潮濕·降雨中':road==='damp'?'微濕·有降雨機率':'乾燥·路面狀態良好';
+        const rdTxt=road==='wet'?'\u6F6E\u6FD5\u00B7\u964D\u96E8\u4E2D':road==='damp'?'\u5FAE\u6FD5\u00B7\u6709\u964D\u96E8\u6A5F\u7387':'\u4E7E\u71E5\u00B7\u8DEF\u9762\u72C0\u614B\u826F\u597D';
         const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
         const wdir=dirs[Math.round(wd/22.5)%16];
         return{...seg,t,f,rain,road,rd:rdTxt,w:{ms:ws,dir:wdir,a},pr,tl};
@@ -553,19 +553,19 @@ function processWeather(raw){
       const avgPr=Math.round(segsData.reduce((s,x)=>s+x.pr,0)/segsData.length);
       const avgA=segsData.reduce((s,x)=>s+x.w.a,0)/segsData.length;
       const score=Math.max(15,Math.min(98,avgPr));
-      const verdict=score>=80?'狀態良好，把握當前時段':score>=65?'條件中上，適合練習':score>=50?'條件一般，注意安全':score>=35?'不建議出發，路況差':'強烈不建議出發';
-      const reason=`平均降雨 ${Math.round(avgRain)}%、風向對齊 ${Math.round(avgA*100)}%、破紀錄指數均值 ${avgPr}。`;
-      const wl=score>=75?'最佳視窗·現在起':score>=60?'條件漸轉·把握時間':'今日條件不佳';
+      const verdict=score>=80?'\u72C0\u614B\u826F\u597D\uFF0C\u628A\u63E1\u7576\u524D\u6642\u6BB5':score>=65?'\u689D\u4EF6\u4E2D\u4E0A\uFF0C\u9069\u5408\u7DF4\u7FD2':score>=50?'\u689D\u4EF6\u4E00\u822C\uFF0C\u6CE8\u610F\u5B89\u5168':score>=35?'\u4E0D\u5EFA\u8B70\u51FA\u767C\uFF0C\u8DEF\u6CC1\u5DEE':'\u5F37\u70C8\u4E0D\u5EFA\u8B70\u51FA\u767C';
+      const reason=`\u5E73\u5747\u964D\u96E8 ${Math.round(avgRain)}%\u3001\u98A8\u5411\u5C0D\u9F4A ${Math.round(avgA*100)}%\u3001\u7834\u7D00\u9304\u6307\u6578\u5747\u503C ${avgPr}\u3002`;
+      const wl=score>=75?'\u6700\u4F73\u8996\u7A97\u00B7\u73FE\u5728\u8D77':score>=60?'\u689D\u4EF6\u6F38\u8F49\u00B7\u628A\u63E1\u6642\u9593':'\u4ECA\u65E5\u689D\u4EF6\u4E0D\u4F73';
       const wt=score>=75?'g':score>=55?'w':'b';
       const weakest=segsData.reduce((w,s)=>s.pr<w.pr?s:w,segsData[0]);
       // Route-level timeline (use first seg's timeline as base)
       const rtl=segsData[0].tl;
       return{score,verdict,reason,windowLabel:wl,windowType:wt,segs:segsData,tl:rtl,
-        surf:{state:avgRain<15?'全線偏乾':avgRain<40?'部分路段微濕':'多段潮濕',
+        surf:{state:avgRain<15?'\u5168\u7DDA\u504F\u4E7E':avgRain<40?'\u90E8\u5206\u8DEF\u6BB5\u5FAE\u6FD5':'\u591A\u6BB5\u6F6E\u6FD5',
               stateCls:avgRain<15?'good':avgRain<40?'warn':'bad',
-              weakest:`${weakest.n}·破紀錄指數最低 (${weakest.pr})`,
-              window:score>=70?'現在為最佳時段':'注意天氣變化',
-              hazards:avgRain>=40?'降雨路滑·煞車增距':'午後雷陣雨·稜線風大'}};
+              weakest:`${weakest.n}\u00B7\u7834\u7D00\u9304\u6307\u6578\u6700\u4F4E (${weakest.pr})`,
+              window:score>=70?'\u73FE\u5728\u70BA\u6700\u4F73\u6642\u6BB5':'\u6CE8\u610F\u5929\u6C23\u8B8A\u5316',
+              hazards:avgRain>=40?'\u964D\u96E8\u8DEF\u6ED1\u00B7\u715E\u8ECA\u589E\u8DDD':'\u5348\u5F8C\u96F7\u9663\u96E8\u00B7\u7A1C\u7DDA\u98A8\u5927'}};
     });
     processed.push({...route,days});
   });
@@ -573,7 +573,7 @@ function processWeather(raw){
 }
 
 function findNowIdx(times){
-  // 自動校正：使用台北時區(UTC+8)對應API的Asia/Taipei時間
+  // \u81EA\u52D5\u6821\u6B63\uFF1A\u4F7F\u7528\u53F0\u5317\u6642\u5340(UTC+8)\u5C0D\u61C9API\u7684Asia/Taipei\u6642\u9593
   const taipeiNow=new Date(now.toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
   const n=taipeiNow.getFullYear()+'-'+String(taipeiNow.getMonth()+1).padStart(2,'0')+'-'+String(taipeiNow.getDate()).padStart(2,'0')+'T'+String(taipeiNow.getHours()).padStart(2,'0');
   for(let i=0;i<times.length;i++){if(times[i]&&times[i].startsWith(n))return i;}
@@ -586,19 +586,19 @@ function findHourIdx(times,dayOffset,hour){
   return Math.min(dayOffset*24+hour,times.length-1);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 // UI HELPERS
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const sC=s=>s>=80?'#4CAF50':s>=65?'#FFC107':s>=45?'#FF9800':'#E53935';
-const RT={dry:'乾燥',damp:'微濕',wet:'潮濕'};
+const RT={dry:'\u4E7E\u71E5',damp:'\u5FAE\u6FD5',wet:'\u6F6E\u6FD5'};
 const RC={dry:'#4CAF50',damp:'#FFC107',wet:'#E53935'};
 const kOf=a=>a>.15?'tail':a<-.15?'head':'side';
-const wL=k=>k==='tail'?'順風':k==='head'?'逆風':'側風';
-function gear(f,rain){const p=[];if(f>=22)p.push('短袖車衣','短車褲');else if(f>=19)p.push('短袖+薄臂套','短車褲');else if(f>=16)p.push('長袖車衣','薄腿套');else p.push('保暖長袖','防風外套');if(rain>=40)p.push('輕量雨衣');if(f<13)p.push('長指手套');else if(f<19)p.push('薄手套');return p.join(' · ');}
+const wL=k=>k==='tail'?'\u9806\u98A8':k==='head'?'\u9006\u98A8':'\u5074\u98A8';
+function gear(f,rain){const p=[];if(f>=22)p.push('\u77ED\u8896\u8ECA\u8863','\u77ED\u8ECA\u8932');else if(f>=19)p.push('\u77ED\u8896+\u8584\u81C2\u5957','\u77ED\u8ECA\u8932');else if(f>=16)p.push('\u9577\u8896\u8ECA\u8863','\u8584\u817F\u5957');else p.push('\u4FDD\u6696\u9577\u8896','\u9632\u98A8\u5916\u5957');if(rain>=40)p.push('\u8F15\u91CF\u96E8\u8863');if(f<13)p.push('\u9577\u6307\u624B\u5957');else if(f<19)p.push('\u8584\u624B\u5957');return p.join(' \u00B7 ');}
 function sRing(s){const c=sC(s),d=Math.round(s*1.6);return`<svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="26" stroke="#2a2a2a" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="26" stroke="${c}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="${d} 165" transform="rotate(-90 32 32)"/></svg>`;}
 function setText(t,s){const a=document.getElementById('loadText'),b=document.getElementById('loadSrc');if(a)a.textContent=t;if(b)b.textContent=s;}
-function showError(msg){const b=document.getElementById('errBanner');b.textContent='⚠ '+msg;b.classList.add('show');}
-function chint(rd){const f=rd[0],t={dry:'乾燥',damp:'微濕',wet:'潮濕'};for(let i=1;i<rd.length;i++){if(rd[i]!==f){const m=i*30;return`+${m>=60?Math.floor(m/60)+'h'+(m%60?m%60+'m':''):m+' 分'} ${rd[i]==='wet'||rd[i]==='damp'?'轉':'恢復'}${t[rd[i]]}`;}}return`維持${t[f]}（穩定）`;}
+function showError(msg){const b=document.getElementById('errBanner');b.textContent='\u26A0 '+msg;b.classList.add('show');}
+function chint(rd){const f=rd[0],t={dry:'\u4E7E\u71E5',damp:'\u5FAE\u6FD5',wet:'\u6F6E\u6FD5'};for(let i=1;i<rd.length;i++){if(rd[i]!==f){const m=i*30;return`+${m>=60?Math.floor(m/60)+'h'+(m%60?m%60+'m':''):m+' \u5206'} ${rd[i]==='wet'||rd[i]==='damp'?'\u8F49':'\u6062\u5FA9'}${t[rd[i]]}`;}}return`\u7DAD\u6301${t[f]}\uFF08\u7A69\u5B9A\uFF09`;}
 
 function msToBeaufort(ms){const BF_BOUNDS=[0,0.3,1.6,3.4,5.5,8.0,10.8,13.9,17.2,20.8,24.5,28.5,32.7,99];if(ms<0.3)return 0;for(let i=1;i<BF_BOUNDS.length-1;i++){if(ms<BF_BOUNDS[i+1]){const frac=(ms-BF_BOUNDS[i])/(BF_BOUNDS[i+1]-BF_BOUNDS[i]);return parseFloat((i+frac).toFixed(1));}}return 12;}
 function sTL(seg,tb,di){
@@ -620,7 +620,7 @@ function sTL(seg,tb,di){
   const a=s.windAlign[i]||0,pct=Math.round(Math.abs(a)*100);
   const isTail=a>0.15,isHead=a<-0.15;
   const ay=arY+arH*0.4,pctY=arY+arH-2;
-  if(!isTail&&!isHead)return'<circle cx="'+x+'" cy="'+ay+'" r="5" fill="rgba(150,150,150,.4)"/><text x="'+x+'" y="'+pctY+'" text-anchor="middle" font-size="9" fill="#888">側風</text>';
+  if(!isTail&&!isHead)return'<circle cx="'+x+'" cy="'+ay+'" r="5" fill="rgba(150,150,150,.4)"/><text x="'+x+'" y="'+pctY+'" text-anchor="middle" font-size="9" fill="#888">\u5074\u98A8</text>';
   const col=isTail?'#4CAF50':'#E53935',dir=isTail?1:-1;
   const len=24,hw=9,hl=12;
   const x1=x-dir*len/2,x2=x+dir*len/2;
@@ -640,10 +640,10 @@ function sTL(seg,tb,di){
  }).join('');
  const xl=xs.map((x,i)=>{if(i%2!==0)return'';const d=new Date(tb.getTime()+i*30*60000);return'<text x="'+x+'" y="'+xlY+'" text-anchor="middle" font-size="9" fill="#666">'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</text>';}).join('');
  const vLine='<line x1="'+xs[0]+'" y1="'+(pT-2)+'" x2="'+xs[0]+'" y2="'+(wY+wH)+'" stroke="#e8e8e8" stroke-width=".5" stroke-dasharray="2 2"/>';
- const lbls='<text x="'+(pL-4)+'" y="'+(rY+rH/2+3)+'" text-anchor="end" font-size="9" fill="#999">降雨%</text>'+
-  '<text x="'+(pL-4)+'" y="'+(dY+dH/2+3)+'" text-anchor="end" font-size="9" fill="#999">路面</text>'+
-  '<text x="'+(pL-4)+'" y="'+(arY+arH/2+3)+'" text-anchor="end" font-size="9" fill="#999">風向</text>'+
-  '<text x="'+(pL-4)+'" y="'+(wY+wH/2+3)+'" text-anchor="end" font-size="9" fill="#9C8FD9">風速</text>';
+ const lbls='<text x="'+(pL-4)+'" y="'+(rY+rH/2+3)+'" text-anchor="end" font-size="9" fill="#999">\u964D\u96E8%</text>'+
+  '<text x="'+(pL-4)+'" y="'+(dY+dH/2+3)+'" text-anchor="end" font-size="9" fill="#999">\u8DEF\u9762</text>'+
+  '<text x="'+(pL-4)+'" y="'+(arY+arH/2+3)+'" text-anchor="end" font-size="9" fill="#999">\u98A8\u5411</text>'+
+  '<text x="'+(pL-4)+'" y="'+(wY+wH/2+3)+'" text-anchor="end" font-size="9" fill="#9C8FD9">\u98A8\u901F</text>';
  return'<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+vLine+rb+dc+arrows+windBars+lbls+xl+'</svg>';
 }
 function elevProfile(r, segsData){
@@ -681,14 +681,14 @@ function elevProfile(r, segsData){
   return '<div class="elev-card"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block"><rect width="'+W+'" height="'+H+'" rx="4" fill="rgba(0,0,0,.3)"/>'+fills+'<path d="'+lines+'" fill="none" stroke="rgba(180,210,255,.8)" stroke-width="1.5" stroke-linejoin="round"/>'+divs+labels+kmLabs+elevLab+'</svg></div>';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// RADAR MAP: 採用 NCDR 落雨小幫手相同方式 (equirectangular 投影)
-// ═══════════════════════════════════════════════════════════════════════════════
-// NCDR 地理範圍（完全覆蓋投影畫布）
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// RADAR MAP: \u63A1\u7528 NCDR \u843D\u96E8\u5C0F\u5E6B\u624B\u76F8\u540C\u65B9\u5F0F (equirectangular \u6295\u5F71)
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// NCDR \u5730\u7406\u7BC4\u570D\uFF08\u5B8C\u5168\u8986\u84CB\u6295\u5F71\u756B\u5E03\uFF09
 const NCDR_DOMAIN={slon:117.1595,elon:123.9804,slat:21.2646,elat:26.5353};
-// canvas 顯示設定（與 NCDR 3300x2550 比例一致）
+// canvas \u986F\u793A\u8A2D\u5B9A\uFF08\u8207 NCDR 3300x2550 \u6BD4\u4F8B\u4E00\u81F4\uFF09
 const RCW=1920,RCH=1485;
-// D3 equirectangular 投影（與落雨小幫手相同：center=[120.57,23.9], scale=4200*(w/500)）
+// D3 equirectangular \u6295\u5F71\uFF08\u8207\u843D\u96E8\u5C0F\u5E6B\u624B\u76F8\u540C\uFF1Acenter=[120.57,23.9], scale=4200*(w/500)\uFF09
 const PROJ_CENTER=[120.57,23.9];
 const DEG2RAD=Math.PI/180;
 function projX(lon,w){return(lon-PROJ_CENTER[0])*(4200*(w/500))*DEG2RAD+w/2;}
@@ -715,7 +715,7 @@ function drF(st){
   const f=radarFrames.length>0?radarFrames[Math.min(st,radarFrames.length-1)]:null;
   const wrap=cv.parentElement;wrap.style.position='relative';
 
-  // 1. 衛星底圖 (CSS img, bypass CORS)
+  // 1. \u885B\u661F\u5E95\u5716 (CSS img, bypass CORS)
   let bkEl=document.getElementById('radarBkImg');
   if(!bkEl){bkEl=document.createElement('img');bkEl.id='radarBkImg';
     bkEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;';
@@ -723,7 +723,7 @@ function drF(st){
   const BK_URL='https://watch.ncdr.nat.gov.tw/appv2/module/nowcast/icon/radar_nowcast_bk_hi.jpg';
   if(bkEl.src!==BK_URL)bkEl.src=BK_URL;
 
-  // 2. NCDR雷達回波圖 (CSS img, bypass CORS)
+  // 2. NCDR\u96F7\u9054\u56DE\u6CE2\u5716 (CSS img, bypass CORS)
   let dbzEl=document.getElementById('radarDbzImg');
   if(!dbzEl){dbzEl=document.createElement('img');dbzEl.id='radarDbzImg';
     dbzEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:1;opacity:0.82;';
@@ -731,7 +731,7 @@ function drF(st){
   const fUrl=f?.url||null;
   if(fUrl&&dbzEl.src!==fUrl)dbzEl.src=fUrl;
 
-  // 3. 台灣縣市邊界線 (canvas, equirectangular projection)
+  // 3. \u53F0\u7063\u7E23\u5E02\u908A\u754C\u7DDA (canvas, equirectangular projection)
   cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;z-index:2;';
   if(window._bdGeo){
     ctx.save();
@@ -762,9 +762,9 @@ function initR(rid){
   const tk=document.getElementById('rTicks');
   if(tk){tk.innerHTML='';const fCount=radarFrames.length||16;const step=Math.max(1,Math.floor(fCount/5));for(let i=0;i<fCount;i+=step){const f=radarFrames[i];if(!f)continue;const s=document.createElement('span');const h=f.time.getHours(),m=f.time.getMinutes();s.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');tk.appendChild(s);}}
   function rb(id){const el=document.getElementById(id);if(!el)return null;const n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return n;}
-  const pb=rb('rPlayBtn');if(pb)pb.onclick=()=>{rPl=!rPl;pb.textContent=rPl?'⏸':'▶';if(rPl){const fCount=radarFrames.length||16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);}else{clearInterval(rTmr);rTmr=null;}};
-  const sl=rb('rSlider');if(sl){sl.max=(radarFrames.length||16)-1;sl.oninput=e=>{rPl=false;clearInterval(rTmr);rTmr=null;const p2=document.getElementById('rPlayBtn');if(p2)p2.textContent='▶';rSt=parseInt(e.target.value,10);drF(rSt);updR();};}
-  rPl=true;const pb2=document.getElementById('rPlayBtn');if(pb2)pb2.textContent='⏸';
+  const pb=rb('rPlayBtn');if(pb)pb.onclick=()=>{rPl=!rPl;pb.textContent=rPl?'\u23F8':'\u25B6';if(rPl){const fCount=radarFrames.length||16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);}else{clearInterval(rTmr);rTmr=null;}};
+  const sl=rb('rSlider');if(sl){sl.max=(radarFrames.length||16)-1;sl.oninput=e=>{rPl=false;clearInterval(rTmr);rTmr=null;const p2=document.getElementById('rPlayBtn');if(p2)p2.textContent='\u25B6';rSt=parseInt(e.target.value,10);drF(rSt);updR();};}
+  rPl=true;const pb2=document.getElementById('rPlayBtn');if(pb2)pb2.textContent='\u23F8';
   const fCount=radarFrames.length||16;rTmr=setInterval(()=>{rSt=(rSt+1)%fCount;drF(rSt);updR();},800);
 }
 
@@ -775,11 +775,11 @@ function updR(){
   else{const dd=new Date(now.getTime()+rSt*15*60000);displayTime=String(dd.getHours()).padStart(2,'0')+':'+String(dd.getMinutes()).padStart(2,'0');}
   const te=document.getElementById('rTime');if(te)te.textContent=displayTime;
   const offMin=f?f.offset:rSt*15;const oe=document.getElementById('rOff');
-  if(oe)oe.textContent=offMin<0?offMin+'分':offMin===0?'現在':'+'+( offMin>=60?Math.floor(offMin/60)+'h'+(offMin%60?String(offMin%60).padStart(2,'0')+'m':''):offMin+'m');
+  if(oe)oe.textContent=offMin<0?offMin+'\u5206':offMin===0?'\u73FE\u5728':'+'+( offMin>=60?Math.floor(offMin/60)+'h'+(offMin%60?String(offMin%60).padStart(2,'0')+'m':''):offMin+'m');
   const se=document.getElementById('rSlider');if(se){se.max=fCount-1;se.value=rSt;}
   const ar=processedRoutes.find(x=>x.id===rAid);const rain=ar?.days[curDI]?.segs[0]?.rain||0;
-  const risk=rain<10?'無降水·路況良好':rain<25?'輕雨機率·攜帶雨衣':rain<40?'降雨·路面漸濕':'大雨·不建議出發';
-  const se2=document.getElementById('rStatus');if(se2)se2.innerHTML='<b>降雨 '+rain+'%</b> · '+risk;
+  const risk=rain<10?'\u7121\u964D\u6C34\u00B7\u8DEF\u6CC1\u826F\u597D':rain<25?'\u8F15\u96E8\u6A5F\u7387\u00B7\u651C\u5E36\u96E8\u8863':rain<40?'\u964D\u96E8\u00B7\u8DEF\u9762\u6F38\u6FD5':'\u5927\u96E8\u00B7\u4E0D\u5EFA\u8B70\u51FA\u767C';
+  const se2=document.getElementById('rStatus');if(se2)se2.innerHTML='<b>\u964D\u96E8 '+rain+'%</b> \u00B7 '+risk;
 }
 
 let processedRoutes=[],curRoute=null,curDI=0;
@@ -789,7 +789,7 @@ function renderTabs(){
     const b=document.createElement('button');
     const s=r.days[0]?.score||50;
     b.className='tab'+(i===0?' active':'');b.dataset.id=r.id;
-    b.innerHTML=`${r.name}<span class="ts" style="color:${sC(s)}">${s} 分</span>`;
+    b.innerHTML=`${r.name}<span class="ts" style="color:${sC(s)}">${s} \u5206</span>`;
     b.onclick=()=>sel(r.id);el.appendChild(b);
   });
 }
@@ -803,35 +803,35 @@ function sel(id){
 function render(r){
   const dts=[0,1,2].map(d=>{const dt=new Date(now);dt.setDate(dt.getDate()+d);return`${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`;});
   document.getElementById('main').innerHTML=`
-<div class="route-hd"><div><h2>${r.name}</h2><div class="desc">${r.sub}</div></div><div class="stats"><span>距離<b>${r.dist}km</b></span> <span>爬升<b>${r.elev}m</b></span></div></div>
-<div class="day-row">${[{i:0,n:'今天'},{i:1,n:'明天'},{i:2,n:'後天'}].map(({i,n})=>{const s=r.days[i]?.score||50;return`<button class="dbtn${curDI===i?' active':''}" data-day="${i}"><span class="dn">${n}</span><span class="ds" style="${curDI!==i?'color:'+sC(s):''}">${s}</span><span class="dd">${dts[i]}</span></button>`;}).join('')}</div>
-<div class="src-info">資料來源：<b>${weatherSrc}</b> · 雷達：<b>${radarSrc||'--'}</b> · 更新時間：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
-<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">⏸</button><span id="rOff" class="radar-off">現在</span></div><div class="radar-crop"><div class="radar-wrap"><canvas id="rCV" width="1920" height="1485">/canvas></div></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
+<div class="route-hd"><div><h2>${r.name}</h2><div class="desc">${r.sub}</div></div><div class="stats"><span>\u8DDD\u96E2<b>${r.dist}km</b></span> <span>\u722C\u5347<b>${r.elev}m</b></span></div></div>
+<div class="day-row">${[{i:0,n:'\u4ECA\u5929'},{i:1,n:'\u660E\u5929'},{i:2,n:'\u5F8C\u5929'}].map(({i,n})=>{const s=r.days[i]?.score||50;return`<button class="dbtn${curDI===i?' active':''}" data-day="${i}"><span class="dn">${n}</span><span class="ds" style="${curDI!==i?'color:'+sC(s):''}">${s}</span><span class="dd">${dts[i]}</span></button>`;}).join('')}</div>
+<div class="src-info">\u8CC7\u6599\u4F86\u6E90\uFF1A<b>${weatherSrc}</b> \u00B7 \u96F7\u9054\uFF1A<b>${radarSrc||'--'}</b> \u00B7 \u66F4\u65B0\u6642\u9593\uFF1A${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>
+<div class="card"><div class="radar-ctrl"><span id="rTime" class="radar-time">--:--</span><button id="rPlayBtn" class="play-btn">\u23F8</button><span id="rOff" class="radar-off">\u73FE\u5728</span></div><div class="radar-crop"><div class="radar-wrap"><canvas id="rCV" width="1920" height="1485">/canvas></div></div><input type="range" id="rSlider" class="rslider" min="0" max="15" value="0" step="1"><div class="rticks" id="rTicks"></div><div id="rStatus" class="rstatus"></div></div>
 <div id="day-content">${bldDay(r,curDI)}</div>`;
   document.querySelectorAll('.dbtn').forEach(btn=>{btn.onclick=()=>{curDI=parseInt(btn.dataset.day);document.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.day)===curDI));document.getElementById('day-content').innerHTML=bldDay(r,curDI);bindSegs(r);};});
   bindSegs(r);initCamVideos();setTimeout(()=>initR(r.id),80);
 }
 
 function bldDay(r,di){
-  const day=r.days[di];if(!day)return'<p>資料載入中...</p>';
+  const day=r.days[di];if(!day)return'<p>\u8CC7\u6599\u8F09\u5165\u4E2D...</p>';
   const sc=day,dn=Math.round(sc.segs.filter(s=>s.road==='dry').length/sc.segs.length*100);
-  const wc=sc.windowType;const tlL=di===0?'現在起 4 小時':di===1?'明天 06:00–10:00':'後天 06:00–10:00';
+  const wc=sc.windowType;const tlL=di===0?'\u73FE\u5728\u8D77 4 \u5C0F\u6642':di===1?'\u660E\u5929 06:00\u201310:00':'\u5F8C\u5929 06:00\u201310:00';
   const tb=di===0?now:(()=>{const d=new Date(now);d.setDate(d.getDate()+di);d.setHours(6,0,0,0);return d;})();
   const segsH=sc.segs.map((s,i)=>{
-    const k=kOf(s.w.a),p=Math.round(Math.abs(s.w.a)*100),pd=s.pr>=85?{t:'絕佳',c:'g'}:s.pr>=70?{t:'良好',c:'g'}:s.pr>=55?{t:'中等',c:'w'}:s.pr>=40?{t:'不建議',c:'w'}:{t:'避免',c:'b'};
+    const k=kOf(s.w.a),p=Math.round(Math.abs(s.w.a)*100),pd=s.pr>=85?{t:'\u7D55\u4F73',c:'g'}:s.pr>=70?{t:'\u826F\u597D',c:'g'}:s.pr>=55?{t:'\u4E2D\u7B49',c:'w'}:s.pr>=40?{t:'\u4E0D\u5EFA\u8B70',c:'w'}:{t:'\u907F\u514D',c:'b'};
     const ht=s.tl?chint(s.tl.road):'';
     const wf=k==='tail'?`left:50%;width:${p/2}%;`:k==='head'?`left:${50-p/2}%;width:${p/2}%;`:'left:48%;width:4%;';
-    const cb=s.cam?`<button class="sbtn cam" data-cam="${s.cam.url}"><span class="dot"></span>${s.cam.name}</button>`:`<button class="sbtn" disabled><span class="dot" style="background:#666"></span>無攝影機</button>`;
+    const cb=s.cam?`<button class="sbtn cam" data-cam="${s.cam.url}"><span class="dot"></span>${s.cam.name}</button>`:`<button class="sbtn" disabled><span class="dot" style="background:#666"></span>\u7121\u651D\u5F71\u6A5F</button>`;
     return`<div class="seg">
-<div class="seg-top"><div><p class="seg-name">${s.n}</p><span class="seg-meta">${s.m}</span></div><div class="temp-blk"><span class="big">${s.t}°</span><span class="sm">體感 ${s.f}°</span></div></div>
-<div class="wind-ind"><div class="wind-row"><span class="wtag ${k}">${wL(k)} ${p}%</span><span class="wspeed">${s.w.ms} m/s（${bf(s.w.ms)}級）· ${s.w.dir}</span></div><div class="wbar"><div class="wbar-c"></div><div class="wfill ${k}" style="${wf}"></div></div><div class="wscale"><span>← 逆風</span><span>0</span><span>順風 →</span></div></div>
-<div class="road-box"><div class="road-hdr"><div class="road-lbl"><span>路面</span><span class="pill ${s.road==='dry'?'g':s.road==='damp'?'w':'b'}">${RT[s.road]}</span></div><span class="road-rain">降雨 ${s.rain}%</span></div><div class="road-desc">${s.rd}</div><div class="tl-period">${tlL}</div>${sTL(s,tb,di)}<div class="tl-leg"><span><span class="tl-sw" style="background:#4CAF50"></span>乾</span><span><span class="tl-sw" style="background:#FFC107"></span>微濕</span><span><span class="tl-sw" style="background:#E53935"></span>潮濕</span><span><span class="tl-sw" style="background:#7E57C2"></span>風速</span></div>${ht?`<div class="tl-hint"><b>${ht}</b></div>`:''}<div class="note"><b>騎乘備注：</b>${s.rd}</div><div class="tr-box"><b>🚗 交通路況：</b>${s.tr}</div></div>
-<div class="pr-line"><span class="pr-lbl">破紀錄指數</span><div class="pr-body"><span class="pr-val">${s.pr}</span><span class="pill ${pd.c}">${pd.t}</span></div></div>
+<div class="seg-top"><div><p class="seg-name">${s.n}</p><span class="seg-meta">${s.m}</span></div><div class="temp-blk"><span class="big">${s.t}\u00B0</span><span class="sm">\u9AD4\u611F ${s.f}\u00B0</span></div></div>
+<div class="wind-ind"><div class="wind-row"><span class="wtag ${k}">${wL(k)} ${p}%</span><span class="wspeed">${s.w.ms}\u00A0m/s\uFF08${bf(s.w.ms)}\u7D1A\uFF09\u00B7\u00A0${s.w.dir}</span></div><div class="wbar"><div class="wbar-c"></div><div class="wfill ${k}" style="${wf}"></div></div><div class="wscale"><span>\u2190 \u9006\u98A8</span><span>0</span><span>\u9806\u98A8 \u2192</span></div></div>
+<div class="road-box"><div class="road-hdr"><div class="road-lbl"><span>\u8DEF\u9762</span><span class="pill ${s.road==='dry'?'g':s.road==='damp'?'w':'b'}">${RT[s.road]}</span></div><span class="road-rain">\u964D\u96E8 ${s.rain}%</span></div><div class="road-desc">${s.rd}</div><div class="tl-period">${tlL}</div>${sTL(s,tb,di)}<div class="tl-leg"><span><span class="tl-sw" style="background:#4CAF50"></span>\u4E7E</span><span><span class="tl-sw" style="background:#FFC107"></span>\u5FAE\u6FD5</span><span><span class="tl-sw" style="background:#E53935"></span>\u6F6E\u6FD5</span><span><span class="tl-sw" style="background:#7E57C2"></span>\u98A8\u901F</span></div>${ht?`<div class="tl-hint"><b>${ht}</b></div>`:''}<div class="note"><b>\u9A0E\u4E58\u5099\u6CE8\uFF1A</b>${s.rd}</div><div class="tr-box"><b>\uD83D\uDE97 \u4EA4\u901A\u8DEF\u6CC1\uFF1A</b>${s.tr}</div></div>
+<div class="pr-line"><span class="pr-lbl">\u7834\u7D00\u9304\u6307\u6578</span><div class="pr-body"><span class="pr-val">${s.pr}</span><span class="pill ${pd.c}">${pd.t}</span></div></div>
 
-<div class="cam-live-box">${s.cam?`<video id="cv-${s.cam.id}" autoplay muted playsinline style="width:100%;height:200px;display:block;background:#111;object-fit:fill" data-livecam="${s.cam.url}"></video><a class="cam-live-lnk" href="${s.cam.url}" target="_blank">${s.cam.name}��</a>`:"<div class=\"cam-live-none\">!sBq�</div>"}</div></div></div>`;}).join('');
+<div class="cam-live-box">${s.cam?`<video id="cv-${s.cam.id}" autoplay muted playsinline style="width:100%;height:200px;display:block;background:#111;object-fit:fill" data-livecam="${s.cam.url}"></video><a class="cam-live-lnk" href="${s.cam.url}" target="_blank">${s.cam.name}\uFFFD\uFFFD</a>`:"<div class=\"cam-live-none\">!sBq\uFFFD</div>"}</div></div></div>`;}).join('');
   return`<div class="hero"><div class="score-ring">${sRing(sc.score)}<div class="score-num">${sc.score}</div></div><div class="hero-txt"><h3>${sc.verdict}</h3><p class="reason">${sc.reason}</p><span class="wchip ${wc}">${sc.windowLabel}</span></div></div>
-<div class="card"><div class="card-head"><h4>${r.name} 全線路面</h4><span class="pill ${sc.surf.stateCls==='good'?'g':sc.surf.stateCls==='warn'?'w':'b'}">${sc.surf.state}</span></div><div class="metrics"><div class="metric"><span class="lbl">目前乾段占比</span><span class="val">${dn}%</span><div class="mbar"><div class="mfill" style="width:${Math.max(3,dn)}%;background:${dn>=75?'#4CAF50':dn>=40?'#FFC107':'#E53935'}"></div></div></div><div class="metric"><span class="lbl">最薄弱路段</span><span class="val" style="font-size:12px">${sc.surf.weakest}</span></div></div><div class="callouts"><div class="co"><span class="co-tag ok">視窗</span><span>${sc.surf.window}</span></div><div class="co"><span class="co-tag warn">風險</span><span>${sc.surf.hazards}</span></div></div></div>
-<div class="band">分區段推演 <span class="hint">${sc.segs.length} 段 · ${tlL}</span></div>
+<div class="card"><div class="card-head"><h4>${r.name} \u5168\u7DDA\u8DEF\u9762</h4><span class="pill ${sc.surf.stateCls==='good'?'g':sc.surf.stateCls==='warn'?'w':'b'}">${sc.surf.state}</span></div><div class="metrics"><div class="metric"><span class="lbl">\u76EE\u524D\u4E7E\u6BB5\u5360\u6BD4</span><span class="val">${dn}%</span><div class="mbar"><div class="mfill" style="width:${Math.max(3,dn)}%;background:${dn>=75?'#4CAF50':dn>=40?'#FFC107':'#E53935'}"></div></div></div><div class="metric"><span class="lbl">\u6700\u8584\u5F31\u8DEF\u6BB5</span><span class="val" style="font-size:12px">${sc.surf.weakest}</span></div></div><div class="callouts"><div class="co"><span class="co-tag ok">\u8996\u7A97</span><span>${sc.surf.window}</span></div><div class="co"><span class="co-tag warn">\u98A8\u96AA</span><span>${sc.surf.hazards}</span></div></div></div>
+<div class="band">\u5206\u5340\u6BB5\u63A8\u6F14 <span class="hint">${sc.segs.length} \u6BB5 \u00B7 ${tlL}</span></div>
 ${elevProfile(r, sc.segs)}
 <div class="seg-list">${segsH}</div>`;
 }
@@ -857,13 +857,13 @@ function initCamVideos(){
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 // BOOT
-// ═══════════════════════════════════════════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 async function boot(){
   try{
     const[raw]=await Promise.all([fetchWeather(),fetchRadar()]);
-    setText('處理氣象資料中...','計算路線評分');
+    setText('\u8655\u7406\u6C23\u8C61\u8CC7\u6599\u4E2D...','\u8A08\u7B97\u8DEF\u7DDA\u8A55\u5206');
     processedRoutes=processWeather(raw);
     document.getElementById('srcLabel').textContent=weatherSrc;
     renderTabs();sel(processedRoutes[0].id);
@@ -871,7 +871,7 @@ async function boot(){
     setTimeout(()=>document.getElementById('loadScreen').style.display='none',600);
   }catch(e){
     console.error('Boot error:',e);
-    showError('啟動失敗: '+e.message);
+    showError('\u555F\u52D5\u5931\u6557: '+e.message);
     document.getElementById('loadScreen').classList.add('hidden');
   }
 }
