@@ -863,7 +863,7 @@ function initCamVideos(){
    if(isMjpeg){
     var img=document.createElement('img');
     img.src=su;
-    img.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:0;';
+    img.style.cssText='width:100%;display:block;min-height:200px;object-fit:cover;background:#000;';
     v.parentNode.replaceChild(img,v);
    } else if(window.Hls&&Hls.isSupported()){
     var hls=new Hls();
